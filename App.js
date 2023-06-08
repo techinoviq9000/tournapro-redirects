@@ -38,7 +38,7 @@ export default function App() {
               screenOptions={{
                 headerShown: false
               }}
-              initialRouteName="LoginScreen"
+              initialRouteName="SignUpScreen"
             >
                 {screens.map(({ name, component, options }) => (
                   <Stack.Screen

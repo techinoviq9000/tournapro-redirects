@@ -1,20 +1,8 @@
 import { Platform } from "react-native"
 import { gql, useMutation, useQuery } from "@apollo/client"
-import {
-  Box,
-  Button,
-  HStack,
-  Icon,
-  Image,
-  Input,
-  KeyboardAvoidingView,
-  Stack,
-  Text,
-  VStack,
-  useTheme,
-  FormControl,
-  ScrollView
-} from "native-base"
+import { Box, Button, Image, useTheme, Text, Input } from "native-base"
+import { Formik, Form } from "formik"
+import * as Yup from "yup"
 import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons"
 import { useState } from "react"
 import { navigate } from "../../../rootNavigation"
@@ -27,11 +15,23 @@ import LoaderModal from "../../components/LoaderModal"
 // }
 
 const ADD_NEW_WORKER = gql`
-mutation addWorker($worker_name: String!, $worker_email: String!, $contact_number: String!, $worker_id: uuid!) {
-  insert_workers_one(object: {worker_name: $worker_name, worker_email: $worker_email, contact_number: $contact_number, worker_id: $worker_id}) {
-    id
+  mutation addWorker(
+    $worker_name: String!
+    $worker_email: String!
+    $contact_number: String!
+    $worker_id: uuid!
+  ) {
+    insert_workers_one(
+      object: {
+        worker_name: $worker_name
+        worker_email: $worker_email
+        contact_number: $contact_number
+        worker_id: $worker_id
+      }
+    ) {
+      id
+    }
   }
-}
 `
 
 const SignUpScreen = () => {
@@ -51,7 +51,7 @@ const SignUpScreen = () => {
   const [togglePassword, setTogglePassword] = useState(true)
 
   const [gqlError, setGqlError] = useState(false)
-  
+
   const [addWorker, { loading: addWorkerLoading }] = useMutation(
     ADD_NEW_WORKER,
     {
@@ -65,7 +65,6 @@ const SignUpScreen = () => {
       }
     }
   )
-
 
   const signUp = async () => {
     try {
@@ -98,9 +97,9 @@ const SignUpScreen = () => {
   }
 
   return (
-    <Box bg={colors.coolGray[900]} minH="full" flex={1}>
+    <Box bg={"white"} minH="full" flex={1}>
       <Box
-        bg={colors.coolGray[900]}
+        bg={"white"}
         flex={0.5}
         w="full"
         justifyContent="center"
@@ -114,7 +113,7 @@ const SignUpScreen = () => {
           source={require("../../../assets/Login/TournaProIcon.png")}
         />
       </Box>
-      <Box bg="#fff" flex={1} borderTopRadius="2xl">
+      {/* <Box bg="#fff" flex={1} borderTopRadius="2xl">
         <ScrollView>
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -245,6 +244,120 @@ const SignUpScreen = () => {
             </Box>
           </KeyboardAvoidingView>
         </ScrollView>
+      </Box> */}
+      <Box bg="white" flex={1} p={8}>
+        <Text fontSize={"2xl"} bold mb={2}>
+          Create Account
+        </Text>
+        <Formik
+          initialValues={{ email: "", firstName: "", lastName: "", password: '', confirmPassword: '' }}
+          onSubmit={(values) => console.log(values)}
+        >
+          {({ handleChange, handleBlur, handleSubmit, values }) => (
+            <Box>
+              <Input
+                onChangeText={handleChange("firstName")}
+                onBlur={handleBlur("firstName")}
+                value={values.firstName}
+                variant="outline"
+                placeholder="First Name"
+                fontSize="sm"
+                color="black"
+                borderColor={"gray.300"}
+                borderRadius={"md"}
+                selectionColor={colors.primary[600]}
+                //  onChangeText={(e) => setEmail(e.trim())}
+                autoCapitalize="none"
+                mb={4}
+              />
+              <Input
+                onChangeText={handleChange("lastName")}
+                onBlur={handleBlur("lastName")}
+                value={values.lastName}
+                variant="outline"
+                placeholder="Last Name"
+                fontSize="sm"
+                color="black"
+                borderColor={"gray.300"}
+                borderRadius={"md"}
+                selectionColor={colors.primary[600]}
+                //  onChangeText={(e) => setEmail(e.trim())}
+                autoCapitalize="words"
+                mb={4}
+              />
+              <Input
+                onChangeText={handleChange("email")}
+                onBlur={handleBlur("email")}
+                value={values.email}
+                variant="outline"
+                placeholder="Email"
+                autoComplete="email"
+                fontSize="sm"
+                color="black"
+                borderColor={"gray.300"}
+                borderRadius={"md"}
+                selectionColor={colors.primary[600]}
+                //  onChangeText={(e) => setEmail(e.trim())}
+                autoCapitalize="none"
+                mb={4}
+              />
+              <Input
+                onChangeText={handleChange("password")}
+                onBlur={handleBlur("password")}
+                value={values.password}
+                variant="outline"
+                placeholder="Password"
+                autoComplete="password"
+                fontSize="sm"
+                color="black"
+                borderColor={"gray.300"}
+                borderRadius={"md"}
+                selectionColor={colors.primary[600]}
+                //  onChangeText={(e) => setEmail(e.trim())}
+                autoCapitalize="none"
+                mb={4}
+                InputRightElement={
+                  <Box pr="3">
+                    <Ionicons
+                    onPress={() => setTogglePassword(!togglePassword)}
+                    name={togglePassword ? "eye-off-outline" : "eye-outline"}
+                    size={18}
+                    color={colors.black}
+                    />
+                  </Box>
+                }
+              />
+              <Input
+                onChangeText={handleChange("confirmPassword")}
+                onBlur={handleBlur("confirmPassword")}
+                value={values.confirmPassword}
+                variant="outline"
+                placeholder="Confirm Password"
+                fontSize="sm"
+                color="black"
+                borderColor={"gray.300"}
+                borderRadius={"md"}
+                selectionColor={colors.primary[600]}
+                //  onChangeText={(e) => setEmail(e.trim())}
+                autoCapitalize="none"
+                mb={4}
+                InputRightElement={
+                  <Box pr="3">
+                    <Ionicons
+                    onPress={() => setTogglePassword(!togglePassword)}
+                    name={togglePassword ? "eye-off-outline" : "eye-outline"}
+                    size={18}
+                    color={colors.black}
+                    />
+                  </Box>
+                }
+              />
+              <Button size="sm" borderRadius="full" onPress={handleSubmit} bgColor={"blue.400"}>
+               Create Account
+              </Button>
+            </Box>
+          )}
+        </Formik>
       </Box>
       <LoaderModal isLoading={isLoading} />
     </Box>
