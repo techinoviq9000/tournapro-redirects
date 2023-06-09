@@ -1,6 +1,7 @@
 import LoginScreen from "./Auth/LoginScreen"
 import HomeScreen from "./Home/HomeScreen"
 import SignUpScreen from "./Auth/SignUpScreen"
+import SelectRoleScreen from "./Auth/SelectRoleScreen"
 // import CreateReportScreen from "./Reports/CreateReportScreen"
 // import ViewReportScreen from "./Reports/ViewReportScreen"
 // import InventoryScreen from "./Inventory/InventoryScreen"
@@ -178,6 +179,14 @@ const screens = [
   {
     name: "SignUpScreen",
     component: SignUpScreen,
+    options: {
+      gestureEnabled: false,
+      cardOverlayEnabled: false
+    }
+  },
+  {
+    name: "SelectRoleScreen",
+    component: SelectRoleScreen,
     options: {
       gestureEnabled: false,
       cardOverlayEnabled: false

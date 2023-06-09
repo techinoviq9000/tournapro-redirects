@@ -225,7 +225,7 @@ const LoginScreen = () => {
           size="64"
           resizeMode="center"
           // style={{width: "100%", paddingHorizontal: 10}}
-          source={require("../../../assets/Login/TournaProIcon.png")}
+          source={require("../../../assets/Login/TournaProLogo.png")}
         />
       </Box>
       <Box bg="#239681" flex={1} borderTopRadius="2xl">
