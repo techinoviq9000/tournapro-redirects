@@ -7,7 +7,7 @@ import {
   useTheme,
   Text,
   Input,
-  ScrollView
+  ScrollView,
 } from "native-base"
 import { Formik, Form } from "formik"
 import * as Yup from "yup"
@@ -52,7 +52,8 @@ const SignUpScreen = () => {
       .min(8, "Too Short!")
       .max(50, "Too Long!")
       .required("Required"),
-    email: Yup.string().email("Invalid email").required("Required")
+    email: Yup.string().email("Invalid email").required("Required"),
+    phoneNumber: Yup.string().required(),
   })
 
   const {
@@ -61,7 +62,7 @@ const SignUpScreen = () => {
     isSuccess,
     needsEmailVerification,
     isError,
-    error
+    error,
   } = useSignUpEmailPassword()
   const { colors } = useTheme()
   const [email, setEmail] = useState("")
@@ -83,7 +84,7 @@ const SignUpScreen = () => {
       onError: (error) => {
         setGqlError(true)
         console.log(error)
-      }
+      },
     }
   )
   let submitForm = false
@@ -117,7 +118,7 @@ const SignUpScreen = () => {
         email.toLowerCase().trim(),
         password.trim(),
         {
-          displayName: `${userName}`.trim()
+          displayName: `${userName}`.trim(),
         }
       )
       if (res?.isError) {
@@ -132,8 +133,8 @@ const SignUpScreen = () => {
             worker_name: userName,
             worker_email: email,
             contact_number: contact_number,
-            worker_id: res?.user?.id
-          }
+            worker_id: res?.user?.id,
+          },
         })
       }
     } catch (e) {
@@ -165,15 +166,20 @@ const SignUpScreen = () => {
           </Text>
           <Formik
             initialValues={{
-              email: "",
-              fullName: "",
-              password: "",
-              confirmPassword: ""
+              email: "salmanhanif133@gmail.com",
+              fullName: "Salman Hanif",
+              password: "123456789",
+              phoneNumber: "03222681575",
+              confirmPassword: "123456789",
             }}
-            // validationSchema={SignupSchema}
-            // validateOnChange={false}
-            // validate={(values) => validate(values)}
-            onSubmit={(values) => navigationRef.navigate("SelectRoleScreen")}
+            validationSchema={SignupSchema}
+            validateOnChange={false}
+            validate={(values) => validate(values)}
+            onSubmit={(values) =>
+              navigationRef.navigate("SelectRoleScreen", {
+                values,
+              })
+            }
           >
             {({
               handleChange,
@@ -181,7 +187,7 @@ const SignUpScreen = () => {
               handleSubmit,
               values,
               errors,
-              touched
+              touched,
             }) => (
               <Box>
                 <Input
@@ -197,7 +203,7 @@ const SignUpScreen = () => {
                   selectionColor={colors.primary[600]}
                   _focus={{
                     borderColor: "gray.600",
-                    bgColor: "white"
+                    bgColor: "white",
                   }}
                   py={3}
                   //  onChangeText={(e) => setEmail(e.trim())}
@@ -218,10 +224,11 @@ const SignUpScreen = () => {
                   color="black"
                   borderColor={"gray.300"}
                   borderRadius={"md"}
+                  keyboardType="email-address"
                   selectionColor={colors.primary[600]}
                   _focus={{
                     borderColor: "gray.600",
-                    bgColor: "white"
+                    bgColor: "white",
                   }}
                   autoCapitalize="none"
                   py={3}
@@ -230,6 +237,30 @@ const SignUpScreen = () => {
                 />
                 {errors.email && touched.email && (
                   <Text color="red.500">{errors.email}</Text>
+                )}
+                <Input
+                  onChangeText={handleChange("phoneNumber")}
+                  onBlur={handleBlur("phoneNumber")}
+                  value={values.phoneNumber}
+                  variant="outline"
+                  placeholder="Phone Number"                  
+                  fontSize="sm"
+                  color="black"
+                  borderColor={"gray.300"}
+                  borderRadius={"md"}
+                  keyboardType="number-pad"
+                  selectionColor={colors.primary[600]}
+                  _focus={{
+                    borderColor: "gray.600",
+                    bgColor: "white",
+                  }}
+                  autoCapitalize="none"
+                  py={3}
+                  mt={4}
+                  mb={1}
+                />
+                {errors.phoneNumber && touched.phoneNumber && (
+                  <Text color="red.500">{errors.phoneNumber}</Text>
                 )}
                 <Input
                   onChangeText={handleChange("password")}
@@ -246,7 +277,7 @@ const SignUpScreen = () => {
                   type={togglePassword ? "password" : "text"}
                   _focus={{
                     borderColor: "gray.600",
-                    bgColor: "white"
+                    bgColor: "white",
                   }}
                   autoCapitalize="none"
                   py={3}
@@ -281,7 +312,7 @@ const SignUpScreen = () => {
                   selectionColor={colors.primary[600]}
                   _focus={{
                     borderColor: "gray.600",
-                    bgColor: "white"
+                    bgColor: "white",
                   }}
                   type={toggleConfirmPassword ? "password" : "text"}
                   autoCapitalize="none"
@@ -312,7 +343,8 @@ const SignUpScreen = () => {
                   size="lg"
                   borderRadius="lg"
                   onPress={() => handleSubmit()}
-                  bgColor={"blue.700"}
+                  // bgColor={"blue.700"}
+                  colorScheme={"blue"}
                   my={4}
                 >
                   Create Account

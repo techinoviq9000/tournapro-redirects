@@ -13,6 +13,8 @@ import {
   ScrollView
 } from "native-base"
 import * as Device from "expo-device"
+import { Formik, Form } from "formik"
+import * as Yup from "yup"
 import * as Notifications from "expo-notifications"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { Ionicons } from "@expo/vector-icons"
@@ -43,7 +45,7 @@ const UPDATE_TOKEN = gql`
   }
 `
 
-const LoginScreen = () => {
+const LoginScreen = ({route}) => {
   const { isAuthenticated, isLoading } = useAuthenticationStatus()
   const [tokenLoading, setTokenLoading] = useState(false)
   const [errors, setErrors] = useState([])
@@ -135,7 +137,7 @@ const LoginScreen = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [togglePassword, setTogglePassword] = useState(true)
-  const signIn = async () => {
+  const signIn = async ({email, password}) => {
     try {
       const res = await signInEmailPassword( //use nhost function to sign in
         email.toLowerCase().trim(),
@@ -147,30 +149,10 @@ const LoginScreen = () => {
         setErrors([...errors, "error in login"])
         console.log("error in login")
       } else {
-        setTokenLoading(true)
-        registerForPushNotificationsAsync() //register for notifcations by getting device token
-          .then(async (token) => {
-            //before navigating, register user for notificaiton
-            setUserToken(token, res.user?.email)
-              .then(() => {
-                setTokenLoading(false)
-                navigationRef.reset({
-                  index: 1,
-                  routes: [{ name: "HomeScreen" }]
-                })
-              })
-              .catch((e) => { //problem setting user token
-                setTokenLoading(false)
-                setErrors([...errors, JSON.stringify(e)])
-                console.log(e)
-              })
-          }) //problem registering device for token
-          .catch((e) => {
-            setTokenLoading(false)
-            setErrors([...errors, JSON.stringify(e)])
-            console.log(e)
-            // setError("No internet")
-          })
+        navigationRef.reset({
+          index: 1,
+          routes: [{ name: "HomeScreen" }]
+        })
       }
     } catch (e) { //some error in whole process
       setErrors([...errors, JSON.stringify(e)])
@@ -183,43 +165,24 @@ const LoginScreen = () => {
   useEffect(() => {
     if (!isLoading) { //if loading is false meaning isAuthenticated function has ran.
       if (isAuthenticated) { //if the user is authenticated
-        console.log({isAuthenticated})
-        registerForPushNotificationsAsync() //register device for notificaiton
-          .then((token) => {
-            //before navigating, register user for notificaiton
-            setTokenLoading(true)
-            setUserToken(token, undefined) //set user token 
-              .then(() => {
-                navigationRef.reset({
-                  index: 1,
-                  routes: [{ name: "HomeScreen" }]
-                })
-              })
-              .catch((e) => {
-                setErrors([...errors, JSON.stringify(e)])
-                console.log(e)
-              })
-          })
-          .catch((e) => {
-            setTokenLoading(false)
-            setErrors([...errors, JSON.stringify(e)])
-            console.log(e)
-            // setError("No internet")
-          })
+        navigationRef.reset({
+          index: 1,
+          routes: [{ name: "HomeScreen" }]
+        })
       }
     }
   }, [isLoading])
 
   return (
-    <Box bg={"white"} minH="full" flex={1}>
+    <ScrollView keyboardDismissMode="interactive">
+    <Box bg={"white"} minH="full" flex={1} safeArea>
       <Box
         bg={"white"}
-        flex={1}
         w="full"
         justifyContent="center"
         alignItems="center"
+        pt={2}
       >
-        <Text fontSize={"5xl"}>Tourna Pro</Text>
         <Image
           alt="QS LOGO"
           size="64"
@@ -228,137 +191,131 @@ const LoginScreen = () => {
           source={require("../../../assets/Login/TournaProLogo.png")}
         />
       </Box>
-      <Box bg="#239681" flex={1} borderTopRadius="2xl">
-        <ScrollView scrollEnabled={true}>
-          <KeyboardAvoidingView
-            h={{
-              base: "400px",
-              lg: "auto"
-            }}
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-          >
-            <Box p={8}>
-              <VStack mb="4" space={4}>
-                <Text
-                  fontSize="2xl"
-                  fontWeight="bold"
-                  letterSpacing="sm"
-                  color="white"
-                >
-                  Sign in
-                </Text>
-                <Input
-                  variant="underlined"
-                  placeholder="Email"
-                  autoComplete="email"
-                  importantForAutofill="yes"
-                  fontSize="sm"
-                  color="white"
-                  autoCapitalize="none"
-                  selectionColor="white"
-                  placeholderTextColor="white"
-                  focusOutlineColor="white"
-                  onChangeText={(e) => setEmail(e.trim())}
-                  value={email}
-                  InputLeftElement={
-                    <Box pr="3">
-                      <Ionicons
-                        name="person"
-                        size={18}
-                        color={"white"}
-                      />
-                    </Box>
-                  }
-                />
-                <Input
-                  variant="underlined"
-                  placeholder="Password"
-                  fontSize="sm"
-                  autoComplete="password"
-                  importantForAutofill="yes"
-                  type={togglePassword ? "password" : "text"}
-                  color="white"
-                  autoCapitalize="none"
-                  selectionColor={"white"}
-                  placeholderTextColor="white"
-                  borderColor={"white"}
-                  focusOutlineColor="white"
-                  onChangeText={(e) => setPassword(e.trim())}
-                  value={password}
-                  InputLeftElement={
-                    <Box pr="3">
-                      <Ionicons
-                        name="md-lock-closed"
-                        size={18}
-                        color={"white"}
-                      />
-                    </Box>
-                  }
-                  InputRightElement={
-                    <Box pr="3">
-                      <Ionicons
-                        onPress={() => setTogglePassword(!togglePassword)}
-                        name={
-                          togglePassword ? "eye-off-outline" : "eye-outline"
-                        }
-                        size={18}
-                        color={"white"}
-                      />
-                    </Box>
-                  }
-                  mb={isError ? "0" : "5"}
-                />
-                {isError && (
-                  <Text textAlign="center" fontWeight="bold" color="red.600">
-                    {error?.message}
-                  </Text>
-                )}
-                <Button size="sm" borderRadius="full" onPress={() => signIn()} backgroundColor="white" _text={{color: "#239681"}}>
-                  Sign in
-                </Button>
-              </VStack>
-              <Text textAlign="center" color={"white"}>
-                Don't have an account yet?
-              </Text>
-              <Text
-                textAlign="center"
-                underline
-                bold
-                color={"white"}
-                onPress={() => navigate("SignUpScreen")}
+      <Box bg="white" flex={1} p={8} pt={1}>
+        <Text fontSize={"4xl"} fontWeight={"800"} mb={4}>
+          Login Details
+        </Text>
+        <Formik
+          initialValues={{
+            email: "salmanhanif133@gmail.com",
+            password: "123456789",
+          }}
+          // validationSchema={SignupSchema}
+          // validateOnChange={false}
+          // validate={(values) => validate(values)}
+          onSubmit={(values) =>
+            signIn(values)
+          }
+        >
+          {({
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            values,
+            errors,
+            touched,
+          }) => (
+            <Box>
+              <Input
+                onChangeText={handleChange("email")}
+                onBlur={handleBlur("email")}
+                value={values.email}
+                variant="outline"
+                placeholder="Email"
+                autoComplete="email"
+                fontSize="sm"
+                color="black"
+                borderColor={"gray.300"}
+                borderRadius={"md"}
+                keyboardType="email-address"
+                selectionColor={colors.primary[600]}
+                _focus={{
+                  borderColor: "gray.600",
+                  bgColor: "white",
+                }}
+                autoCapitalize="none"
+                py={3}
+                mt={4}
+                mb={1}
+              />
+              {errors.email && touched.email && (
+                <Text color="red.500">{errors.email}</Text>
+              )}
+              <Input
+                onChangeText={handleChange("password")}
+                onBlur={handleBlur("password")}
+                value={values.password}
+                variant="outline"
+                placeholder="Password"
+                autoComplete="password"
+                fontSize="sm"
+                color="black"
+                borderColor={"gray.300"}
+                borderRadius={"md"}
+                selectionColor={colors.primary[600]}
+                type={togglePassword ? "password" : "text"}
+                _focus={{
+                  borderColor: "gray.600",
+                  bgColor: "white",
+                }}
+                autoCapitalize="none"
+                py={3}
+                mt={4}
+                mb={1}
+                InputRightElement={
+                  <Box pr="3">
+                    <Ionicons
+                      onPress={() => setTogglePassword(!togglePassword)}
+                      name={
+                        togglePassword ? "eye-off-outline" : "eye-outline"
+                      }
+                      size={18}
+                      color={colors.black}
+                    />
+                  </Box>
+                }
+              />
+              {errors.password && touched.password && (
+                <Text color="red.500">{errors.password}</Text>
+              )}
+              <Button
+                size="lg"
+                borderRadius="lg"
+                onPress={() => handleSubmit()}
+                // bgColor={"blue.700"}
+                colorScheme={"blue"}
+                my={4}
               >
-                Sign Up now
+                Login
+              </Button>
+              <Text textAlign="center" color={colors.primary[900]} mb={2}>
+                or{" "}
+                <Text
+                  textAlign="center"
+                  underline
+                  bold
+                  color={colors.primary[900]}
+                  onPress={() => navigate("SignUpScreen")}
+                >
+                  Sign up
+                </Text>
               </Text>
-              <Text textAlign="center" my={2} color={"white"}>Or</Text>
-              <Text textAlign="center" color={"white"} fontSize="xl">
-                Skip Sign in
-              </Text>
-              {/* block for logs */}
-              {/* <ScrollView>
-                <Box flex={1}>
-                  {errors.map((item, index) => (
-                    <VStack space={1}>
-                      <Text fontSize={"xs"} color="black">
-                        {index}..... {item}
-                      </Text>
-                    </VStack>
-                  ))}
-                </Box>
-              </ScrollView> */}
+                <Text
+                  textAlign="center"
+                  underline
+                  bold
+                  color={colors.primary[900]}
+                  onPress={() => navigate("LoginScreen")}
+                >
+                  Forgot Password?
+                </Text>
             </Box>
-          </KeyboardAvoidingView>
-        </ScrollView>
-        <AppVersion />
+          )}
+        </Formik>
       </Box>
-
-      <LoaderModal isLoading={isLoading || tokenLoading || loading} />
-      <LoaderModal isLoading={signInLoadng} />
-      <StatusBar
-        animated
-        backgroundColor={colors.coolGray[900]}
-        style="light"
-      />
+      <LoaderModal isLoading={isLoading} />
     </Box>
+  </ScrollView>
   )
 }
 
