@@ -151,7 +151,7 @@ const LoginScreen = ({route}) => {
       } else {
         navigationRef.reset({
           index: 1,
-          routes: [{ name: "HomeScreen" }]
+          routes: [{ name: "HomeStack" }]
         })
       }
     } catch (e) { //some error in whole process
@@ -167,7 +167,7 @@ const LoginScreen = ({route}) => {
       if (isAuthenticated) { //if the user is authenticated
         navigationRef.reset({
           index: 1,
-          routes: [{ name: "HomeScreen" }]
+          routes: [{ name: "HomeStack" }]
         })
       }
     }

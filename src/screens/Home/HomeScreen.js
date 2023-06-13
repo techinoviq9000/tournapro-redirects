@@ -2,11 +2,11 @@ import {
   useAuthenticationStatus,
   useSignOut,
   useUserDisplayName,
-  useUserEmail,
+  useUserEmail
 } from "@nhost/react"
 import { gql, useLazyQuery, useQuery } from "@apollo/client"
 import { useFocusEffect } from "@react-navigation/native"
-import * as Location from 'expo-location';
+import * as Location from "expo-location"
 import {
   Box,
   Button,
@@ -19,13 +19,13 @@ import {
   Skeleton,
   Text,
   useTheme,
-  VStack,
+  VStack
 } from "native-base"
 import {
   Ionicons,
   AntDesign,
   MaterialIcons,
-  MaterialCommunityIcons,
+  MaterialCommunityIcons
 } from "@expo/vector-icons"
 import { RefreshControl } from "react-native"
 import moment from "moment"
@@ -59,34 +59,31 @@ const GET_SPORTS = gql`
   }
 `
 
-export default HomeScreen = ({navigation}) => {
+export default HomeScreen = ({ navigation }) => {
   const [selectedSportsId, setSelectedSportsId] = useState(null)
   const [tournamentData, setTournamentData] = useState([])
   const [locationLoading, setLocationLoading] = useState(true)
-  const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
+  const [location, setLocation] = useState(null)
+  const [errorMsg, setErrorMsg] = useState(null)
   const [getTournaments, { loading, data, error }] = useLazyQuery(
     GET_TOURNAMENT,
     {
       notifyOnNetworkStatusChange: true,
-      nextFetchPolicy: "network-only",
       onCompleted: (data) => {
         setTournamentData(data.tournaments)
         console.log(data, "data")
       },
       onError: (e) => {
         console.log(e)
-      },
+      }
     }
   )
 
   const [
     getSports,
-    { loading: sportsLoading, data: sportsData, error: sportsError },
+    { loading: sportsLoading, data: sportsData, error: sportsError }
   ] = useLazyQuery(GET_SPORTS, {
     notifyOnNetworkStatusChange: true,
-    nextFetchPolicy: "network-only",
-    fetchPolicy: "network-only",
     onCompleted: (data) => {
       console.log(data)
       if (!selectedSportsId) {
@@ -96,12 +93,12 @@ export default HomeScreen = ({navigation}) => {
         setSelectedSportsId(id)
         getTournaments({
           variables: {
-            sport_id: id,
-          },
+            sport_id: id
+          }
         })
       }
     },
-    onError: e => {
+    onError: (e) => {
       console.log(e, "error")
     }
   })
@@ -116,7 +113,7 @@ export default HomeScreen = ({navigation}) => {
     try {
       navigationRef.reset({
         index: 0,
-        routes: [{ name: "LoginScreen" }],
+        routes: [{ name: "LoginScreen" }]
       })
       setLogOutLoading(true)
       signOut()
@@ -130,8 +127,10 @@ export default HomeScreen = ({navigation}) => {
   useFocusEffect(
     useCallback(() => {
       console.log("Running")
+      console.log({isLoading})
       if (!isLoading) {
         if (isAuthenticated) {
+          console.log({isAuthenticated})
           getSports()
           // (async () => {
           //   setLocationLoading(true)
@@ -141,17 +140,17 @@ export default HomeScreen = ({navigation}) => {
           //     setLocationLoading(false)
           //     return;
           //   }
-      
+
           //   let location = await Location.getCurrentPositionAsync({});
           //   let loc = await Location.reverseGeocodeAsync({latitude: location.coords.latitude, longitude: location.coords.longitude})
           //   setLocation(loc[0]);
           //   setLocationLoading(false)
           // })();
-          
         } else {
+          console.log("navigate bck to login")
           navigation.reset({
             index: 0,
-            routes: [{ name: "LoginScreen" }],
+            routes: [{ name: "LoginScreen" }]
           })
         }
       }
@@ -208,8 +207,8 @@ export default HomeScreen = ({navigation}) => {
         onPress={() => {
           getTournaments({
             variables: {
-              sport_id: selectedSportsId,
-            },
+              sport_id: selectedSportsId
+            }
           })
         }}
       >
@@ -262,7 +261,7 @@ export default HomeScreen = ({navigation}) => {
         space={8}
         rounded="md"
         _light={{
-          borderColor: "coolGray.200",
+          borderColor: "coolGray.200"
         }}
         p="4"
       >
@@ -270,15 +269,23 @@ export default HomeScreen = ({navigation}) => {
       </HStack>
     </Box>
   )
-console.log(sportsData)
+  console.log({ sportsData })
   return (
     <Box flex={1} safeArea>
       <Box p={5} pb={0}>
         {isLoading ? <HeaderLoading /> : <Header />}
       </Box>
       <HStack p={5} pb={0} alignItems={"flex-end"} space={1}>
-      <Ionicons name="location-outline" size={24} color="black" />
-      {locationLoading ? <LocationLoading /> : errorMsg ? <Text color="black">{errorMsg}</Text> : <Text color="black" bold>{location?.country}, {location?.subregion}, {location?.region}</Text>}
+        <Ionicons name="location-outline" size={24} color="black" />
+        {locationLoading ? (
+          <LocationLoading />
+        ) : errorMsg ? (
+          <Text color="black">{errorMsg}</Text>
+        ) : (
+          <Text color="black" bold>
+            {location?.country}, {location?.subregion}, {location?.region}
+          </Text>
+        )}
       </HStack>
       <Box px={5} my={4}>
         <Text fontSize={"3xl"} bold mb={4}>
@@ -305,14 +312,14 @@ console.log(sportsData)
                       setSelectedSportsId(item.id),
                         getTournaments({
                           variables: {
-                            sport_id: item.id,
-                          },
+                            sport_id: item.id
+                          }
                         })
                     }}
                   >
                     <Image
                       source={{
-                        uri: item.image,
+                        uri: item.image
                       }}
                       alt="Alternate Text"
                       size="xl"
@@ -335,7 +342,7 @@ console.log(sportsData)
           )}
         </HStack>
       </Box>
-      
+
       <Box px={5} flex={"1"}>
         {loading && sportsLoading ? (
           <DataLoadingSkeleton />
@@ -353,7 +360,7 @@ console.log(sportsData)
                 <Divider my={4} bgColor="transparent" />
               )}
               _contentContainerStyle={{
-                padding: 1,
+                padding: 1
               }}
               data={tournamentData}
               keyExtractor={(item, index) => `${item.id}-${index}`}

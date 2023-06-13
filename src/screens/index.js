@@ -2,12 +2,9 @@ import LoginScreen from "./Auth/LoginScreen"
 import HomeScreen from "./Home/HomeScreen"
 import SignUpScreen from "./Auth/SignUpScreen"
 import SelectRoleScreen from "./Auth/SelectRoleScreen"
-import { ScreenStackHeaderBackButtonImage } from "react-native-screens";
-const navigationOptions = ({ navigation }) => ({
-  headerLeft: <ScreenStackHeaderBackButtonImage onPress={() => navigation.goBack(null)} />,
-});
+import TournamentScreen from "./Tournaments/TournamentScreen"
 
-const screens = [
+export const homeScreens = [
   {
     name: "HomeScreen",
     component: HomeScreen,
@@ -16,7 +13,20 @@ const screens = [
       gestureEnabled: false,
       cardOverlayEnabled: false
     }
-  },
+  }
+]
+export const tournamentSreen = [
+  {
+    name: "SelectOrViewTournamentScreen",
+    component: TournamentScreen,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false
+    }
+  }
+]
+export const authScreens = [
   {
     name: "LoginScreen",
     component: LoginScreen,
@@ -43,4 +53,3 @@ const screens = [
     }
   }
 ]
-export default screens
