@@ -3,6 +3,7 @@ import HomeScreen from "./Home/HomeScreen"
 import SignUpScreen from "./Auth/SignUpScreen"
 import SelectRoleScreen from "./Auth/SelectRoleScreen"
 import TournamentScreen from "./Tournaments/TournamentScreen"
+import SplashScreen from "./SplashScreen"
 
 export const homeScreens = [
   {
@@ -53,3 +54,13 @@ export const authScreens = [
     }
   }
 ]
+
+export const splashScreen =  {
+  name: "SplashScreen",
+  component: SplashScreen,
+  options: {
+    headerShown: false,
+    gestureEnabled: false,
+    cardOverlayEnabled: false
+  }
+}

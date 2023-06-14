@@ -85,7 +85,7 @@ export default HomeScreen = ({ navigation }) => {
   ] = useLazyQuery(GET_SPORTS, {
     notifyOnNetworkStatusChange: true,
     onCompleted: (data) => {
-      console.log(data)
+      console.log(data, "sportsdata")
       if (!selectedSportsId) {
         const id = data?.sports.filter(
           (item) => item.sport_name == "Cricket"
@@ -108,16 +108,10 @@ export default HomeScreen = ({ navigation }) => {
   const { colors } = useTheme()
   const [logOutLoading, setLogOutLoading] = useState(false)
   const { signOut } = useSignOut()
-  console.log({ selectedSportsId })
   const logOut = async () => {
     try {
-      navigationRef.reset({
-        index: 0,
-        routes: [{ name: "LoginScreen" }]
-      })
       setLogOutLoading(true)
       signOut()
-      // console.log({ result })
       setLogOutLoading(false)
     } catch (error) {
       setLogOutLoading(false)
@@ -126,11 +120,6 @@ export default HomeScreen = ({ navigation }) => {
   }
   useFocusEffect(
     useCallback(() => {
-      console.log("Running")
-      console.log({isLoading})
-      if (!isLoading) {
-        if (isAuthenticated) {
-          console.log({isAuthenticated})
           getSports()
           // (async () => {
           //   setLocationLoading(true)
@@ -146,14 +135,7 @@ export default HomeScreen = ({ navigation }) => {
           //   setLocation(loc[0]);
           //   setLocationLoading(false)
           // })();
-        } else {
-          console.log("navigate bck to login")
-          navigation.reset({
-            index: 0,
-            routes: [{ name: "LoginScreen" }]
-          })
-        }
-      }
+      
     }, [])
   )
 
@@ -218,7 +200,6 @@ export default HomeScreen = ({ navigation }) => {
   )
 
   const Header = () => {
-    // console.log(setLogOutLoading)
     return (
       <HStack direction="row" alignItems={"center"} mb={1}>
         <Box flex={1}>
@@ -269,7 +250,6 @@ export default HomeScreen = ({ navigation }) => {
       </HStack>
     </Box>
   )
-  console.log({ sportsData })
   return (
     <Box flex={1} safeArea>
       <Box p={5} pb={0}>

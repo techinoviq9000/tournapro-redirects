@@ -161,17 +161,17 @@ const LoginScreen = ({route}) => {
   }
 
   const { colors } = useTheme()
-  console.log({isAuthenticated})
-  useEffect(() => {
-    if (!isLoading) { //if loading is false meaning isAuthenticated function has ran.
-      if (isAuthenticated) { //if the user is authenticated
-        navigationRef.reset({
-          index: 1,
-          routes: [{ name: "HomeStack" }]
-        })
-      }
-    }
-  }, [isLoading])
+  // console.log({isAuthenticated})
+  // useEffect(() => {
+  //   if (!isLoading) { //if loading is false meaning isAuthenticated function has ran.
+  //     if (isAuthenticated) { //if the user is authenticated
+  //       navigationRef.reset({
+  //         index: 1,
+  //         routes: [{ name: "HomeStack" }]
+  //       })
+  //     }
+  //   }
+  // }, [isLoading])
 
   return (
     <ScrollView keyboardDismissMode="interactive">
