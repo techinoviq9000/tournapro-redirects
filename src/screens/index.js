@@ -4,6 +4,8 @@ import SignUpScreen from "./Auth/SignUpScreen"
 import SelectRoleScreen from "./Auth/SelectRoleScreen"
 import TournamentScreen from "./Tournaments/TournamentScreen"
 import SplashScreen from "./SplashScreen"
+import TournamentOverviewScreen from "./Tournaments/TournamentOverviewScreen"
+import TournamentRegistrationScreen from "./Tournaments/TournamentRegistrationScreen"
 
 export const homeScreens = [
   {
@@ -20,6 +22,24 @@ export const tournamentSreen = [
   {
     name: "SelectOrViewTournamentScreen",
     component: TournamentScreen,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false
+    }
+  },
+  {
+    name: "TournamentOverviewScreen",
+    component: TournamentOverviewScreen,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false
+    }
+  },
+  {
+    name: "TournamentRegistrationScreen",
+    component: TournamentRegistrationScreen,
     options: {
       headerShown: false,
       gestureEnabled: false,

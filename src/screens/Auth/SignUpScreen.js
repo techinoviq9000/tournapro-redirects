@@ -17,31 +17,6 @@ import { navigate, navigationRef } from "../../../rootNavigation"
 import { useSignUpEmailPassword } from "@nhost/react"
 import LoaderModal from "../../components/LoaderModal"
 
-// export interface ErrorMessage {
-//   error: string
-//   message: string
-// }
-
-const ADD_NEW_WORKER = gql`
-  mutation addWorker(
-    $worker_name: String!
-    $worker_email: String!
-    $contact_number: String!
-    $worker_id: uuid!
-  ) {
-    insert_workers_one(
-      object: {
-        worker_name: $worker_name
-        worker_email: $worker_email
-        contact_number: $contact_number
-        worker_id: $worker_id
-      }
-    ) {
-      id
-    }
-  }
-`
-
 const SignUpScreen = () => {
   const SignupSchema = Yup.object().shape({
     fullName: Yup.string()
@@ -56,37 +31,10 @@ const SignUpScreen = () => {
     phoneNumber: Yup.string().required(),
   })
 
-  const {
-    signUpEmailPassword,
-    isLoading,
-    isSuccess,
-    needsEmailVerification,
-    isError,
-    error,
-  } = useSignUpEmailPassword()
   const { colors } = useTheme()
-  const [email, setEmail] = useState("")
-  const [userName, setUserName] = useState("")
-  const [contact_number, setContactNumber] = useState("")
-  const [password, setPassword] = useState("")
   const [togglePassword, setTogglePassword] = useState(true)
   const [toggleConfirmPassword, setToggleConfirmPassword] = useState(true)
 
-  const [gqlError, setGqlError] = useState(false)
-
-  const [addWorker, { loading: addWorkerLoading }] = useMutation(
-    ADD_NEW_WORKER,
-    {
-      onCompleted: (data) => {
-        navigate("HomeScreen")
-        console.log(data)
-      },
-      onError: (error) => {
-        setGqlError(true)
-        console.log(error)
-      },
-    }
-  )
   let submitForm = false
 
   const validate = async (values) => {
@@ -109,36 +57,6 @@ const SignUpScreen = () => {
     if (submitForm) {
     } else {
       return {}
-    }
-  }
-
-  const signUp = async () => {
-    try {
-      const res = await signUpEmailPassword(
-        email.toLowerCase().trim(),
-        password.trim(),
-        {
-          displayName: `${userName}`.trim(),
-        }
-      )
-      if (res?.isError) {
-        console.log(res)
-        const error = res?.error?.error
-        const message = res?.error?.message
-        // setErrorMsg({error, message})
-      } else {
-        console.log(res)
-        addWorker({
-          variables: {
-            worker_name: userName,
-            worker_email: email,
-            contact_number: contact_number,
-            worker_id: res?.user?.id,
-          },
-        })
-      }
-    } catch (e) {
-      console.log(e)
     }
   }
 
@@ -380,7 +298,6 @@ const SignUpScreen = () => {
             )}
           </Formik>
         </Box>
-        <LoaderModal isLoading={isLoading} />
       </Box>
     </ScrollView>
   )

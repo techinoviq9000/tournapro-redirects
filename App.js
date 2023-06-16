@@ -8,8 +8,9 @@ import {
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native"
 import { navigationRef } from "./rootNavigation"
 import * as SecureStore from "expo-secure-store"
-
 import Router from "./src/screens/Router"
+import { store } from "./store/store";
+import { Provider } from "react-redux";
 
 const nhost = new NhostClient({
   subdomain: "wepuirejkqdmeaineqto",
@@ -35,10 +36,11 @@ export default function App() {
     <NhostProvider nhost={nhost}>
       <NhostApolloProvider nhost={nhost}>
         <NativeBaseProvider>
+        <Provider store={store}>
           <NavigationContainer ref={navigationRef} theme={MyTheme}>
            <Router />
           </NavigationContainer>
-
+          </Provider>
           <StatusBar style="dark" />
         </NativeBaseProvider>
       </NhostApolloProvider>

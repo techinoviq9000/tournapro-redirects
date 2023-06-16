@@ -137,7 +137,9 @@ const LoginScreen = ({route}) => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [togglePassword, setTogglePassword] = useState(true)
+  const [signInloading, setSignInloading] = useState(false)
   const signIn = async ({email, password}) => {
+    setSignInloading(true);
     try {
       const res = await signInEmailPassword( //use nhost function to sign in
         email.toLowerCase().trim(),
@@ -148,12 +150,8 @@ const LoginScreen = ({route}) => {
         console.log(res)
         setErrors([...errors, "error in login"])
         console.log("error in login")
-      } else {
-        navigationRef.reset({
-          index: 1,
-          routes: [{ name: "HomeStack" }]
-        })
       }
+      setSignInLoading(false)
     } catch (e) { //some error in whole process
       setErrors([...errors, JSON.stringify(e)])
       console.log(e, "error")
@@ -315,6 +313,7 @@ const LoginScreen = ({route}) => {
       </Box>
       <LoaderModal isLoading={isLoading} />
     </Box>
+    <LoaderModal isLoading={signInloading} />
   </ScrollView>
   )
 }

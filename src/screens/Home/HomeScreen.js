@@ -27,12 +27,21 @@ import {
   MaterialIcons,
   MaterialCommunityIcons
 } from "@expo/vector-icons"
-import { RefreshControl } from "react-native"
+import { RefreshControl, ScrollView } from "react-native"
 import moment from "moment"
-import { useCallback, useState } from "react"
+import { useCallback, useContext, useEffect, useState } from "react"
 import { navigationRef } from "../../../rootNavigation"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import LoaderModal from "../../components/LoaderModal"
+import { useDispatch, useSelector } from "react-redux"
+import { setTournament } from "../../../store/tournamentSlice"
+import { setLocation } from "../../../store/dataSlice"
+import { StatusBar } from "expo-status-bar"
+import HeaderLoading from "../../components/HeaderLoading"
+import LocationLoading from "../../components/LocationLoading"
+import DataLoadingSkeleton from "../../components/DataLoadingSkeleton"
+import NoData from "../../components/NoData"
+import SportsLoadingSkeleton from "../../components/SportsLoadingSkeleton"
 
 const GET_TOURNAMENT = gql`
   query GetTournaments($sport_id: Int!) {
@@ -41,6 +50,8 @@ const GET_TOURNAMENT = gql`
       sport_id
       tournament_name
       venue
+      start_date
+      end_date
       created_at
       updated_at
       time
@@ -60,18 +71,20 @@ const GET_SPORTS = gql`
 `
 
 export default HomeScreen = ({ navigation }) => {
+  const tournamentData = useSelector((state) => state.tournament.data)
+  const location = useSelector((state) => state.generalData.location)
+  const dispatch = useDispatch()
+
   const [selectedSportsId, setSelectedSportsId] = useState(null)
-  const [tournamentData, setTournamentData] = useState([])
-  const [locationLoading, setLocationLoading] = useState(true)
-  const [location, setLocation] = useState(null)
+  const [locationLoading, setLocationLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState(null)
+  
   const [getTournaments, { loading, data, error }] = useLazyQuery(
     GET_TOURNAMENT,
     {
       notifyOnNetworkStatusChange: true,
       onCompleted: (data) => {
-        setTournamentData(data.tournaments)
-        console.log(data, "data")
+        dispatch(setTournament(data.tournaments))
       },
       onError: (e) => {
         console.log(e)
@@ -83,9 +96,9 @@ export default HomeScreen = ({ navigation }) => {
     getSports,
     { loading: sportsLoading, data: sportsData, error: sportsError }
   ] = useLazyQuery(GET_SPORTS, {
-    notifyOnNetworkStatusChange: true,
+    // notifyOnNetworkStatusChange: true,
+    fetchPolicy: "cache-first",
     onCompleted: (data) => {
-      console.log(data, "sportsdata")
       if (!selectedSportsId) {
         const id = data?.sports.filter(
           (item) => item.sport_name == "Cricket"
@@ -118,26 +131,32 @@ export default HomeScreen = ({ navigation }) => {
       console.log(error)
     }
   }
-  useFocusEffect(
-    useCallback(() => {
-          getSports()
-          // (async () => {
-          //   setLocationLoading(true)
-          //   let { status } = await Location.requestForegroundPermissionsAsync();
-          //   if (status !== 'granted') {
-          //     setErrorMsg('Permission to access location was denied');
-          //     setLocationLoading(false)
-          //     return;
-          //   }
 
-          //   let location = await Location.getCurrentPositionAsync({});
-          //   let loc = await Location.reverseGeocodeAsync({latitude: location.coords.latitude, longitude: location.coords.longitude})
-          //   setLocation(loc[0]);
-          //   setLocationLoading(false)
-          // })();
-      
-    }, [])
-  )
+  const getLocation = async () => {
+    setLocationLoading(true)
+    let { status } = await Location.requestForegroundPermissionsAsync()
+    if (status !== "granted") {
+      setErrorMsg("Permission to access location was denied")
+      setLocationLoading(false)
+      return
+    }
+
+    let location = await Location.getCurrentPositionAsync({})
+    let loc = await Location.reverseGeocodeAsync({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude
+    })
+    dispatch(setLocation(loc[0]))
+    setLocationLoading(false)
+  }
+  // useFocusEffect(
+  useEffect(() => {
+    getSports()
+    if (!location) {
+      getLocation()
+    }
+  }, [])
+  // )
 
   const OnGoingTournament = ({ item }) => {
     return (
@@ -178,26 +197,6 @@ export default HomeScreen = ({ navigation }) => {
     )
   }
 
-  const NoData = () => (
-    <Box flex={1} alignItems="center" justifyContent="center" mb="20" w="full">
-      <AntDesign name="warning" size={64} color={colors.primary[500]} />
-      <Text color={colors.primary[500]} fontSize="lg" fontWeight="bold" my="2">
-        No Tournaments for this sports.
-      </Text>
-      <Button
-        bgColor={colors.primary[900]}
-        onPress={() => {
-          getTournaments({
-            variables: {
-              sport_id: selectedSportsId
-            }
-          })
-        }}
-      >
-        Check Again!
-      </Button>
-    </Box>
-  )
 
   const Header = () => {
     return (
@@ -218,140 +217,109 @@ export default HomeScreen = ({ navigation }) => {
     )
   }
 
-  const HeaderLoading = () => (
-    <VStack space={5} alignItems={"flex-start"} mb={4}>
-      <Skeleton.Text lines={1} alignItems="flex-start" w="16" />
-      <Skeleton.Text lines={1} alignItems="flex-start" pr="12" />
-    </VStack>
-  )
-
-  const LocationLoading = () => (
-    <VStack space={5} alignItems={"flex-start"} mb={1}>
-      <Skeleton.Text lines={1} alignItems="flex-start" w="32" />
-    </VStack>
-  )
-
-  const DataLoadingSkeleton = () => (
-    <Box shadow="4">
-      <Text fontSize={"3xl"} bold mb={4}>
-        On going tournaments
-      </Text>
-      <HStack
-        borderWidth="1"
-        w="40"
-        space={8}
-        rounded="md"
-        _light={{
-          borderColor: "coolGray.200"
-        }}
-        p="4"
-      >
-        <Skeleton flex="1" h="150" rounded="md" startColor="coolGray.100" />
-      </HStack>
-    </Box>
-  )
   return (
-    <Box flex={1} safeArea>
-      <Box p={5} pb={0}>
-        {isLoading ? <HeaderLoading /> : <Header />}
-      </Box>
-      <HStack p={5} pb={0} alignItems={"flex-end"} space={1}>
-        <Ionicons name="location-outline" size={24} color="black" />
-        {locationLoading ? (
-          <LocationLoading />
-        ) : errorMsg ? (
-          <Text color="black">{errorMsg}</Text>
-        ) : (
-          <Text color="black" bold>
-            {location?.country}, {location?.subregion}, {location?.region}
-          </Text>
-        )}
-      </HStack>
-      <Box px={5} my={4}>
-        <Text fontSize={"3xl"} bold mb={4}>
-          Sports
-        </Text>
-        <HStack justifyContent={"space-between"}>
-          {sportsLoading ? (
-            <Text>Loading</Text>
+    <ScrollView>
+      <Box flex={1} safeArea>
+        <Box p={5} pb={0}>
+          {isLoading ? <HeaderLoading /> : <Header />}
+        </Box>
+        <HStack p={5} pb={0} alignItems={"flex-end"} space={1}>
+          <Ionicons name="location-outline" size={24} color="black" />
+          {locationLoading ? (
+            <LocationLoading />
+          ) : errorMsg ? (
+            <Text color="black">{errorMsg}</Text>
           ) : (
-            sportsData?.sports.map((item, index) => {
-              let selected = selectedSportsId == item.id ? true : false
-              return (
-                <Box key={index}>
-                  <Pressable
-                    bg="gray.100"
-                    w={20}
-                    h={20}
-                    shadow={"2"}
-                    borderRadius={"md"}
-                    alignItems={"center"}
-                    justifyContent={"center"}
-                    mb={2}
-                    onPress={() => {
-                      setSelectedSportsId(item.id),
-                        getTournaments({
-                          variables: {
-                            sport_id: item.id
-                          }
-                        })
-                    }}
-                  >
-                    <Image
-                      source={{
-                        uri: item.image
-                      }}
-                      alt="Alternate Text"
-                      size="xl"
-                      w={20}
-                      h={20}
-                      rounded={"md"}
-                      borderWidth={selected ? "4" : 0}
-                      borderColor={"lightBlue.500"}
-                    />
-                  </Pressable>
-                  <Text
-                    textAlign={"center"}
-                    fontWeight={selected ? "bold" : "normal"}
-                  >
-                    {item.sport_name}
-                  </Text>
-                </Box>
-              )
-            })
+            <Text color="black" bold>
+              {location?.country}, {location?.subregion}, {location?.region}
+            </Text>
           )}
         </HStack>
-      </Box>
+        <Box px={5} my={4}>
+          <Text fontSize={"3xl"} bold mb={4}>
+            Sports
+          </Text>
+          <HStack justifyContent={"space-between"}>
+            {sportsLoading ? (
+              <SportsLoadingSkeleton />
+            ) : (
+              sportsData?.sports.map((item, index) => {
+                let selected = selectedSportsId == item.id ? true : false
+                return (
+                  <Box key={index}>
+                    <Pressable
+                      bg="gray.100"
+                      w={20}
+                      h={20}
+                      shadow={"2"}
+                      borderRadius={"md"}
+                      alignItems={"center"}
+                      justifyContent={"center"}
+                      mb={2}
+                      onPress={() => {
+                        setSelectedSportsId(item.id),
+                          getTournaments({
+                            variables: {
+                              sport_id: item.id
+                            }
+                          })
+                      }}
+                    >
+                      <Image
+                        source={{
+                          uri: item.image
+                        }}
+                        alt="Alternate Text"
+                        size="xl"
+                        w={20}
+                        h={20}
+                        rounded={"md"}
+                        borderWidth={selected ? "4" : 0}
+                        borderColor={"lightBlue.500"}
+                      />
+                    </Pressable>
+                    <Text
+                      textAlign={"center"}
+                      fontWeight={selected ? "bold" : "normal"}
+                    >
+                      {item.sport_name}
+                    </Text>
+                  </Box>
+                )
+              })
+            )}
+          </HStack>
+        </Box>
 
-      <Box px={5} flex={"1"}>
-        {loading && sportsLoading ? (
-          <DataLoadingSkeleton />
-        ) : tournamentData?.length >= 1 ? (
-          <>
-            <Text fontSize={"3xl"} bold mb={4}>
-              On going tournaments
-            </Text>
+        <Box px={5} flex={"1"}>
+          {loading || sportsLoading ? (
+            <DataLoadingSkeleton />
+          ) : tournamentData?.length >= 1 ? (
+            <>
+              <Text fontSize={"3xl"} bold mb={4}>
+                On going tournaments
+              </Text>
 
-            <FlatList
-              // refreshControl={
-              //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              // }
-              ItemSeparatorComponent={() => (
-                <Divider my={4} bgColor="transparent" />
-              )}
-              _contentContainerStyle={{
-                padding: 1
-              }}
-              data={tournamentData}
-              keyExtractor={(item, index) => `${item.id}-${index}`}
-              renderItem={({ item }) => <OnGoingTournament item={item} />}
-            />
-          </>
-        ) : (
-          <NoData />
-        )}
-      </Box>
-      {/* <Box mb={4} p={4}>
+              <FlatList
+                // refreshControl={
+                //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                // }
+                ItemSeparatorComponent={() => (
+                  <Divider my={4} bgColor="transparent" />
+                )}
+                _contentContainerStyle={{
+                  padding: 1
+                }}
+                data={tournamentData}
+                keyExtractor={(item, index) => `${item.id}-${index}`}
+                renderItem={({ item }) => <OnGoingTournament item={item} />}
+              />
+            </>
+          ) : (
+            <NoData getData={getTournaments} id={selectedSportsId} colors={colors} />
+          )}
+        </Box>
+        {/* <Box mb={4} p={4}>
         <Text fontSize={"3xl"} bold mb={4}>
           On going tournaments
         </Text>
@@ -373,7 +341,9 @@ export default HomeScreen = ({ navigation }) => {
             </Box>
           ))}
       </Box> */}
-      <LoaderModal isLoading={logOutLoading || isLoading || loading} />
-    </Box>
+        <LoaderModal isLoading={logOutLoading || isLoading || loading} />
+      </Box>
+      <StatusBar style="dark" translucent={false} />
+    </ScrollView>
   )
 }

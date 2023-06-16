@@ -1,25 +1,35 @@
 import { useAuthenticationStatus } from "@nhost/react"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import React from "react"
+import React, { useState } from "react"
 import { authScreens, homeScreens, tournamentSreen } from "."
 import SplashScreen from "./SplashScreen"
-import TournamentScreen from "./Tournaments/TournamentScreen"
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
+import { Center, Spinner, useTheme } from "native-base"
+import { StatusBar } from "expo-status-bar"
 
 const Router = () => {
-  
+  const { colors } = useTheme()
   const Stack = createNativeStackNavigator()
 
   const Tab = createBottomTabNavigator()
+  const LazyPlaceholder = () => ( <Center> <Spinner size="lg" /> </Center> );
 
   const HomeTabs = () => {
     return (
       <Tab.Navigator
+      lazyPlaceholder={LazyPlaceholder}
         screenOptions={({ route }) => ({
-          activeTintColor: "tomato",
-          inactiveTintColor: "gray",
+          tabBarActiveTintColor: colors.blue[500],
+          tabBarInactiveTintColor: colors.gray[500],
+          // tabBarStyle: {
+          //   height: 5
+          // },
+          tabBarLabelStyle: {
+            paddingBottom: 5
+          },
           headerShown: false,
+          lazy: true,
           tabBarIcon: ({ focused, color, size }) => {
             let iconName
             if (route.name === "Home") {

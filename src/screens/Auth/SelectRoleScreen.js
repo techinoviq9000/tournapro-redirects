@@ -1,5 +1,5 @@
 import { Platform } from "react-native"
-import { gql, useMutation, useQuery } from "@apollo/client"
+import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client"
 import {
   Box,
   Button,
@@ -26,38 +26,26 @@ import LoaderModal from "../../components/LoaderModal"
 //   message: string
 // }
 
-const ADD_NEW_WORKER = gql`
-  mutation addWorker(
-    $worker_name: String!
-    $worker_email: String!
-    $contact_number: String!
-    $worker_id: uuid!
-  ) {
-    insert_workers_one(
-      object: {
-        worker_name: $worker_name
-        worker_email: $worker_email
-        contact_number: $contact_number
-        worker_id: $worker_id
-      }
-    ) {
-      id
-    }
+const ADD_PLAYER = gql`
+mutation insertPlayer($player_id: uuid!) {
+  insert_player_one(object: {player_id: $player_id}) {
+    id
   }
+}
+
 `
 
 const SelectRoleScreen = ({ route }) => {
   const {
     signUpEmailPassword,
-    isLoading,
-    isSuccess,
-    needsEmailVerification,
-    isError,
-    error,
+    isLoading
   } = useSignUpEmailPassword()
   const { colors } = useTheme()
   const [radioValue, setRadioValue] = useState("manager")
   const { email, fullName, password } = route.params.values
+
+  const [addPlayer] = useMutation(ADD_PLAYER);
+
   const planArray = [
     { title: "Register As Team Captain / Manager", description: "Only the Captain / Manger can register their teams for tournaments", role: "manager" },
     { title: "Register As Tournament Organizer", description: "Organizers are Super Users", role: "organizer" },
@@ -80,6 +68,13 @@ const SelectRoleScreen = ({ route }) => {
         const message = res?.error?.message
         // setErrorMsg({error, message})
       } else if (res.needsEmailVerification) {
+        console.log(res.user)
+        addPlayer({
+          variables: {
+            player_name: `${fullName}`.trim(),
+            player_id: res?.user?.id,
+          },
+        })
         console.log(res)
         navigationRef.navigate("LoginScreen", {
           needsEmailVerification: true,
