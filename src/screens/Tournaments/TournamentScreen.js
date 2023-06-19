@@ -13,6 +13,15 @@ import { navigationRef } from "../../../rootNavigation"
 import { useDispatch, useSelector } from "react-redux"
 import { setTournamentDetails } from "../../../store/tournamentSlice"
 
+
+import * as React from 'react';
+import { View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NativeScreenNavigationContainer } from "react-native-screens"
+
+
 const TournamentScreen = ({ route }) => {
   const tournamentData = useSelector((state) => state.tournament.data)
   const { colors } = useTheme()

@@ -44,20 +44,32 @@ import NoData from "../../components/NoData"
 import SportsLoadingSkeleton from "../../components/SportsLoadingSkeleton"
 
 const GET_TOURNAMENT = gql`
-  query GetTournaments($sport_id: Int!) {
-    tournaments(where: { sport_id: { _eq: $sport_id } }) {
+query GetTournaments {
+    tournaments(where: {start_date: {_gt: "now()"}}) {
       id
       sport_id
       tournament_name
+      time
       venue
       start_date
-      end_date
-      created_at
-      updated_at
-      time
     }
   }
+  
 `
+const GET_OngoingTOURNAMENT = gql`
+query GetOngoingTournaments {
+  tournaments(where: {start_date: {_lte: "now()"}}) {
+    id
+    sport_id
+    tournament_name
+    time
+    venue
+    start_date
+    end_date
+  }
+}
+`
+
 const GET_SPORTS = gql`
   query GetSports {
     sports {
@@ -78,8 +90,8 @@ export default HomeScreen = ({ navigation }) => {
   const [selectedSportsId, setSelectedSportsId] = useState(null)
   const [locationLoading, setLocationLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState(null)
-  
-  const [getTournaments, { loading, data, error }] = useLazyQuery(
+
+  const [getTournaments,{ loading, data, error }] = useLazyQuery(
     GET_TOURNAMENT,
     {
       notifyOnNetworkStatusChange: true,
@@ -89,13 +101,24 @@ export default HomeScreen = ({ navigation }) => {
       onError: (e) => {
         console.log(e)
       }
+    },
+    GET_OngoingTOURNAMENT,
+    {
+      notifyOnNetworkStatusChange: true,
+      onCompleted: (data) => {
+        dispatch(setTournament(data.tournaments))
+      },
+      onError: (e) => {
+        console.log(e)
+      }
+
     }
   )
 
-  const [
+ const [
     getSports,
     { loading: sportsLoading, data: sportsData, error: sportsError }
-  ] = useLazyQuery(GET_SPORTS, {
+  ] = useLazyQuery(GET_SPORTS,{
     // notifyOnNetworkStatusChange: true,
     fetchPolicy: "cache-first",
     onCompleted: (data) => {
@@ -115,6 +138,7 @@ export default HomeScreen = ({ navigation }) => {
       console.log(e, "error")
     }
   })
+  
   const { isAuthenticated, isLoading } = useAuthenticationStatus()
   const userName = useUserDisplayName() ?? ""
   const userEmail = useUserEmail() ?? ""
@@ -160,6 +184,7 @@ export default HomeScreen = ({ navigation }) => {
 
   const OnGoingTournament = ({ item }) => {
     return (
+
       <Box bg={"white"} p={6} borderRadius="lg" shadow="3" width="90%">
         <HStack
           alignItems="center"
@@ -196,6 +221,8 @@ export default HomeScreen = ({ navigation }) => {
       </Box>
     )
   }
+
+  
 
 
   const Header = () => {
@@ -319,28 +346,53 @@ export default HomeScreen = ({ navigation }) => {
             <NoData getData={getTournaments} id={selectedSportsId} colors={colors} />
           )}
         </Box>
-        {/* <Box mb={4} p={4}>
+        <Box mb={4} p={4}>
         <Text fontSize={"3xl"} bold mb={4}>
-          On going tournaments
+          Upcoming tournaments
         </Text>
         {data &&
           data?.tournaments.map((item) => (
             <Box
-              borderWidth={"1"}
-              borderRadius={5}
-              borderColor={"gray.200"}
-              p={2}
-              width={200}
-              height={300}
-              shadow={"4"}
-              bg={"gray.50"}
+            bg={"white"} p={6} borderRadius="lg" shadow="3" width="90%"
             >
-              <Text>Name: {item.name}</Text>
-              <Text>Location: {item.location}</Text>
-              <Text>Day: {new Date(item.start_date).getDay()}</Text>
+              <HStack
+          alignItems="center"
+          justifyContent="space-between"
+          mb={3}
+          w="full"
+        >
+          <Heading color="black" size="md" w="5/6">
+            {item?.tournament_name || "N/A"}
+          </Heading>
+          <Text color="gray.400">ID: {item?.id}</Text>
+          </HStack>
+
+          <Divider bg="gray.200" my={4} />
+        <VStack space={2}>
+          <Text color="black" fontSize="sm" mb={1}>
+            Will Start at
+          </Text>
+          <HStack space={2} alignItems="center">
+            <AntDesign name="calendar" size={18} />
+            <Text color="black" fontSize="sm">
+              {moment(item?.start_date).format("DD MMM yyyy") || "N/A"}
+            </Text>
+          </HStack>
+          <HStack space={2} alignItems="center">
+            <Ionicons name="location-outline" size={24} color="black" />
+            <Text color="black" fontSize="sm">
+              {(item?.venue) || "N/A"}
+            </Text>
+          </HStack>
+          </VStack>
+          <Divider bg="gray.200" my={4} />
+          
+             {/* <Text>Name: {item.tournament_name}</Text>
+              <Text>Location: {item.venue}</Text>
+              <Text>Day: {new Date(item.start_date).getDay()}</Text> */}
             </Box>
           ))}
-      </Box> */}
+      </Box>
         <LoaderModal isLoading={logOutLoading || isLoading || loading} />
       </Box>
       <StatusBar style="dark" translucent={false} />
