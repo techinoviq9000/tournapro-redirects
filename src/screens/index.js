@@ -6,11 +6,21 @@ import TournamentScreen from "./Tournaments/TournamentScreen"
 import SplashScreen from "./SplashScreen"
 import TournamentOverviewScreen from "./Tournaments/TournamentOverviewScreen"
 import TournamentRegistrationScreen from "./Tournaments/TournamentRegistrationScreen"
+import DrawerMenu from "./Home/DrawerMenu"
 
 export const homeScreens = [
   {
     name: "HomeScreen",
     component: HomeScreen,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false
+    }
+  },
+  {
+    name: "DrawerMenu",
+    component: DrawerMenu,
     options: {
       headerShown: false,
       gestureEnabled: false,
@@ -65,6 +75,8 @@ export const authScreens = [
       cardOverlayEnabled: false
     }
   },
+
+  
   {
     name: "SelectRoleScreen",
     component: SelectRoleScreen,

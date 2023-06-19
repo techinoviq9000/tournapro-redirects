@@ -7,6 +7,7 @@ import {
 import { gql, useLazyQuery, useQuery } from "@apollo/client"
 import { useFocusEffect } from "@react-navigation/native"
 import * as Location from "expo-location"
+
 import {
   Box,
   Button,
@@ -42,6 +43,8 @@ import LocationLoading from "../../components/LocationLoading"
 import DataLoadingSkeleton from "../../components/DataLoadingSkeleton"
 import NoData from "../../components/NoData"
 import SportsLoadingSkeleton from "../../components/SportsLoadingSkeleton"
+import * as React from 'react'
+
 
 const GET_TOURNAMENT = gql`
   query GetTournaments($sport_id: Int!) {
@@ -199,6 +202,8 @@ export default HomeScreen = ({ navigation }) => {
 
 
   const Header = () => {
+
+    
     return (
       <HStack direction="row" alignItems={"center"} mb={1}>
         <Box flex={1}>
@@ -219,6 +224,7 @@ export default HomeScreen = ({ navigation }) => {
 
   return (
     <ScrollView>
+      <DrawerMenu />
       <Box flex={1} safeArea>
         <Box p={5} pb={0}>
           {isLoading ? <HeaderLoading /> : <Header />}
@@ -343,7 +349,7 @@ export default HomeScreen = ({ navigation }) => {
       </Box> */}
         <LoaderModal isLoading={logOutLoading || isLoading || loading} />
       </Box>
-      <StatusBar style="dark" translucent={false} />
+      <StatusBar style="dark" translucent={false}/>
     </ScrollView>
   )
 }
