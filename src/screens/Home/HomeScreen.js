@@ -34,7 +34,7 @@ import { navigationRef } from "../../../rootNavigation"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import LoaderModal from "../../components/LoaderModal"
 import { useDispatch, useSelector } from "react-redux"
-import { setTournament } from "../../../store/tournamentSlice"
+import { setTournament, setongoingTournament, setupcomingTournament } from "../../../store/tournamentSlice"
 import { setLocation } from "../../../store/dataSlice"
 import { StatusBar } from "expo-status-bar"
 import HeaderLoading from "../../components/HeaderLoading"
@@ -44,21 +44,8 @@ import NoData from "../../components/NoData"
 import SportsLoadingSkeleton from "../../components/SportsLoadingSkeleton"
 
 const GET_TOURNAMENT = gql`
-query GetTournaments {
-    tournaments(where: {start_date: {_gt: "now()"}}) {
-      id
-      sport_id
-      tournament_name
-      time
-      venue
-      start_date
-    }
-  }
-  
-`
-const GET_OngoingTOURNAMENT = gql`
-query GetOngoingTournaments {
-  tournaments(where: {start_date: {_lte: "now()"}}) {
+query GetOngoingTournaments($sport_id: Int!) {
+  tournaments (where: {sport_id: {_eq: $sport_id}, start_date: {_lte: "now()"}}){
     id
     sport_id
     tournament_name
@@ -68,6 +55,22 @@ query GetOngoingTournaments {
     end_date
   }
 }
+
+  
+`
+const GET_UPCOMINGTOURNAMENT = gql`
+
+query GetTournaments ($sport_id: Int!) {
+  tournaments(where: {sport_id: {_eq: $sport_id}, start_date: {_gt: "now()"}}) {
+    id
+    sport_id
+    tournament_name
+    time
+    venue
+    start_date
+  }
+}
+
 `
 
 const GET_SPORTS = gql`
@@ -83,7 +86,8 @@ const GET_SPORTS = gql`
 `
 
 export default HomeScreen = ({ navigation }) => {
-  const tournamentData = useSelector((state) => state.tournament.data)
+  const ongoingtournamentData = useSelector((state) => state.tournament.ongoingdata)
+  const upcomingtournamentData = useSelector((state) => state.tournament.upcomingdata)
   const location = useSelector((state) => state.generalData.location)
   const dispatch = useDispatch()
 
@@ -96,17 +100,20 @@ export default HomeScreen = ({ navigation }) => {
     {
       notifyOnNetworkStatusChange: true,
       onCompleted: (data) => {
-        dispatch(setTournament(data.tournaments))
+        dispatch(setongoingTournament(data.tournaments))
       },
       onError: (e) => {
         console.log(e)
       }
     },
-    GET_OngoingTOURNAMENT,
+  )
+
+  const [getUTournaments,{ loading:utloading, data:utdata, error:utError }] = useLazyQuery(
+    GET_UPCOMINGTOURNAMENT,
     {
       notifyOnNetworkStatusChange: true,
       onCompleted: (data) => {
-        dispatch(setTournament(data.tournaments))
+        dispatch(setupcomingTournament(data.tournaments))
       },
       onError: (e) => {
         console.log(e)
@@ -130,6 +137,14 @@ export default HomeScreen = ({ navigation }) => {
         getTournaments({
           variables: {
             sport_id: id
+          }
+        })
+        getUTournaments({
+          variables: {
+
+            sport_id: id
+            
+            
           }
         })
       }
@@ -203,6 +218,46 @@ export default HomeScreen = ({ navigation }) => {
         <VStack space={2}>
           <Text color="black" fontSize="sm" mb={1}>
             Started at
+          </Text>
+          <HStack space={2} alignItems="center">
+            <AntDesign name="calendar" size={18} />
+            <Text color="black" fontSize="sm">
+              {moment(item?.start_date).format("DD MMM yyyy") || "N/A"}
+            </Text>
+          </HStack>
+          <HStack space={2} alignItems="center">
+            <AntDesign name="clockcircleo" size={18} />
+            <Text color="black" fontSize="sm">
+              {moment(item?.start_date).format("HH:MM:SS") || "N/A"}
+            </Text>
+          </HStack>
+        </VStack>
+        <Divider bg="gray.200" my={4} />
+      </Box>
+    )
+  }
+
+  const UpcomingTournament = ({ item }) => {
+    return (
+
+      <Box bg={"white"} p={6} borderRadius="lg" shadow="3" width="90%">
+        <HStack
+          alignItems="center"
+          justifyContent="space-between"
+          mb={3}
+          w="full"
+        >
+          <Heading color="black" size="md" w="5/6">
+            {item?.tournament_name || "N/A"}
+          </Heading>
+          <Text color="gray.400">ID: {item?.id}</Text>
+        </HStack>
+        {/* <Text fontSize={"lg"} fontWeight="bold" color="black">Clean the windows</Text> */}
+        {/* <AssignedTo item={item} /> */}
+        <Divider bg="gray.200" my={4} />
+        <VStack space={2}>
+          <Text color="black" fontSize="sm" mb={1}>
+            Will start at
           </Text>
           <HStack space={2} alignItems="center">
             <AntDesign name="calendar" size={18} />
@@ -321,7 +376,7 @@ export default HomeScreen = ({ navigation }) => {
         <Box px={5} flex={"1"}>
           {loading || sportsLoading ? (
             <DataLoadingSkeleton />
-          ) : tournamentData?.length >= 1 ? (
+          ) : ongoingtournamentData?.length >= 1 ? (
             <>
               <Text fontSize={"3xl"} bold mb={4}>
                 On going tournaments
@@ -337,7 +392,7 @@ export default HomeScreen = ({ navigation }) => {
                 _contentContainerStyle={{
                   padding: 1
                 }}
-                data={tournamentData}
+                data={ongoingtournamentData}
                 keyExtractor={(item, index) => `${item.id}-${index}`}
                 renderItem={({ item }) => <OnGoingTournament item={item} />}
               />
@@ -346,53 +401,37 @@ export default HomeScreen = ({ navigation }) => {
             <NoData getData={getTournaments} id={selectedSportsId} colors={colors} />
           )}
         </Box>
-        <Box mb={4} p={4}>
-        <Text fontSize={"3xl"} bold mb={4}>
-          Upcoming tournaments
-        </Text>
-        {data &&
-          data?.tournaments.map((item) => (
-            <Box
-            bg={"white"} p={6} borderRadius="lg" shadow="3" width="90%"
-            >
-              <HStack
-          alignItems="center"
-          justifyContent="space-between"
-          mb={3}
-          w="full"
-        >
-          <Heading color="black" size="md" w="5/6">
-            {item?.tournament_name || "N/A"}
-          </Heading>
-          <Text color="gray.400">ID: {item?.id}</Text>
-          </HStack>
 
-          <Divider bg="gray.200" my={4} />
-        <VStack space={2}>
-          <Text color="black" fontSize="sm" mb={1}>
-            Will Start at
-          </Text>
-          <HStack space={2} alignItems="center">
-            <AntDesign name="calendar" size={18} />
-            <Text color="black" fontSize="sm">
-              {moment(item?.start_date).format("DD MMM yyyy") || "N/A"}
-            </Text>
-          </HStack>
-          <HStack space={2} alignItems="center">
-            <Ionicons name="location-outline" size={24} color="black" />
-            <Text color="black" fontSize="sm">
-              {(item?.venue) || "N/A"}
-            </Text>
-          </HStack>
-          </VStack>
-          <Divider bg="gray.200" my={4} />
-          
-             {/* <Text>Name: {item.tournament_name}</Text>
-              <Text>Location: {item.venue}</Text>
-              <Text>Day: {new Date(item.start_date).getDay()}</Text> */}
-            </Box>
-          ))}
-      </Box>
+        <Box px={5} flex={"1"}>
+
+          <>
+
+          <Text fontSize={"3xl"} bold mb={4}>
+                Upcoming tournaments
+              </Text>
+
+              <FlatList
+                // refreshControl={
+                //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                // }
+                ItemSeparatorComponent={() => (
+                  <Divider my={4} bgColor="transparent" />
+                )}
+                _contentContainerStyle={{
+                  padding: 1
+                }}
+                data={upcomingtournamentData}
+                keyExtractor={(item, index) => `${item.id}-${index}`}
+                renderItem={({ item }) => <UpcomingTournament item={item} />}
+              />
+
+
+
+          </>
+
+        </Box>
+
+        
         <LoaderModal isLoading={logOutLoading || isLoading || loading} />
       </Box>
       <StatusBar style="dark" translucent={false} />

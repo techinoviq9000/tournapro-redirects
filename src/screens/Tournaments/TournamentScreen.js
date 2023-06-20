@@ -11,7 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons"
 import { navigationRef } from "../../../rootNavigation"
 import { useDispatch, useSelector } from "react-redux"
-import { setTournamentDetails } from "../../../store/tournamentSlice"
+import { setongoingTournamentDetails } from "../../../store/tournamentSlice"
 
 
 import * as React from 'react';
@@ -24,6 +24,8 @@ import { NativeScreenNavigationContainer } from "react-native-screens"
 
 const TournamentScreen = ({ route }) => {
   const tournamentData = useSelector((state) => state.tournament.data)
+  const ongoingtournamentData = useSelector((state) => state.tournament.ongoingdata)
+  const upcomingtournamentData = useSelector((state) => state.tournament.upcomingdata)
   const { colors } = useTheme()
   const dispatch = useDispatch()
   const handlePress = async (item) => {
@@ -44,11 +46,60 @@ const TournamentScreen = ({ route }) => {
         </Box>
         <Box mb={4} mt={0}>
           <Text fontSize={"4xl"} bold>
+            Ongoing Tournaments
+          </Text>
+          <Text>List of Ongoing Tournaments</Text>
+        </Box>
+        {ongoingtournamentData?.map((item, index) => (
+          <Pressable onPress={() => handlePress(item)} key={item.id}>
+            {({ isHovered, isFocused, isPressed }) => {
+              return (
+                <Box
+                  style={{
+                    transform: [
+                      {
+                        scale: isPressed ? 0.96 : 1
+                      }
+                    ]
+                  }}
+                  py={3}
+                  px={3}
+                  rounded="8"
+                  borderWidth={"1"}
+                  borderColor={"coolGray.300"}
+                  mb={8}
+                >
+                  <HStack alignItems="center" justifyContent={"space-between"}>
+                    <Box>
+                      <Text fontSize={"xl"} bold>
+                        {item.tournament_name}
+                      </Text>
+                      <Text>{item.venue}</Text>
+                      <Text>Start Date: {item.start_date}</Text>
+                      <Text>End Date: {item.end_date}</Text>
+                    </Box>
+                    <Spacer />
+                    <Box>
+                      <Ionicons
+                        name={"arrow-forward"}
+                        size={24}
+                        color={colors.blue[600]}
+                      />
+                    </Box>
+                  </HStack>
+                </Box>
+              )
+            }}
+          </Pressable>
+        ))}
+
+<Box mb={4} mt={0}>
+          <Text fontSize={"4xl"} bold>
             Upcoming Tournaments
           </Text>
-          <Text>List of Tournaments</Text>
+          <Text>List of Upcoming Tournaments</Text>
         </Box>
-        {tournamentData?.map((item, index) => (
+        {upcomingtournamentData?.map((item, index) => (
           <Pressable onPress={() => handlePress(item)} key={item.id}>
             {({ isHovered, isFocused, isPressed }) => {
               return (

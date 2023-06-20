@@ -1,7 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  data: null,
+  ongoingdata: null,
+  upcomingdata: null,
   tournamentDetails: null
 };
 
@@ -9,16 +10,22 @@ export const tournamentSlice = createSlice({
   name: "tournament",
   initialState,
   reducers: {
-    setTournament: (state, action) => {
-      state.data = action.payload;
+    setongoingTournament: (state, action) => {
+      state.ongoingdata = action.payload;
     },
-    setTournamentDetails: (state, action) => {
-      state.tournamentDetails = action.payload;
+    setupcomingTournament:(state, action) => {
+      state.upcomingdata = action.payload;
+    },
+    setongoingTournamentDetails: (state, action) => {
+      state.ongoingTournamentDetails = action.payload;
+    },
+    setupcomingTournamentDetails: (state, action) => {
+      state.upcomingTournamentDetails = action.payload;
     }
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { setTournament, setTournamentDetails } = tournamentSlice.actions;
-
+export const { setongoingTournament, setongoingTournamentDetails } = tournamentSlice.actions;
+export const { setupcomingTournament, setupcomingTournamentDetails } = tournamentSlice.actions;
 export default tournamentSlice.reducer;
