@@ -1,6 +1,7 @@
 import {
   useAuthenticationStatus,
   useSignOut,
+  useUserData,
   useUserDisplayName,
   useUserEmail
 } from "@nhost/react"
@@ -24,6 +25,7 @@ import {
 import {
   Ionicons,
   AntDesign,
+  FontAwesome,
   MaterialIcons,
   MaterialCommunityIcons
 } from "@expo/vector-icons"
@@ -90,6 +92,8 @@ export default HomeScreen = ({ navigation }) => {
   const upcomingtournamentData = useSelector((state) => state.tournament.upcomingdata)
   const location = useSelector((state) => state.generalData.location)
   const dispatch = useDispatch()
+  const userData = useUserData()
+
 
   const [selectedSportsId, setSelectedSportsId] = useState(null)
   const [locationLoading, setLocationLoading] = useState(false)
@@ -282,23 +286,45 @@ export default HomeScreen = ({ navigation }) => {
 
   const Header = () => {
     return (
-      <HStack direction="row" alignItems={"center"} mb={1}>
-        <Box flex={1}>
-          <HStack direction="column" mb={1}>
-            <Text color="black" fontSize={"2xl"}>
-              {`Hello, ${userName}`}
+      <Box flex={1} direction="row" alignContent={"center"} justifyContent={"space-evenly"}>
+        
+          <HStack mt = "2" direction="row" mb={1}>
+          <FontAwesome name="user-circle-o" size={40} color="black" />
+          
+          <HStack p={2} pb={0} space={1}>
+          
+          {locationLoading ? (
+            <LocationLoading />
+          ) : errorMsg ? (
+            <Text color="black">{errorMsg}</Text>
+          ) : (
+            <Text color="black">
+              {location?.country}, {location?.subregion}, {location?.region}
+              <Ionicons name="location-outline" size={18} color="black"/> 
             </Text>
-            <Text color="gray.400" fontSize="xs">
-              {userEmail}
-            </Text>
+            
+          )}
+          
+        </HStack>
+              
+              
+
+              <HStack marginRight="40">
+              <Ionicons name="menu-outline" size={40} color="black" />
+
+              </HStack>
+              
           </HStack>
-        </Box>
-        <Button onPress={() => logOut()}>Logout</Button>
+          
+          
+        
+        
+        
         <Box></Box>
-      </HStack>
+      </Box>
     )
   }
-
+  
   return (
     <ScrollView>
       <Box flex={1} safeArea>
@@ -324,7 +350,7 @@ export default HomeScreen = ({ navigation }) => {
           <HStack justifyContent={"space-between"}>
             {sportsLoading ? (
               <SportsLoadingSkeleton />
-            ) : (
+              ) : (
               sportsData?.sports.map((item, index) => {
                 let selected = selectedSportsId == item.id ? true : false
                 return (
@@ -435,6 +461,7 @@ export default HomeScreen = ({ navigation }) => {
         <LoaderModal isLoading={logOutLoading || isLoading || loading} />
       </Box>
       <StatusBar style="dark" translucent={false} />
+<Button onPress={() => logOut()}>Logout</Button>
     </ScrollView>
   )
 }
