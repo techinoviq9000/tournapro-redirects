@@ -1,13 +1,14 @@
 import {
   useAuthenticationStatus,
   useSignOut,
+  useUserData,
   useUserDisplayName,
-  useUserEmail
-} from "@nhost/react"
-import { gql, useLazyQuery, useQuery } from "@apollo/client"
-import { useFocusEffect } from "@react-navigation/native"
-import * as Location from "expo-location"
-
+  useUserEmail,
+} from "@nhost/react";
+import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { useFocusEffect } from "@react-navigation/native";
+import * as Location from "expo-location";
+import { View, StyleSheet } from "react-native";
 import {
   Box,
   Button,
@@ -18,33 +19,33 @@ import {
   Image,
   Pressable,
   Skeleton,
+  Stack,
   Text,
   useTheme,
-  VStack
-} from "native-base"
+  VStack,
+} from "native-base";
 import {
   Ionicons,
   AntDesign,
   MaterialIcons,
-  MaterialCommunityIcons
-} from "@expo/vector-icons"
-import { RefreshControl, ScrollView } from "react-native"
-import moment from "moment"
-import { useCallback, useContext, useEffect, useState } from "react"
-import { navigationRef } from "../../../rootNavigation"
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import LoaderModal from "../../components/LoaderModal"
-import { useDispatch, useSelector } from "react-redux"
-import { setTournament } from "../../../store/tournamentSlice"
-import { setLocation } from "../../../store/dataSlice"
-import { StatusBar } from "expo-status-bar"
-import HeaderLoading from "../../components/HeaderLoading"
-import LocationLoading from "../../components/LocationLoading"
-import DataLoadingSkeleton from "../../components/DataLoadingSkeleton"
-import NoData from "../../components/NoData"
-import SportsLoadingSkeleton from "../../components/SportsLoadingSkeleton"
-import * as React from 'react'
-
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
+import { RefreshControl, ScrollView } from "react-native";
+import moment from "moment";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { navigationRef } from "../../../rootNavigation";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import LoaderModal from "../../components/LoaderModal";
+import { useDispatch, useSelector } from "react-redux";
+import { setTournament } from "../../../store/tournamentSlice";
+import { setLocation } from "../../../store/dataSlice";
+import { StatusBar } from "expo-status-bar";
+import HeaderLoading from "../../components/HeaderLoading";
+import LocationLoading from "../../components/LocationLoading";
+import DataLoadingSkeleton from "../../components/DataLoadingSkeleton";
+import NoData from "../../components/NoData";
+import SportsLoadingSkeleton from "../../components/SportsLoadingSkeleton";
+import * as React from "react";
 
 const GET_TOURNAMENT = gql`
   query GetTournaments($sport_id: Int!) {
@@ -60,7 +61,7 @@ const GET_TOURNAMENT = gql`
       time
     }
   }
-`
+`;
 const GET_SPORTS = gql`
   query GetSports {
     sports {
@@ -71,33 +72,35 @@ const GET_SPORTS = gql`
       updated_at
     }
   }
-`
+`;
 
 export default HomeScreen = ({ navigation }) => {
-  const tournamentData = useSelector((state) => state.tournament.data)
-  const location = useSelector((state) => state.generalData.location)
-  const dispatch = useDispatch()
+  const userData = useUserData();
 
-  const [selectedSportsId, setSelectedSportsId] = useState(null)
-  const [locationLoading, setLocationLoading] = useState(false)
-  const [errorMsg, setErrorMsg] = useState(null)
-  
+  const tournamentData = useSelector((state) => state.tournament.data);
+  const location = useSelector((state) => state.generalData.location);
+  const dispatch = useDispatch();
+
+  const [selectedSportsId, setSelectedSportsId] = useState(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
+
   const [getTournaments, { loading, data, error }] = useLazyQuery(
     GET_TOURNAMENT,
     {
       notifyOnNetworkStatusChange: true,
       onCompleted: (data) => {
-        dispatch(setTournament(data.tournaments))
+        dispatch(setTournament(data.tournaments));
       },
       onError: (e) => {
-        console.log(e)
-      }
+        console.log(e);
+      },
     }
-  )
+  );
 
   const [
     getSports,
-    { loading: sportsLoading, data: sportsData, error: sportsError }
+    { loading: sportsLoading, data: sportsData, error: sportsError },
   ] = useLazyQuery(GET_SPORTS, {
     // notifyOnNetworkStatusChange: true,
     fetchPolicy: "cache-first",
@@ -105,60 +108,60 @@ export default HomeScreen = ({ navigation }) => {
       if (!selectedSportsId) {
         const id = data?.sports.filter(
           (item) => item.sport_name == "Cricket"
-        )[0].id
-        setSelectedSportsId(id)
+        )[0].id;
+        setSelectedSportsId(id);
         getTournaments({
           variables: {
-            sport_id: id
-          }
-        })
+            sport_id: id,
+          },
+        });
       }
     },
     onError: (e) => {
-      console.log(e, "error")
-    }
-  })
-  const { isAuthenticated, isLoading } = useAuthenticationStatus()
-  const userName = useUserDisplayName() ?? ""
-  const userEmail = useUserEmail() ?? ""
-  const { colors } = useTheme()
-  const [logOutLoading, setLogOutLoading] = useState(false)
-  const { signOut } = useSignOut()
+      console.log(e, "error");
+    },
+  });
+  const { isAuthenticated, isLoading } = useAuthenticationStatus();
+  const userName = useUserDisplayName() ?? "";
+  const userEmail = useUserEmail() ?? "";
+  const { colors } = useTheme();
+  const [logOutLoading, setLogOutLoading] = useState(false);
+  const { signOut } = useSignOut();
   const logOut = async () => {
     try {
-      setLogOutLoading(true)
-      signOut()
-      setLogOutLoading(false)
+      setLogOutLoading(true);
+      signOut();
+      setLogOutLoading(false);
     } catch (error) {
-      setLogOutLoading(false)
-      console.log(error)
+      setLogOutLoading(false);
+      console.log(error);
     }
-  }
+  };
 
   const getLocation = async () => {
-    setLocationLoading(true)
-    let { status } = await Location.requestForegroundPermissionsAsync()
+    setLocationLoading(true);
+    let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
-      setErrorMsg("Permission to access location was denied")
-      setLocationLoading(false)
-      return
+      setErrorMsg("Permission to access location was denied");
+      setLocationLoading(false);
+      return;
     }
 
-    let location = await Location.getCurrentPositionAsync({})
+    let location = await Location.getCurrentPositionAsync({});
     let loc = await Location.reverseGeocodeAsync({
       latitude: location.coords.latitude,
-      longitude: location.coords.longitude
-    })
-    dispatch(setLocation(loc[0]))
-    setLocationLoading(false)
-  }
+      longitude: location.coords.longitude,
+    });
+    dispatch(setLocation(loc[0]));
+    setLocationLoading(false);
+  };
   // useFocusEffect(
   useEffect(() => {
-    getSports()
+    getSports();
     if (!location) {
-      getLocation()
+      getLocation();
     }
-  }, [])
+  }, []);
   // )
 
   const OnGoingTournament = ({ item }) => {
@@ -197,39 +200,65 @@ export default HomeScreen = ({ navigation }) => {
         </VStack>
         <Divider bg="gray.200" my={4} />
       </Box>
-    )
-  }
-
+    );
+  };
 
   const Header = () => {
-
-    
+    const userData = useUserData();
     return (
-      <HStack direction="row" alignItems={"center"} mb={1}>
-        <Box flex={1}>
+      <>
+      <HStack alignItems="center" justifyContent={"space-between"} mb={2}>
+        {/* <Box flex={1}>
           <HStack direction="column" mb={1}>
-            <Text color="black" fontSize={"2xl"}>
-              {`Hello, ${userName}`}
-            </Text>
-            <Text color="gray.400" fontSize="xs">
-              {userEmail}
-            </Text>
+          <Text color="black" fontSize={"2xl"}>
+          {`Hello, ${userName}`}
+          </Text>
+          <Text color="gray.400" fontSize="xs">
+          {userEmail}
+          </Text>
           </HStack>
-        </Box>
-        <Button onPress={() => logOut()}>Logout</Button>
-        <Box></Box>
+          </Box> 
+        <Button onPress={() => logOut()}>Logout</Button> */}
+        <Image
+          size={30}
+          borderRadius={100}
+          source={{
+            uri: userData?.avatarUrl,
+          }}
+          alt="Alternate Text"
+          />
+        <HStack alignItems={"flex-end"} space={1}>
+          <Ionicons name="location-outline" size={24} color="black" />
+          {locationLoading ? (
+            <LocationLoading />
+          ) : errorMsg ? (
+            <Text color="black">{errorMsg}</Text>
+            ) : (
+              <Text color="black" bold>
+              {location?.country}, {location?.subregion}, {location?.region}
+            </Text>
+          )}
+        </HStack>
+        <Ionicons
+          name="menu"
+          p={6}
+          size={24}
+          color="black"
+          onPress={() => navigation.openDrawer()}
+          />
       </HStack>
-    )
-  }
+      <Divider my="2" />
+        </>
+    );
+  };
 
   return (
     <ScrollView>
-      <DrawerMenu />
       <Box flex={1} safeArea>
         <Box p={5} pb={0}>
           {isLoading ? <HeaderLoading /> : <Header />}
         </Box>
-        <HStack p={5} pb={0} alignItems={"flex-end"} space={1}>
+        {/* <HStack p={5} pb={0} alignItems={"flex-end"} space={1}>
           <Ionicons name="location-outline" size={24} color="black" />
           {locationLoading ? (
             <LocationLoading />
@@ -240,8 +269,8 @@ export default HomeScreen = ({ navigation }) => {
               {location?.country}, {location?.subregion}, {location?.region}
             </Text>
           )}
-        </HStack>
-        <Box px={5} my={4}>
+        </HStack> */}
+        <Box px={5} my={4} marginTop="15px">
           <Text fontSize={"3xl"} bold mb={4}>
             Sports
           </Text>
@@ -250,7 +279,7 @@ export default HomeScreen = ({ navigation }) => {
               <SportsLoadingSkeleton />
             ) : (
               sportsData?.sports.map((item, index) => {
-                let selected = selectedSportsId == item.id ? true : false
+                let selected = selectedSportsId == item.id ? true : false;
                 return (
                   <Box key={index}>
                     <Pressable
@@ -266,14 +295,14 @@ export default HomeScreen = ({ navigation }) => {
                         setSelectedSportsId(item.id),
                           getTournaments({
                             variables: {
-                              sport_id: item.id
-                            }
-                          })
+                              sport_id: item.id,
+                            },
+                          });
                       }}
                     >
                       <Image
                         source={{
-                          uri: item.image
+                          uri: item.image,
                         }}
                         alt="Alternate Text"
                         size="xl"
@@ -291,7 +320,7 @@ export default HomeScreen = ({ navigation }) => {
                       {item.sport_name}
                     </Text>
                   </Box>
-                )
+                );
               })
             )}
           </HStack>
@@ -314,7 +343,7 @@ export default HomeScreen = ({ navigation }) => {
                   <Divider my={4} bgColor="transparent" />
                 )}
                 _contentContainerStyle={{
-                  padding: 1
+                  padding: 1,
                 }}
                 data={tournamentData}
                 keyExtractor={(item, index) => `${item.id}-${index}`}
@@ -322,7 +351,11 @@ export default HomeScreen = ({ navigation }) => {
               />
             </>
           ) : (
-            <NoData getData={getTournaments} id={selectedSportsId} colors={colors} />
+            <NoData
+              getData={getTournaments}
+              id={selectedSportsId}
+              colors={colors}
+            />
           )}
         </Box>
         {/* <Box mb={4} p={4}>
@@ -349,7 +382,7 @@ export default HomeScreen = ({ navigation }) => {
       </Box> */}
         <LoaderModal isLoading={logOutLoading || isLoading || loading} />
       </Box>
-      <StatusBar style="dark" translucent={false}/>
+      <StatusBar style="dark" translucent={false} />
     </ScrollView>
-  )
-}
+  );
+};

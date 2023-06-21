@@ -6,7 +6,7 @@ import TournamentScreen from "./Tournaments/TournamentScreen"
 import SplashScreen from "./SplashScreen"
 import TournamentOverviewScreen from "./Tournaments/TournamentOverviewScreen"
 import TournamentRegistrationScreen from "./Tournaments/TournamentRegistrationScreen"
-import DrawerMenu from "./Home/DrawerMenu"
+import ViewUserProfileScreen from "./UserProfile/ViewUserProfileScreen"
 
 export const homeScreens = [
   {
@@ -17,10 +17,12 @@ export const homeScreens = [
       gestureEnabled: false,
       cardOverlayEnabled: false
     }
-  },
+  }
+]
+export const userProfileScreens = [
   {
-    name: "DrawerMenu",
-    component: DrawerMenu,
+    name: "ViewUserProfileSCreen",
+    component: ViewUserProfileScreen,
     options: {
       headerShown: false,
       gestureEnabled: false,
