@@ -75,6 +75,20 @@ query GetTournaments ($sport_id: Int!) {
 
 `
 
+const GET_MATCHES = gql`
+query GetMatches {
+  matches {
+      id
+      team1_id
+      team2_id
+      man_of_the_match
+      match_time
+      match_venue
+      run_score_points
+  }
+  }
+`
+
 const GET_SPORTS = gql`
   query GetSports {
     sports {
@@ -87,6 +101,9 @@ const GET_SPORTS = gql`
   }
 `
 
+
+
+
 export default HomeScreen = ({ navigation }) => {
   const ongoingtournamentData = useSelector((state) => state.tournament.ongoingdata)
   const upcomingtournamentData = useSelector((state) => state.tournament.upcomingdata)
@@ -96,6 +113,8 @@ export default HomeScreen = ({ navigation }) => {
 
 
   const [selectedSportsId, setSelectedSportsId] = useState(null)
+
+  
   const [locationLoading, setLocationLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState(null)
 
@@ -126,6 +145,20 @@ export default HomeScreen = ({ navigation }) => {
     }
   )
 
+  const[getMatches,{loading: matchesloading, data: matchdata, error: matcherror}] = useLazyQuery(
+    GET_MATCHES,
+    {
+      notifyOnNetworkStatusChange: true,
+      onCompleted: (data) => {
+        (matchdata.matches)
+        
+      },
+      onError: (e) => {
+        console.log(e)
+      }
+    }
+  )
+
  const [
     getSports,
     { loading: sportsLoading, data: sportsData, error: sportsError }
@@ -147,6 +180,14 @@ export default HomeScreen = ({ navigation }) => {
           variables: {
 
             sport_id: id
+            
+            
+          }
+        })
+        getMatches({
+          variables: {
+
+            
             
             
           }
@@ -243,6 +284,7 @@ export default HomeScreen = ({ navigation }) => {
 
   const UpcomingTournament = ({ item }) => {
     return (
+      
 
       <Box bg={"white"} p={6} borderRadius="lg" shadow="3" width="90%">
         <HStack
@@ -280,6 +322,57 @@ export default HomeScreen = ({ navigation }) => {
       </Box>
     )
   }
+  
+
+  const Matches = ({ item }) => {
+
+    
+    return (
+     
+      <Box bg={"white"} p={6} borderRadius="lg" shadow="3" width="90%">
+        
+        <HStack
+
+          alignItems="center"
+          justifyContent="space-between"
+          mb={3}
+          w="full"
+        >
+          
+          <Heading color="black" size="md" w="5/6">
+            {item?.team1_id || "N/A"} <Text>VS</Text> {item?.team2_id}
+          </Heading>
+          <Text color="gray.400">ID: {item?.id}</Text>
+        </HStack>
+        {/* <Text fontSize={"lg"} fontWeight="bold" color="black">Clean the windows</Text> */}
+        {/* <AssignedTo item={item} /> */}
+        <Divider bg="gray.200" my={4} />
+        <VStack space={2}>
+          <Text color="black" fontSize="sm" mb={1}>
+            Will start at
+          </Text>
+          <HStack space={2} alignItems="center">
+            <AntDesign name="calendar" size={18} />
+            <Text color="black" fontSize="sm">
+              {moment(item?.match_time).format("DD MMM yyyy") || "N/A"}
+            </Text>
+          </HStack>
+          <HStack space={2} alignItems="center">
+          <Ionicons name="location-outline" size={18} color="black"/> 
+            <Text color="black" fontSize="sm">
+              {item?.match_venue|| "N/A"}
+            </Text>
+          </HStack>
+        </VStack>
+        <Divider bg="gray.200" my={4} />
+        
+      </Box>
+
+            
+    )
+    
+  }
+    console.log(matchdata)
 
   
 
@@ -397,8 +490,43 @@ export default HomeScreen = ({ navigation }) => {
               })
             )}
           </HStack>
+
         </Box>
 
+
+
+        <Box px={5} flex={"1"}>
+
+<>
+
+<Text fontSize={"3xl"} bold mb={4}>
+      My Matches
+      
+      
+    </Text>
+    
+    <FlatList
+      // refreshControl={
+      //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      // }
+      
+      
+      ItemSeparatorComponent={() => (
+        <Divider my={4} bgColor="transparent" />
+      )}
+      _contentContainerStyle={{
+        padding: 1
+      }}
+      data={matchdata?.matches}
+      keyExtractor={(item, index) => `${item.id}-${index}`}
+      renderItem={({ item }) => <Matches item={item} />}
+    />
+
+
+
+</>
+
+</Box>
         <Box px={5} flex={"1"}>
           {loading || sportsLoading ? (
             <DataLoadingSkeleton />
@@ -449,7 +577,9 @@ export default HomeScreen = ({ navigation }) => {
                 data={upcomingtournamentData}
                 keyExtractor={(item, index) => `${item.id}-${index}`}
                 renderItem={({ item }) => <UpcomingTournament item={item} />}
+                
               />
+              
 
 
 
@@ -462,6 +592,7 @@ export default HomeScreen = ({ navigation }) => {
       </Box>
       <StatusBar style="dark" translucent={false} />
 <Button onPress={() => logOut()}>Logout</Button>
+
     </ScrollView>
   )
 }

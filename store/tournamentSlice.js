@@ -3,7 +3,8 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   ongoingdata: null,
   upcomingdata: null,
-  tournamentDetails: null
+  ongoingTournamentDetails: null,
+  upcomingTournamentDetails: null
 };
 
 export const tournamentSlice = createSlice({
