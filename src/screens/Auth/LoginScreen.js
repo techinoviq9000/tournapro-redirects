@@ -22,6 +22,7 @@ import { useState, useEffect } from "react"
 import { navigate, navigationRef } from "../../../rootNavigation"
 import {
   useAuthenticationStatus,
+  useSendVerificationEmail,
   useSignInEmailPassword,
   useUserData
 } from "@nhost/react"
@@ -50,6 +51,8 @@ const LoginScreen = ({ route }) => {
   const [tokenLoading, setTokenLoading] = useState(false)
   const [errors, setErrors] = useState([])
   const userData = useUserData()
+  const { sendEmail, isLoading: loadingSendEmail, isSent } =
+  useSendVerificationEmail()
   const [updateToken, { loading, error: gqlError, data }] = useMutation(
     UPDATE_TOKEN,
     {
@@ -154,6 +157,10 @@ const LoginScreen = ({ route }) => {
     }
   }
 
+  const handleSendVerificationEmail = async (email) => {
+    const res = await sendEmail(email)
+    console.log({res})
+  }
   const { colors } = useTheme()
   // console.log({isAuthenticated})
   // useEffect(() => {
@@ -301,19 +308,21 @@ const LoginScreen = ({ route }) => {
                 >
                   Forgot Password?
                 </Text>
-              </Box>
-            )}
-          </Formik>
-          {needsEmailVerification && (
+                {needsEmailVerification && (
             <Box my={4}>
               <Text color="red.600" bold textAlign={"center"}>Verify your email address and login</Text>
               <Text color="red.600" bold textAlign={"center"}>Open your email to verify your email</Text>
+              <Text color="red.600" bold textAlign={"center"}>Didnt recieve verification? <Text onPress={() => handleSendVerificationEmail(values.email)} underline>Click here</Text> to send verification link again</Text>
             </Box>
           )}
+              </Box>
+            )}
+
+          </Formik>
+        
         </Box>
-        <LoaderModal isLoading={isLoading} />
       </Box>
-      <LoaderModal isLoading={signInloading} />
+      <LoaderModal isLoading={signInloading || isLoading || loadingSendEmail} />
     </ScrollView>
   )
 }
