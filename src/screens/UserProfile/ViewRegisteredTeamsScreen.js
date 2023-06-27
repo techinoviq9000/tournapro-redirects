@@ -6,16 +6,21 @@ import { useSelector } from "react-redux";
 import { navigationRef } from "../../../rootNavigation";
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
 import { MaterialIcons } from '@expo/vector-icons';
+
 const GET_REGTEAMS = gql`
-  query RegTeams($where: team_tournaments_bool_exp!) {
-    team_tournaments(where: $where) {
-      team_tournaments_team {
-        id
-        team_name
-        team_image
-      }
+query RegTeams($where: team_tournaments_bool_exp!) {
+  team_tournaments(where: $where) {
+    team_tournaments_team {
+      id
+      team_name
+      team_image
+    }
+    player_captain {
+      player_name
     }
   }
+}
+
 `;
 
 const ViewRegisteredTeamsScreen = () => {
@@ -68,7 +73,7 @@ const ViewRegisteredTeamsScreen = () => {
         <Text fontSize="lg" fontWeight="bold">{item?.team_tournaments_team?.team_name}</Text>
         </Box>
         <MaterialIcons name="navigate-next" size={24} color="black"/>
-        <Text></Text>
+        <Text>{item?.player_captain?.player_name}</Text>
       </Box>
       </HStack>
     );
@@ -81,7 +86,7 @@ const ViewRegisteredTeamsScreen = () => {
           name="arrow-back"
           size={24}
           color="black"
-          onPress={() => navigationRef.navigate("ViewUserProfileScreen")}
+          onPress={() => navigationRef.goBack()}
         />
       </Box>
       <Box padding="20px" display="flex" alignItems="center">
