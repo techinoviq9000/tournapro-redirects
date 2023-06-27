@@ -225,8 +225,7 @@ export default HomeScreen = ({ navigation }) => {
           source={{
             uri: userData?.avatarUrl,
           }}
-          alt="Alternate Text"
-          />
+          alt="Alternate Text"/>
         <HStack alignItems={"flex-end"} space={1}>
           <Ionicons name="location-outline" size={24} color="black" />
           {locationLoading ? (

@@ -35,7 +35,7 @@ const TournamentOverviewScreen = () => {
 
         <Box flex="1" justifyContent={"flex-end"} marginTop="5">
           {userRole == "manager" && (
-            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>View Registered Teams</Button>
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("ViewRegisteredTeamsScreen")}>View Registered Teams</Button>
           )}
         </Box>
 

@@ -7,6 +7,8 @@ import SplashScreen from "./SplashScreen"
 import TournamentOverviewScreen from "./Tournaments/TournamentOverviewScreen"
 import TournamentRegistrationScreen from "./Tournaments/TournamentRegistrationScreen"
 import ViewUserProfileScreen from "./UserProfile/ViewUserProfileScreen"
+import EditProfile from "./UserProfile/EditProfile"
+import ViewRegisteredTeamsScreen from "./UserProfile/ViewRegisteredTeamsScreen"
 
 export const homeScreens = [
   {
@@ -23,6 +25,15 @@ export const userProfileScreens = [
   {
     name: "ViewUserProfileSCreen",
     component: ViewUserProfileScreen,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false
+    }
+  },
+  {
+    name: "EditProfile",
+    component: EditProfile,
     options: {
       headerShown: false,
       gestureEnabled: false,
@@ -57,7 +68,17 @@ export const tournamentSreen = [
       gestureEnabled: false,
       cardOverlayEnabled: false
     }
-  }
+  },
+  {
+    name: "ViewRegisteredTeamsScreen",
+    component: ViewRegisteredTeamsScreen,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false
+    }
+  },
+ 
 ]
 export const authScreens = [
   {

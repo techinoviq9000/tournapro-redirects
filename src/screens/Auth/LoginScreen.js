@@ -195,7 +195,7 @@ const LoginScreen = ({route}) => {
         </Text>
         <Formik
           initialValues={{
-            email: "ammarsheikh125@gmail.com",
+            email: "ammar.s@techinoviq.com",
             password: "123456789",
           }}
           // validationSchema={SignupSchema}
