@@ -651,6 +651,14 @@ export default HomeScreen = ({ navigation }) => {
               // _contentContainerStyle={{
               //   padding: 1,
               // }}
+
+              ItemSeparatorComponent={() => (
+                // <Divider bgColor="transparent" />
+                <Box w="2" />
+              )}
+              _contentContainerStyle={{
+                padding: 1,
+              }}
               padding={1}
               data={upcomingtournamentData}
               horizontal

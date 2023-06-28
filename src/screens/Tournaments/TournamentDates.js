@@ -202,7 +202,7 @@ const TournamentDates = () => {
             // bgColor={"blue.700"}
             colorScheme={"red"}
             my={4}
-            onPress={() => navigate("TournamentDates")}
+            onPress={() => navigate("CreateTournamentScreen")}
           >
             Cancel
           </Button>

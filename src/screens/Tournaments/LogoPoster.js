@@ -114,7 +114,7 @@ const LogoPoster = () => {
           // bgColor={"blue.700"}
           colorScheme={"amber"}
           my={2}
-          onPress={() => navigate("LogoPoster")}
+          onPress={() => navigate("HomeScreen")}
         >
           Create Tournament
         </Button>
@@ -124,7 +124,7 @@ const LogoPoster = () => {
           // bgColor={"blue.700"}
           colorScheme={"red"}
           my={2}
-          onPress={() => navigate("TournamentDates")}
+          onPress={() => navigate("CreateTournamentScreen")}
         >
           Cancel
         </Button>
