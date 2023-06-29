@@ -5,8 +5,10 @@ import {
   Box,
   Button,
   CheckIcon,
+  FormControl,
   HStack,
   Input,
+  Modal,
   Pressable,
   Select,
   Skeleton,
@@ -17,7 +19,9 @@ import {
 } from "native-base"
 import React, { useEffect, useState } from "react"
 import { ScrollView } from "react-native"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
+import { navigationRef } from "../../../rootNavigation"
+import { setPlayerDetails } from "../../../store/registerPlayerSlice"
 
 const TournamentRegistrationScreen = () => {
   const GET_TEAMS = gql`
@@ -35,24 +39,50 @@ const TournamentRegistrationScreen = () => {
         player {
           id
           player_name
+          player_email
         }
       }
     }
   `
-  const tournamentDetails = useSelector(
-    (state) => state.tournament.tournamentDetails
-  )
+  const FIND_USER = gql`
+  query findUser($player_email: String) {
+    player(where: {player_email: {_eq: $player_email}}) {
+      id
+      player_email
+      user {
+        email
+      }
+    }
+  }
+  
+  `
+
+  const dispatch = useDispatch()
   const { colors } = useTheme()
   const [service, setService] = useState("")
   const [players, setPlayers] = useState(null)
+  const [modalVisible, setModalVisible] = useState(true);
   const [getTeams, { loading, data, error }] = useLazyQuery(GET_TEAMS)
+  const [findUser, { loading: userLoading, data: findUserData }] = useLazyQuery(
+    FIND_USER,
+    {
+      notifyOnNetworkStatusChange: true,
+      onError: (e) => {
+        console.log(e)
+      }
+    }
+  )
   const [getTeamPlayers, { loading: playersLoading }] = useLazyQuery(
     GET_PLAYERS,
     {
       onCompleted: (data) => {
         setPlayers(
           data.player_teams.map((item) => {
-            return { id: item.player.id, player_name: item.player.player_name }
+            return {
+              id: item.player.id,
+              player_email: item.player.player_email,
+              found: null
+            }
           })
         )
       },
@@ -77,23 +107,46 @@ const TournamentRegistrationScreen = () => {
 
   const handleAddPlayerInputField = () => {
     const id = `player_${currenPlayerCount - 1}`
-    setPlayers([...players, { id, player_name: "" }])
+    setPlayers([...players, { id, player_email: "" }])
   }
 
-  const handleFindPlayer = (player) => {
-    
+  const handleFindPlayer = async (player, index) => {
+    const res = await findUser({
+      variables: {
+        player_email: player.player_email
+      }
+    })
+    const returnedUser = res?.player?.users
+    const returnedPlayer = res?.player?.player_email
+    if (returnedPlayer && returnedUser) {
+      const newPlayer = players[index]
+      newPlayer.found = true
+      setPlayers([...players])
+    } else {
+      const newPlayer = players[index]
+      newPlayer.found = false
+      setPlayers([...players])
+    }
   }
 
   const handlePlayerNameChange = (text, index) => {
     const newPlayer = players[index]
-    newPlayer.player_name = text
+    newPlayer.player_email = text
     setPlayers([...players])
     console.log(players)
   }
 
   const removePlayer = (id) => {
-    const removedPlayers = players.filter(item => item.id !== id)
+    const removedPlayers = players.filter((item) => item.id !== id)
     setPlayers(removedPlayers)
+  }
+
+  const handleInvitePlayer = (player, index) => {
+    dispatch(setPlayerDetails(player))
+    const newPlayer = players[index]
+    newPlayer.found = undefined
+    setPlayers([...players])
+    navigationRef.navigate("RegisterUserForTeamScreen")
   }
   useEffect(() => {
     getTeams()
@@ -140,26 +193,69 @@ const TournamentRegistrationScreen = () => {
           {playersLoading ? (
             <PlayerLoadngSkeleton />
           ) : (
-            players?.map((player, index) => (
-              <VStack mb={6} flex="1" w="full">
-                <Text mb={1}>Player {index + 1}</Text>
-                <HStack flex="1" space={2}>
-                <Input
-                  type="text"
-                  flex={"1"}
-                  value={player.player_name}
-                  placeholder={"Add Player"}
-                  onChangeText={(text) => handlePlayerNameChange(text, index)}
-                  InputRightElement={
-                    <Pressable p={2} onPress={() => removePlayer(player.id)}>
-                    <Ionicons name="trash-outline" size={24} />
-                    </Pressable>
-                  }
-                />
-                <Button colorScheme={"blue"} onPress={() => handleFindPlayer(player)}>Find</Button>
-                </HStack>
-              </VStack>
-            ))
+            players?.map((player, index) => {
+              let founded = undefined
+              if (player.found == true) {
+                founded = true
+              } else if (player.found == false) {
+                founded = false
+              }
+              console.log(founded)
+              return (
+                <VStack mb={6} flex="1" w="full">
+                  <Text mb={1} fontWeight="bold">Player {index + 1}</Text>
+                  <HStack flex="1" space={2}>
+                    <Input
+                      type="text"
+                      flex={"1"}
+                      value={player.player_email}
+                      placeholder={"Add Player"}
+                      borderColor={
+                        founded != undefined
+                          ? founded
+                            ? "green.400"
+                            : "red.500"
+                          : "gray.300"
+                      }
+                      onChangeText={(text) =>
+                        handlePlayerNameChange(text, index)
+                      }
+                      InputRightElement={
+                        <Pressable
+                          p={2}
+                          onPress={() => removePlayer(player.id)}
+                        >
+                          <Ionicons name="trash-outline" size={24} />
+                        </Pressable>
+                      }
+                    />
+                    <Button
+                      colorScheme={"blue"}
+                      isDisabled={player?.player_email?.length < 1}
+                      _disabled={{
+                        bgColor: "blue.500"
+                      }}
+                      onPress={() => handleFindPlayer(player, index)}
+                    >
+                      Find
+                    </Button>
+                  </HStack>
+                  <Box mt={1}>
+                    {founded == false ? (
+                      <Box>
+                        <Text color="red.500" fontWeight={"bold"} mb={1}>Player not found</Text>
+                        <Button colorScheme={"blue"} size="sm" w="24" onPress={() =>  handleInvitePlayer(player, index)}>Invite player</Button>
+                      </Box>
+                    ) : founded == true ? (
+                      <Box>
+                        <Text>Player found</Text>
+                        
+                      </Box>
+                    ) : <></>}
+                  </Box>
+                </VStack>
+              )
+            })
           )}
           {allowedPlayerToRegisterCount > 0 && (
             <Pressable

@@ -6,6 +6,7 @@ import TournamentScreen from "./Tournaments/TournamentScreen"
 import SplashScreen from "./SplashScreen"
 import TournamentOverviewScreen from "./Tournaments/TournamentOverviewScreen"
 import TournamentRegistrationScreen from "./Tournaments/TournamentRegistrationScreen"
+import RegisterUserForTeamScreen from "./Tournaments/RegisterUserForTeamScreen"
 
 export const homeScreens = [
   {
@@ -40,6 +41,15 @@ export const tournamentSreen = [
   {
     name: "TournamentRegistrationScreen",
     component: TournamentRegistrationScreen,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false
+    }
+  },
+  {
+    name: "RegisterUserForTeamScreen",
+    component: RegisterUserForTeamScreen,
     options: {
       headerShown: false,
       gestureEnabled: false,
