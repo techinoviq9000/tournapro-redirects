@@ -10,7 +10,7 @@ import {
   Text,
   VStack,
   useTheme,
-  ScrollView
+  ScrollView,
 } from "native-base"
 import * as Device from "expo-device"
 import { Formik, Form } from "formik"
@@ -24,7 +24,7 @@ import {
   useAuthenticationStatus,
   useSendVerificationEmail,
   useSignInEmailPassword,
-  useUserData
+  useUserData,
 } from "@nhost/react"
 import { StatusBar } from "expo-status-bar"
 import AppVersion from "../../../AppVersion"
@@ -49,16 +49,18 @@ const UPDATE_TOKEN = gql`
 const LoginScreen = ({ route }) => {
   const { isAuthenticated, isLoading } = useAuthenticationStatus()
   const [tokenLoading, setTokenLoading] = useState(false)
-  const [errors, setErrors] = useState([])
   const userData = useUserData()
-  const { sendEmail, isLoading: loadingSendEmail, isSent } =
-  useSendVerificationEmail()
+  const {
+    sendEmail,
+    isLoading: loadingSendEmail,
+    isSent,
+  } = useSendVerificationEmail()
   const [updateToken, { loading, error: gqlError, data }] = useMutation(
     UPDATE_TOKEN,
     {
       onCompleted: (data) => {
         console.log({ data })
-      }
+      },
     }
   )
   const registerForPushNotificationsAsync = async () => {
@@ -69,7 +71,7 @@ const LoginScreen = ({ route }) => {
         name: "default",
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C"
+        lightColor: "#FF231F7C",
       })
     }
     if (Device.isDevice) {
@@ -109,18 +111,16 @@ const LoginScreen = ({ route }) => {
             //insert row in db or udpate existing row
             variables: {
               token: token,
-              email: email ?? userData?.email ?? "N/A"
-            }
+              email: email ?? userData?.email ?? "N/A",
+            },
           })
           return await Promise.resolve(true)
         } else {
           console.log("token founded")
-          setErrors([...errors, "token not found"])
           return await Promise.resolve(true)
         }
       } else {
         console.log("No token found and no token set") //some error when getting token
-        setErrors([...errors, "token not found and no token set"])
         return await Promise.reject(false)
       }
     })
@@ -132,8 +132,9 @@ const LoginScreen = ({ route }) => {
     isSuccess,
     needsEmailVerification,
     isError,
-    error
+    error,
   } = useSignInEmailPassword()
+  console.log({ error })
   const [togglePassword, setTogglePassword] = useState(true)
   const [signInloading, setSignInLoading] = useState(false)
   const signIn = async ({ email, password }) => {
@@ -144,22 +145,22 @@ const LoginScreen = ({ route }) => {
         email.toLowerCase().trim(),
         password.trim()
       )
+      console.log(res)
       if (res?.isError) {
         //if there is error during sign in
-        setErrors([...errors, "error in login"])
         console.log("error in login")
       }
       setSignInLoading(false)
     } catch (e) {
       //some error in whole process
-      setErrors([...errors, JSON.stringify(e)])
-      console.log(e, "error")
+      console.log(JSON.stringify(e), "error")
     }
   }
 
   const handleSendVerificationEmail = async (email) => {
+    console.log(email)
     const res = await sendEmail(email)
-    console.log({res})
+    console.log({ res })
   }
   const { colors } = useTheme()
   // console.log({isAuthenticated})
@@ -199,7 +200,7 @@ const LoginScreen = ({ route }) => {
           <Formik
             initialValues={{
               email: "salmanhanif133@gmail.com",
-              password: "123456789"
+              password: "123456789",
             }}
             // validationSchema={SignupSchema}
             // validateOnChange={false}
@@ -212,7 +213,7 @@ const LoginScreen = ({ route }) => {
               handleSubmit,
               values,
               errors,
-              touched
+              touched,
             }) => (
               <Box>
                 <Input
@@ -230,7 +231,7 @@ const LoginScreen = ({ route }) => {
                   selectionColor={colors.primary[600]}
                   _focus={{
                     borderColor: "gray.600",
-                    bgColor: "white"
+                    bgColor: "white",
                   }}
                   autoCapitalize="none"
                   py={3}
@@ -255,7 +256,7 @@ const LoginScreen = ({ route }) => {
                   type={togglePassword ? "password" : "text"}
                   _focus={{
                     borderColor: "gray.600",
-                    bgColor: "white"
+                    bgColor: "white",
                   }}
                   autoCapitalize="none"
                   py={3}
@@ -309,17 +310,37 @@ const LoginScreen = ({ route }) => {
                   Forgot Password?
                 </Text>
                 {needsEmailVerification && (
-            <Box my={4}>
-              <Text color="red.600" bold textAlign={"center"}>Verify your email address and login</Text>
-              <Text color="red.600" bold textAlign={"center"}>Open your email to verify your email</Text>
-              <Text color="red.600" bold textAlign={"center"}>Didnt recieve verification? <Text onPress={() => handleSendVerificationEmail(values.email)} underline>Click here</Text> to send verification link again</Text>
-            </Box>
-          )}
+                  <Box my={4}>
+                    <Text color="red.600" bold textAlign={"center"}>
+                      Verify your email address and login
+                    </Text>
+                    <Text color="red.600" bold textAlign={"center"}>
+                      Open your email to verify your email
+                    </Text>
+                    <Text color="red.600" bold textAlign={"center"}>
+                      Didnt recieve verification?{" "}
+                      <Text
+                        onPress={() =>
+                          handleSendVerificationEmail(values.email)
+                        }
+                        underline
+                      >
+                        Click here
+                      </Text>{" "}
+                      to send verification link again
+                    </Text>
+                  </Box>
+                )}
+                {isError && (
+                  <Box my={4}>
+                    <Text color="red.600" bold textAlign={"center"}>
+                      {error?.message}
+                    </Text>
+                  </Box>
+                )}
               </Box>
             )}
-
           </Formik>
-        
         </Box>
       </Box>
       <LoaderModal isLoading={signInloading || isLoading || loadingSendEmail} />

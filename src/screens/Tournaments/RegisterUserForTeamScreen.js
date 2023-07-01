@@ -19,8 +19,8 @@ import LoaderModal from "../../components/LoaderModal"
 import { useSelector } from "react-redux"
 
 const REGISTER_PLAYER = gql`
-mutation MyMutation($player_email: String = "", $player_name: String = "") {
-  insert_player_one(object: {player_email: $player_email, player_name: $player_name}) {
+mutation MyMutation($player_email: citext!, $player_name: String!) {
+  insert_players_one(object: {player_email: $player_email, player_name: $player_name}) {
     id
   }
 }
