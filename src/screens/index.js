@@ -1,11 +1,12 @@
-import LoginScreen from "./Auth/LoginScreen";
-import HomeScreen from "./Home/HomeScreen";
-import SignUpScreen from "./Auth/SignUpScreen";
-import SelectRoleScreen from "./Auth/SelectRoleScreen";
-import TournamentScreen from "./Tournaments/TournamentScreen";
-import SplashScreen from "./SplashScreen";
-import TournamentOverviewScreen from "./Tournaments/TournamentOverviewScreen";
-import TournamentRegistrationScreen from "./Tournaments/TournamentRegistrationScreen";
+import LoginScreen from "./Auth/LoginScreen"
+import HomeScreen from "./Home/HomeScreen"
+import SignUpScreen from "./Auth/SignUpScreen"
+import SelectRoleScreen from "./Auth/SelectRoleScreen"
+import TournamentScreen from "./Tournaments/TournamentScreen"
+import SplashScreen from "./SplashScreen"
+import TournamentOverviewScreen from "./Tournaments/TournamentOverviewScreen"
+import TournamentRegistrationScreen from "./Tournaments/TournamentRegistrationScreen"
+import RegisterUserForTeamScreen from "./Tournaments/RegisterUserForTeamScreen"
 import OngoingTournamentsScreen from "./Home/OngoingTournaments";
 import UpcomingTournamentsScreen from "./Home/UpcomingTournaments";
 import CreateTournamentScreen from "./Tournaments/CreateTournamentScreen";
@@ -67,6 +68,19 @@ export const tournamentSreen = [
     options: {
       headerShown: false,
       gestureEnabled: false,
+      cardOverlayEnabled: false
+    }
+  },
+  {
+    name: "RegisterUserForTeamScreen",
+    component: RegisterUserForTeamScreen,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false
+    }
+  }
+]
       cardOverlayEnabled: false,
     },
   },
