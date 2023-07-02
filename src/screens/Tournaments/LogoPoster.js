@@ -26,7 +26,6 @@ import { Platform, ScrollView } from "react-native";
 import { useSelector } from "react-redux";
 import { navigate } from "../../../rootNavigation";
 import { AntDesign } from "@expo/vector-icons";
-import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import * as ImagePicker from "expo-image-picker";
 
 const LogoPoster = () => {
