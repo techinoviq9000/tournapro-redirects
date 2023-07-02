@@ -47,29 +47,7 @@ export const userProfileScreens = [
     }
   }
 ]
-      cardOverlayEnabled: false,
-    },
-  },
-  {
-    name: "OngoingTournaments",
-    component: OngoingTournamentsScreen,
-    options: {
-      headerShown: false,
-      gestureEnabled: false,
-      cardOverlayEnabled: false,
-    },
-  },
 
-  {
-    name: "UpcomingTournaments",
-    component: UpcomingTournamentsScreen,
-    options: {
-      headerShown: false,
-      gestureEnabled: false,
-      cardOverlayEnabled: false,
-    },
-  },
-];
 export const tournamentSreen = [
   {
     name: "SelectOrViewTournamentScreen",
@@ -137,6 +115,25 @@ export const tournamentSreen = [
   {
     name: "LogoPoster",
     component: LogoPoster,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false,
+    },
+  },
+  {
+    name: "OngoingTournamentsScreen",
+    component: OngoingTournamentsScreen,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false,
+    },
+  },
+
+  {
+    name: "UpcomingTournamentsScreen",
+    component: UpcomingTournamentsScreen ,
     options: {
       headerShown: false,
       gestureEnabled: false,

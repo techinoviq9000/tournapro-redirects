@@ -53,7 +53,6 @@ import HeaderLoading from "../../components/HeaderLoading"
 import LocationLoading from "../../components/LocationLoading"
 import NoData from "../../components/NoData"
 import SportsLoadingSkeleton from "../../components/SportsLoadingSkeleton"
-import OngoingTournamentsScreen from "./OngoingTournaments"
 import dayjs from "dayjs"
 import MatchesDataLoadingSkeleton from "../../components/MatchesDataLoadingSkeleton"
 import OngGoingDataLoadingSkeleton from "../../components/OngGoingDataLoadingSkeleton"
@@ -278,10 +277,10 @@ export default HomeScreen = ({ navigation }) => {
             <Text>
               Start Date: {dayjs(item.start_date).format("ddd, D MMM")}
             </Text>
-          </HStack>
-        </VStack>
-        <Divider bg="gray.200" my={4} />
-      </Box>
+            <Text>End Date: {dayjs(item.end_date).format("ddd, D MMM")}</Text>
+          </Box>
+        </ImageBackground>
+      </HStack>
     );
   };
 
@@ -332,12 +331,6 @@ export default HomeScreen = ({ navigation }) => {
         </>
     );
   };
-            <Text>End Date: {dayjs(item.end_date).format("ddd, D MMM")}</Text>
-          </Box>
-        </ImageBackground>
-      </HStack>
-    )
-  }
 
   const UpComingTournament = ({ item }) => {
     return (
@@ -506,7 +499,7 @@ export default HomeScreen = ({ navigation }) => {
                   <Text fontSize={"2xl"} bold>
                     My Matches
                   </Text>
-                  <Pressable onPress={() => navigate("OngoingTournaments")}>
+                  <Pressable onPress={() => navigate("OngoingTournamentsScreen")}>
                     <HStack>
                       <Text color="blue.500" bold>
                         See All
@@ -559,7 +552,7 @@ export default HomeScreen = ({ navigation }) => {
                   <Text fontSize={"2xl"} bold>
                     Ongoing tournaments
                   </Text>
-                  <Pressable onPress={() => navigate("OngoingTournaments")}>
+                  <Pressable onPress={() => navigate("OngoingTournamentsScreen")}>
                     <HStack>
                       <Text color="blue.500" bold>
                         See All
@@ -612,7 +605,7 @@ export default HomeScreen = ({ navigation }) => {
                   <Text fontSize={"2xl"} bold>
                     Upcoming tournaments
                   </Text>
-                  <Pressable onPress={() => navigate("OngoingTournaments")}>
+                  <Pressable onPress={() => navigate("OngoingTournamentsScreen")}>
                     <HStack>
                       <Text color="blue.500" bold>
                         See All
