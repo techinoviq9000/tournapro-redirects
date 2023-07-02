@@ -9,12 +9,9 @@ import {
   Spacer,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
-import { navigate, navigationRef } from "../../../rootNavigation";
+import { navigationRef } from "../../../rootNavigation";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  setTournamentDetails,
-  setongoingTournamentDetails,
-} from "../../../store/tournamentSlice";
+import { setongoingTournamentDetails } from "../../../store/tournamentSlice";
 
 import * as React from "react";
 import { View } from "react-native";
@@ -23,7 +20,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NativeScreenNavigationContainer } from "react-native-screens";
 
-const TournamentScreen = ({ route }) => {
+const UpcomingTournamentsScreen = ({ route }) => {
   const tournamentData = useSelector((state) => state.tournament.data);
   const ongoingtournamentData = useSelector(
     (state) => state.tournament.ongoingdata
@@ -41,7 +38,7 @@ const TournamentScreen = ({ route }) => {
   return (
     <ScrollView keyboardDismissMode="interactive">
       <Box bg={"white"} minH="full" flex={1} safeArea p={5} pt={2}>
-        <Box w="full" display={"flex"} justifyItems={"center"}>
+        {/* <Box w="full" display={"flex"} justifyItems={"center"}>
           <Ionicons
             name="arrow-back"
             size={24}
@@ -96,7 +93,7 @@ const TournamentScreen = ({ route }) => {
               );
             }}
           </Pressable>
-        ))}
+        ))} */}
 
         <Box mb={4} mt={0}>
           <Text fontSize={"4xl"} bold>
@@ -150,15 +147,14 @@ const TournamentScreen = ({ route }) => {
           size="lg"
           borderRadius="lg"
           // bgColor={"blue.700"}
-          colorScheme={"amber"}
+          colorScheme={"blue"}
           my={4}
-          onPress={() => navigate("CreateTournamentScreen")}
         >
-          Create New Tournamnet
+          Send Code
         </Button>
       </Box>
     </ScrollView>
   );
 };
 
-export default TournamentScreen;
+export default UpcomingTournamentsScreen;

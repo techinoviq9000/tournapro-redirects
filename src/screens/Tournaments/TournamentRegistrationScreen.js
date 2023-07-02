@@ -1,6 +1,6 @@
-import { gql, useLazyQuery } from "@apollo/client"
-import { Ionicons } from "@expo/vector-icons"
-import dayjs from "dayjs"
+import { gql, useLazyQuery } from "@apollo/client";
+import { Ionicons } from "@expo/vector-icons";
+import dayjs from "dayjs";
 import {
   Box,
   Button,
@@ -13,11 +13,11 @@ import {
   Spacer,
   Text,
   useTheme,
-  VStack
-} from "native-base"
-import React, { useEffect, useState } from "react"
-import { ScrollView } from "react-native"
-import { useSelector } from "react-redux"
+  VStack,
+} from "native-base";
+import React, { useEffect, useState } from "react";
+import { ScrollView } from "react-native";
+import { useSelector } from "react-redux";
 
 const TournamentRegistrationScreen = () => {
   const GET_TEAMS = gql`
@@ -27,7 +27,7 @@ const TournamentRegistrationScreen = () => {
         team_name
       }
     }
-  `
+  `;
 
   const GET_PLAYERS = gql`
     query getPlayers($id: Int!) {
@@ -38,70 +38,68 @@ const TournamentRegistrationScreen = () => {
         }
       }
     }
-  `
+  `;
   const tournamentDetails = useSelector(
     (state) => state.tournament.tournamentDetails
-  )
-  const { colors } = useTheme()
-  const [service, setService] = useState("")
-  const [players, setPlayers] = useState(null)
-  const [getTeams, { loading, data, error }] = useLazyQuery(GET_TEAMS)
+  );
+  const { colors } = useTheme();
+  const [service, setService] = useState("");
+  const [players, setPlayers] = useState(null);
+  const [getTeams, { loading, data, error }] = useLazyQuery(GET_TEAMS);
   const [getTeamPlayers, { loading: playersLoading }] = useLazyQuery(
     GET_PLAYERS,
     {
       onCompleted: (data) => {
         setPlayers(
           data.player_teams.map((item) => {
-            return { id: item.player.id, player_name: item.player.player_name }
+            return { id: item.player.id, player_name: item.player.player_name };
           })
-        )
+        );
       },
       onError: (e) => {
-        console.log({ e })
-      }
+        console.log({ e });
+      },
     }
-  )
+  );
 
-  let allowedPlayerToRegisterCount = 15
-  let currenPlayerCount = players?.length
-  allowedPlayerToRegisterCount = 15 - currenPlayerCount
+  let allowedPlayerToRegisterCount = 15;
+  let currenPlayerCount = players?.length;
+  allowedPlayerToRegisterCount = 15 - currenPlayerCount;
 
   const handleTeamPressed = async (id) => {
-    setService(id)
+    setService(id);
     getTeamPlayers({
       variables: {
-        id
-      }
-    })
-  }
+        id,
+      },
+    });
+  };
 
   const handleAddPlayerInputField = () => {
-    const id = `player_${currenPlayerCount - 1}`
-    setPlayers([...players, { id, player_name: "" }])
-  }
+    const id = `player_${currenPlayerCount - 1}`;
+    setPlayers([...players, { id, player_name: "" }]);
+  };
 
-  const handleFindPlayer = (player) => {
-    
-  }
+  const handleFindPlayer = (player) => {};
 
   const handlePlayerNameChange = (text, index) => {
-    const newPlayer = players[index]
-    newPlayer.player_name = text
-    setPlayers([...players])
-    console.log(players)
-  }
+    const newPlayer = players[index];
+    newPlayer.player_name = text;
+    setPlayers([...players]);
+    console.log(players);
+  };
 
   const removePlayer = (id) => {
-    const removedPlayers = players.filter(item => item.id !== id)
-    setPlayers(removedPlayers)
-  }
+    const removedPlayers = players.filter((item) => item.id !== id);
+    setPlayers(removedPlayers);
+  };
   useEffect(() => {
-    getTeams()
-  }, [])
+    getTeams();
+  }, []);
 
   const PlayerLoadngSkeleton = () => (
     <Skeleton my="4" rounded="md" startColor="coolGray.100" />
-  )
+  );
   return (
     <ScrollView>
       <Box safeArea mt={2} px={4}>
@@ -122,7 +120,7 @@ const TournamentRegistrationScreen = () => {
             placeholder="Select Team"
             _selectedItem={{
               bg: "blue.200",
-              endIcon: <CheckIcon color="white" size="5" />
+              endIcon: <CheckIcon color="white" size="5" />,
             }}
             mt={1}
             onValueChange={(itemId) => handleTeamPressed(itemId)}
@@ -144,19 +142,24 @@ const TournamentRegistrationScreen = () => {
               <VStack mb={6} flex="1" w="full">
                 <Text mb={1}>Player {index + 1}</Text>
                 <HStack flex="1" space={2}>
-                <Input
-                  type="text"
-                  flex={"1"}
-                  value={player.player_name}
-                  placeholder={"Add Player"}
-                  onChangeText={(text) => handlePlayerNameChange(text, index)}
-                  InputRightElement={
-                    <Pressable p={2} onPress={() => removePlayer(player.id)}>
-                    <Ionicons name="trash-outline" size={24} />
-                    </Pressable>
-                  }
-                />
-                <Button colorScheme={"blue"} onPress={() => handleFindPlayer(player)}>Find</Button>
+                  <Input
+                    type="text"
+                    flex={"1"}
+                    value={player.player_name}
+                    placeholder={"Add Player"}
+                    onChangeText={(text) => handlePlayerNameChange(text, index)}
+                    InputRightElement={
+                      <Pressable p={2} onPress={() => removePlayer(player.id)}>
+                        <Ionicons name="trash-outline" size={24} />
+                      </Pressable>
+                    }
+                  />
+                  <Button
+                    colorScheme={"blue"}
+                    onPress={() => handleFindPlayer(player)}
+                  >
+                    Find
+                  </Button>
                 </HStack>
               </VStack>
             ))
@@ -173,9 +176,9 @@ const TournamentRegistrationScreen = () => {
                     style={{
                       transform: [
                         {
-                          scale: isPressed ? 0.96 : 1
-                        }
-                      ]
+                          scale: isPressed ? 0.96 : 1,
+                        },
+                      ],
                     }}
                     py={3}
                     px={3}
@@ -194,14 +197,14 @@ const TournamentRegistrationScreen = () => {
                       </Text>
                     </HStack>
                   </Box>
-                )
+                );
               }}
             </Pressable>
           )}
         </>
       </Box>
     </ScrollView>
-  )
-}
+  );
+};
 
-export default TournamentRegistrationScreen
+export default TournamentRegistrationScreen;
