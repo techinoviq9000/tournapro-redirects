@@ -32,10 +32,20 @@ export default function App() {
     }
   }
 
+  const config = {
+    dependencies: {
+      // For Expo projects (Bare or managed workflow)
+      "linear-gradient": require("expo-linear-gradient").LinearGradient,
+      // For non expo projects
+      // 'linear-gradient': require('react-native-linear-gradient').default,
+    },
+  };
+  
+
   return (
     <NhostProvider nhost={nhost}>
       <NhostApolloProvider nhost={nhost}>
-        <NativeBaseProvider>
+      <NativeBaseProvider config={config}>
         <Provider store={store}>
           <NavigationContainer ref={navigationRef} theme={MyTheme}>
            <Router />

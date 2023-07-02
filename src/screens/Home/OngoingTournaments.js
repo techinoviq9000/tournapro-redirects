@@ -9,12 +9,9 @@ import {
   Spacer,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
-import { navigate, navigationRef } from "../../../rootNavigation";
+import { navigationRef } from "../../../rootNavigation";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  setTournamentDetails,
-  setongoingTournamentDetails,
-} from "../../../store/tournamentSlice";
+import { setongoingTournamentDetails } from "../../../store/tournamentSlice";
 
 import * as React from "react";
 import { View } from "react-native";
@@ -23,7 +20,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NativeScreenNavigationContainer } from "react-native-screens";
 
-const TournamentScreen = ({ route }) => {
+const OngoingTournamentsScreen = ({ route }) => {
   const tournamentData = useSelector((state) => state.tournament.data);
   const ongoingtournamentData = useSelector(
     (state) => state.tournament.ongoingdata
@@ -34,21 +31,13 @@ const TournamentScreen = ({ route }) => {
   const { colors } = useTheme();
   const dispatch = useDispatch();
   const handlePress = async (item) => {
-    await dispatch(setTournamentDetails(item));
+    await dispatch(setongoingTournamentDetails(item));
     navigationRef.navigate("TournamentOverviewScreen");
   };
 
   return (
     <ScrollView keyboardDismissMode="interactive">
       <Box bg={"white"} minH="full" flex={1} safeArea p={5} pt={2}>
-        <Box w="full" display={"flex"} justifyItems={"center"}>
-          <Ionicons
-            name="arrow-back"
-            size={24}
-            color="black"
-            onPress={() => navigationRef.goBack()}
-          />
-        </Box>
         <Box mb={4} mt={0}>
           <Text fontSize={"4xl"} bold>
             Ongoing Tournaments
@@ -98,7 +87,7 @@ const TournamentScreen = ({ route }) => {
           </Pressable>
         ))}
 
-        <Box mb={4} mt={0}>
+        {/* <Box mb={4} mt={0}>
           <Text fontSize={"4xl"} bold>
             Upcoming Tournaments
           </Text>
@@ -150,15 +139,15 @@ const TournamentScreen = ({ route }) => {
           size="lg"
           borderRadius="lg"
           // bgColor={"blue.700"}
-          colorScheme={"amber"}
+          colorScheme={"blue"}
           my={4}
-          onPress={() => navigate("CreateTournamentScreen")}
         >
-          Create New Tournamnet
+          Send Code
         </Button>
+      </Box> */}
       </Box>
     </ScrollView>
   );
 };
 
-export default TournamentScreen;
+export default OngoingTournamentsScreen;

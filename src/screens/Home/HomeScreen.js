@@ -1,15 +1,16 @@
 import {
   useAuthenticationStatus,
   useSignOut,
+  useUserAvatarUrl,
   useUserData,
   useUserDisplayName,
   useUserEmail,
-} from "@nhost/react";
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
-import { useFocusEffect } from "@react-navigation/native";
-import * as Location from "expo-location";
-import { View, StyleSheet } from "react-native";
+} from "@nhost/react"
+import { gql, useLazyQuery, useQuery } from "@apollo/client"
+import { useFocusEffect } from "@react-navigation/native"
+import * as Location from "expo-location"
 import {
+  Avatar,
   Box,
   Button,
   Divider,
@@ -19,49 +20,98 @@ import {
   Image,
   Pressable,
   Skeleton,
-  Stack,
+  Spacer,
   Text,
   useTheme,
   VStack,
-} from "native-base";
+  ListItem,
+  Separator,
+  Icon,
+} from "native-base"
 import {
   Ionicons,
   AntDesign,
+  FontAwesome,
   MaterialIcons,
   MaterialCommunityIcons,
-} from "@expo/vector-icons";
-import { RefreshControl, ScrollView } from "react-native";
-import moment from "moment";
-import { useCallback, useContext, useEffect, useState } from "react";
-import { navigationRef } from "../../../rootNavigation";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import LoaderModal from "../../components/LoaderModal";
-import { useDispatch, useSelector } from "react-redux";
-import { setTournament } from "../../../store/tournamentSlice";
-import { setLocation } from "../../../store/dataSlice";
-import { StatusBar } from "expo-status-bar";
-import HeaderLoading from "../../components/HeaderLoading";
-import LocationLoading from "../../components/LocationLoading";
-import DataLoadingSkeleton from "../../components/DataLoadingSkeleton";
-import NoData from "../../components/NoData";
-import SportsLoadingSkeleton from "../../components/SportsLoadingSkeleton";
-import * as React from "react";
+} from "@expo/vector-icons"
+import { ImageBackground, RefreshControl, ScrollView, View } from "react-native"
+import moment from "moment"
+import { useCallback, useContext, useEffect, useState } from "react"
+import { navigate, navigationRef } from "../../../rootNavigation"
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import LoaderModal from "../../components/LoaderModal"
+import { useDispatch, useSelector } from "react-redux"
+import {
+  setTournament,
+  setongoingTournament,
+  setupcomingTournament,
+} from "../../../store/tournamentSlice"
+import { setLocation } from "../../../store/dataSlice"
+import { StatusBar } from "expo-status-bar"
+import HeaderLoading from "../../components/HeaderLoading"
+import LocationLoading from "../../components/LocationLoading"
+import NoData from "../../components/NoData"
+import SportsLoadingSkeleton from "../../components/SportsLoadingSkeleton"
+import OngoingTournamentsScreen from "./OngoingTournaments"
+import dayjs from "dayjs"
+import MatchesDataLoadingSkeleton from "../../components/MatchesDataLoadingSkeleton"
+import OngGoingDataLoadingSkeleton from "../../components/OngGoingDataLoadingSkeleton"
+import UpComingDataLoadingSkeleton from "../../components/UpComingDataLoadingSkeleton"
 
 const GET_TOURNAMENT = gql`
-  query GetTournaments($sport_id: Int!) {
-    tournaments(where: { sport_id: { _eq: $sport_id } }) {
+  query GetOngoingTournaments($sport_id: Int!) {
+    tournaments(
+      where: { sport_id: { _eq: $sport_id }, end_date: { _gte: "now()" } }
+      order_by: { start_date: desc }
+    ) {
       id
       sport_id
       tournament_name
+      tournament_img
+      banner_img
+      time
       venue
       start_date
       end_date
-      created_at
-      updated_at
-      time
     }
   }
-`;
+`
+
+const GET_MATCHES = gql`
+query GetMatches($player_email: citext!) {
+  matches(where: {_or: [{team1: {players: {player: {player_email: {_eq: $player_email}}}}}, {team2: {players: {player: {player_email: {_eq: $player_email}}}}}]}, order_by: {match_date: asc, match_time: asc}) {
+    id
+    match_date
+    match_time
+    match_venue
+    team1_id
+    team2_id
+    tournament {
+      tournament_name
+    }
+    team1 {
+      team_name
+      team_image
+      players {
+        player {
+          player_email
+        }
+      }
+    }
+    team2 {
+      team_name
+      team_image
+      players {
+        player {
+          player_email
+        }
+      }
+    }
+  }
+}
+
+`
 const GET_SPORTS = gql`
   query GetSports {
     sports {
@@ -75,35 +125,58 @@ const GET_SPORTS = gql`
 `;
 
 export default HomeScreen = ({ navigation }) => {
-  const userData = useUserData();
+  const ongoingtournamentData = useSelector(
+    (state) => state.tournament.ongoingdata
+  )
+  const upcomingtournamentData = useSelector(
+    (state) => state.tournament.upcomingdata
+  )
+  const location = useSelector((state) => state.generalData.location)
+  const dispatch = useDispatch()
+  const userData = useUserData()
 
-  const tournamentData = useSelector((state) => state.tournament.data);
-  const location = useSelector((state) => state.generalData.location);
-  const dispatch = useDispatch();
+  const [selectedSportsId, setSelectedSportsId] = useState(null)
 
-  const [selectedSportsId, setSelectedSportsId] = useState(null);
-  const [locationLoading, setLocationLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState(null);
+  const [locationLoading, setLocationLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState(null)
 
   const [getTournaments, { loading, data, error }] = useLazyQuery(
     GET_TOURNAMENT,
     {
       notifyOnNetworkStatusChange: true,
       onCompleted: (data) => {
-        dispatch(setTournament(data.tournaments));
+        const now = dayjs().format("YYYY-MM-D")        
+        const OnGoingTournament = data.tournaments.filter(
+          (tournament) => dayjs(now).diff(tournament.start_date) >= 0
+        )
+        const UpComingTournament = data.tournaments.filter(
+          (tournament) => dayjs(now).diff(tournament.start_date) < 0
+        )
+        dispatch(setongoingTournament(OnGoingTournament))
+        dispatch(setupcomingTournament(UpComingTournament))
       },
       onError: (e) => {
-        console.log(e);
+        console.log(e)
       },
     }
   );
 
   const [
+    getMatches,
+    { loading: matchesloading, data: matchdata, error: matcherror },
+  ] = useLazyQuery(GET_MATCHES, {
+    notifyOnNetworkStatusChange: true,
+    onCompleted: (data) => {
+    },
+    onError: (e) => {
+      console.log(e)
+    },
+  })
+
+  const [
     getSports,
     { loading: sportsLoading, data: sportsData, error: sportsError },
   ] = useLazyQuery(GET_SPORTS, {
-    // notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-first",
     onCompleted: (data) => {
       if (!selectedSportsId) {
         const id = data?.sports.filter(
@@ -114,19 +187,20 @@ export default HomeScreen = ({ navigation }) => {
           variables: {
             sport_id: id,
           },
-        });
+        })
       }
     },
     onError: (e) => {
-      console.log(e, "error");
+      console.log(e, "error")
     },
-  });
-  const { isAuthenticated, isLoading } = useAuthenticationStatus();
-  const userName = useUserDisplayName() ?? "";
-  const userEmail = useUserEmail() ?? "";
-  const { colors } = useTheme();
-  const [logOutLoading, setLogOutLoading] = useState(false);
-  const { signOut } = useSignOut();
+  })
+
+  const { isAuthenticated, isLoading } = useAuthenticationStatus()
+  const userName = useUserDisplayName() ?? ""
+  const userEmail = useUserEmail()
+  const { colors } = useTheme()
+  const [logOutLoading, setLogOutLoading] = useState(false)
+  const { signOut } = useSignOut()
   const logOut = async () => {
     try {
       setLogOutLoading(true);
@@ -151,50 +225,58 @@ export default HomeScreen = ({ navigation }) => {
     let loc = await Location.reverseGeocodeAsync({
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
-    });
-    dispatch(setLocation(loc[0]));
-    setLocationLoading(false);
-  };
+    })
+    dispatch(setLocation(loc[0]))
+    setLocationLoading(false)
+  }
   // useFocusEffect(
   useEffect(() => {
-    getSports();
-    if (!location) {
-      getLocation();
+    if (userEmail) {
+      getSports()
+      getMatches({
+        variables: {
+          player_email: "abdullah.s@techinoviq.com",
+        },
+      })
+      if (!location) {
+        getLocation()
+      }
     }
   }, []);
   // )
 
   const OnGoingTournament = ({ item }) => {
     return (
-      <Box bg={"white"} p={6} borderRadius="lg" shadow="3" width="90%">
-        <HStack
-          alignItems="center"
-          justifyContent="space-between"
-          mb={3}
-          w="full"
+      <HStack alignItems="center">
+        <ImageBackground
+          source={
+            item.banner_img
+              ? { uri: item.banner_img }
+              : require("../../../assets/tournament_image_placeholder.jpg")
+          }
+          borderRadius={10}
+          resizeMode="cover"
+          style={{ flex: 1 }}
         >
-          <Heading color="black" size="md" w="5/6">
-            {item?.tournament_name || "N/A"}
-          </Heading>
-          <Text color="gray.400">ID: {item?.id}</Text>
-        </HStack>
-        {/* <Text fontSize={"lg"} fontWeight="bold" color="black">Clean the windows</Text> */}
-        {/* <AssignedTo item={item} /> */}
-        <Divider bg="gray.200" my={4} />
-        <VStack space={2}>
-          <Text color="black" fontSize="sm" mb={1}>
-            Started at
-          </Text>
-          <HStack space={2} alignItems="center">
-            <AntDesign name="calendar" size={18} />
-            <Text color="black" fontSize="sm">
-              {moment(item?.start_date).format("DD MMM yyyy") || "N/A"}
+          <Box
+            bg={{
+              linearGradient: {
+                colors: ["blue.300", "transparent"],
+                start: [0.5, 0],
+                end: [1, 0],
+              },
+            }}
+            w={"xs"}
+            flex={1}
+            p={5}
+            borderRadius="lg"
+          >
+            <Text fontSize={"xl"} bold>
+              {item.tournament_name}
             </Text>
-          </HStack>
-          <HStack space={2} alignItems="center">
-            <AntDesign name="clockcircleo" size={18} />
-            <Text color="black" fontSize="sm">
-              {moment(item?.start_date).format("HH:MM:SS") || "N/A"}
+            <Text>{item.venue}</Text>
+            <Text>
+              Start Date: {dayjs(item.start_date).format("ddd, D MMM")}
             </Text>
           </HStack>
         </VStack>
@@ -250,6 +332,90 @@ export default HomeScreen = ({ navigation }) => {
         </>
     );
   };
+            <Text>End Date: {dayjs(item.end_date).format("ddd, D MMM")}</Text>
+          </Box>
+        </ImageBackground>
+      </HStack>
+    )
+  }
+
+  const UpComingTournament = ({ item }) => {
+    return (
+      <HStack alignItems="center">
+        <ImageBackground
+          source={
+            item.banner_img
+              ? { uri: item.banner_img }
+              : require("../../../assets/tournament_image_placeholder.jpg")
+          }
+          borderRadius={10}
+          resizeMode="cover"
+          style={{ flex: 1 }}
+        >
+          <Box
+            bg={{
+              linearGradient: {
+                colors: ["orange.300", "transparent"],
+                start: [0.5, 0],
+                end: [1, 0],
+              },
+            }}
+            w={"xs"}
+            flex={1}
+            p={5}
+            borderRadius="lg"
+          >
+            <Text fontSize={"xl"} bold>
+              {item.tournament_name}
+            </Text>
+            <Text>{item.venue}</Text>
+            <Text>
+              Start Date: {dayjs(item.start_date).format("ddd, D MMM")}
+            </Text>
+            <Text>End Date: {dayjs(item.end_date).format("ddd, D MMM")}</Text>
+          </Box>
+        </ImageBackground>
+      </HStack>
+    )
+  }
+
+  const Matches = ({ item }) => {
+    return (
+        <Box bg={"gray.50"} p={4} borderRadius="lg" w={360} flex={"1"} borderWidth={"1"}  borderLeftWidth={"3"} borderLeftColor={"blue.500"} borderRightWidth={"3"} borderRightColor={"orange.500"} borderBottomColor={"gray.300"} borderTopColor={"gray.300"}>
+          <HStack mb={2} alignItems={"center"} flex={"1"}>
+            <HStack alignItems={"center"} justifyContent={"flex-start"} flex={"1"}>
+            <Image source={{uri: item?.team1?.team_image}} alt="team1" size="sm" borderRadius={100} />
+            <Text fontSize={"lg"} fontWeight={"black"} ml={2} color="blue.500">
+              {item?.team1.team_name}
+            </Text>
+            </HStack>
+            <Text fontSize={"xl"} bold mx={2}>
+              V/S
+            </Text>
+            <HStack alignItems={"center"} justifyContent={"flex-end"} flex={"1"}>
+            <Text fontSize={"lg"} fontWeight={"black"} mr={2} color={"orange.500"}>
+            {item?.team2.team_name}
+            </Text>
+            <Image source={{uri: item?.team2?.team_image}} alt="team2" size="sm" borderRadius={100} />
+            </HStack>
+          </HStack>
+          <Text textAlign={"center"} my={2} bold fontSize={"lg"}>{item?.tournament?.tournament_name}</Text>
+          <VStack flex={"1"} alignItems={"center"} space={1}>
+          <HStack space={2} alignItems="center" mb={2}>
+            
+            <AntDesign name="calendar" size={18} />
+            <Text>
+              {dayjs(item?.match_date).format("DD MMM YYYY") || "N/A"}
+            </Text>
+          </HStack>
+          <HStack space={2} alignItems="center">
+            <Ionicons name="location-outline" size={18} color="black" />
+            <Text>{item?.match_venue || "N/A"}</Text>
+          </HStack>
+          </VStack>
+        </Box>
+    )
+  }
 
   return (
     <ScrollView>
@@ -296,7 +462,7 @@ export default HomeScreen = ({ navigation }) => {
                             variables: {
                               sport_id: item.id,
                             },
-                          });
+                          })
                       }}
                     >
                       <Image
@@ -324,30 +490,50 @@ export default HomeScreen = ({ navigation }) => {
             )}
           </HStack>
         </Box>
-
-        <Box px={5} flex={"1"}>
-          {loading || sportsLoading ? (
-            <DataLoadingSkeleton />
-          ) : tournamentData?.length >= 1 ? (
+        <Divider my={4} />
+        <Box>
+          {matchesloading ? (
+            <MatchesDataLoadingSkeleton />
+          ) : matchdata?.matches?.length >= 1 ? (
             <>
-              <Text fontSize={"3xl"} bold mb={4}>
-                On going tournaments
-              </Text>
+              <VStack>
+                <HStack
+                  px={5}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                >
+                  <Text fontSize={"2xl"} bold>
+                    My Matches
+                  </Text>
+                  <Pressable onPress={() => navigate("OngoingTournaments")}>
+                    <HStack>
+                      <Text color="blue.500" bold>
+                        See All
+                      </Text>
 
-              <FlatList
-                // refreshControl={
-                //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                // }
-                ItemSeparatorComponent={() => (
-                  <Divider my={4} bgColor="transparent" />
-                )}
-                _contentContainerStyle={{
-                  padding: 1,
-                }}
-                data={tournamentData}
-                keyExtractor={(item, index) => `${item.id}-${index}`}
-                renderItem={({ item }) => <OnGoingTournament item={item} />}
-              />
+                      <Ionicons
+                        name="arrow-forward-outline"
+                        size={18}
+                        color={colors.blue[500]}
+                      />
+                    </HStack>
+                  </Pressable>
+                </HStack>
+
+                <FlatList
+                  ItemSeparatorComponent={() => <Box w="4" />}
+                  _contentContainerStyle={{
+                    padding: "2",
+                    paddingX: "5",
+                  }}
+                  data={matchdata?.matches}
+                  horizontal
+                  keyExtractor={(item, index) => `${item.id}-${index}`}
+                  renderItem={({ item }) => <Matches item={item} />}
+                  showsHorizontalScrollIndicator={false}
+                />
+              </VStack>
             </>
           ) : (
             <NoData
@@ -357,31 +543,119 @@ export default HomeScreen = ({ navigation }) => {
             />
           )}
         </Box>
-        {/* <Box mb={4} p={4}>
-        <Text fontSize={"3xl"} bold mb={4}>
-          On going tournaments
-        </Text>
-        {data &&
-          data?.tournaments.map((item) => (
-            <Box
-              borderWidth={"1"}
-              borderRadius={5}
-              borderColor={"gray.200"}
-              p={2}
-              width={200}
-              height={300}
-              shadow={"4"}
-              bg={"gray.50"}
-            >
-              <Text>Name: {item.name}</Text>
-              <Text>Location: {item.location}</Text>
-              <Text>Day: {new Date(item.start_date).getDay()}</Text>
-            </Box>
-          ))}
-      </Box> */}
+        <Divider my={4} />
+        <Box>
+          {loading || sportsLoading ? (
+            <OngGoingDataLoadingSkeleton />
+          ) : ongoingtournamentData?.length >= 1 ? (
+            <>
+              <VStack>
+                <HStack
+                  px={5}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                >
+                  <Text fontSize={"2xl"} bold>
+                    Ongoing tournaments
+                  </Text>
+                  <Pressable onPress={() => navigate("OngoingTournaments")}>
+                    <HStack>
+                      <Text color="blue.500" bold>
+                        See All
+                      </Text>
+
+                      <Ionicons
+                        name="arrow-forward-outline"
+                        size={18}
+                        color={colors.blue[500]}
+                      />
+                    </HStack>
+                  </Pressable>
+                </HStack>
+
+                <FlatList
+                  ItemSeparatorComponent={() => <Box w="4" />}
+                  _contentContainerStyle={{
+                    padding: "2",
+                    paddingX: "5",
+                  }}
+                  data={ongoingtournamentData}
+                  horizontal
+                  keyExtractor={(item, index) => `${item.id}-${index}`}
+                  renderItem={({ item }) => <OnGoingTournament item={item} />}
+                  showsHorizontalScrollIndicator={false}
+                />
+              </VStack>
+            </>
+          ) : (
+            <NoData
+              getData={getTournaments}
+              id={selectedSportsId}
+              colors={colors}
+            />
+          )}
+        </Box>
+        <Divider my={4} />
+        <Box mb={10}>
+          {loading || sportsLoading ? (
+            <UpComingDataLoadingSkeleton />
+          ) : upcomingtournamentData?.length >= 1 ? (
+            <>
+              <VStack>
+                <HStack
+                  px={5}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                >
+                  <Text fontSize={"2xl"} bold>
+                    Upcoming tournaments
+                  </Text>
+                  <Pressable onPress={() => navigate("OngoingTournaments")}>
+                    <HStack>
+                      <Text color="blue.500" bold>
+                        See All
+                      </Text>
+
+                      <Ionicons
+                        name="arrow-forward-outline"
+                        size={18}
+                        color={colors.blue[500]}
+                      />
+                    </HStack>
+                  </Pressable>
+                </HStack>
+
+                <FlatList
+                  ItemSeparatorComponent={() => <Box w="4" />}
+                  _contentContainerStyle={{
+                    padding: "2",
+                    paddingX: "5",
+                  }}
+                  data={upcomingtournamentData}
+                  horizontal
+                  keyExtractor={(item, index) => `${item.id}-${index}`}
+                  renderItem={({ item }) => <UpComingTournament item={item} />}
+                  showsHorizontalScrollIndicator={false}
+                />
+              </VStack>
+            </>
+          ) : (
+            <NoData
+              getData={getTournaments}
+              id={selectedSportsId}
+              colors={colors}
+            />
+          )}
+        </Box>
+
         <LoaderModal isLoading={logOutLoading || isLoading || loading} />
       </Box>
       <StatusBar style="dark" translucent={false} />
+      {/*       
+      <Button onPress={() => logOut()}>Logout</Button>
+     */}
     </ScrollView>
   );
 };
