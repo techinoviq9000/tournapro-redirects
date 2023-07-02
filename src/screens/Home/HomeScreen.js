@@ -112,7 +112,6 @@ query GetMatches($player_email: citext!) {
 }
 
 `
-
 const GET_SPORTS = gql`
   query GetSports {
     sports {
@@ -123,7 +122,7 @@ const GET_SPORTS = gql`
       updated_at
     }
   }
-`
+`;
 
 export default HomeScreen = ({ navigation }) => {
   const ongoingtournamentData = useSelector(
@@ -160,7 +159,7 @@ export default HomeScreen = ({ navigation }) => {
         console.log(e)
       },
     }
-  )
+  );
 
   const [
     getMatches,
@@ -182,8 +181,8 @@ export default HomeScreen = ({ navigation }) => {
       if (!selectedSportsId) {
         const id = data?.sports.filter(
           (item) => item.sport_name == "Cricket"
-        )[0].id
-        setSelectedSportsId(id)
+        )[0].id;
+        setSelectedSportsId(id);
         getTournaments({
           variables: {
             sport_id: id,
@@ -204,25 +203,25 @@ export default HomeScreen = ({ navigation }) => {
   const { signOut } = useSignOut()
   const logOut = async () => {
     try {
-      setLogOutLoading(true)
-      signOut()
-      setLogOutLoading(false)
+      setLogOutLoading(true);
+      signOut();
+      setLogOutLoading(false);
     } catch (error) {
-      setLogOutLoading(false)
-      console.log(error)
+      setLogOutLoading(false);
+      console.log(error);
     }
-  }
+  };
 
   const getLocation = async () => {
-    setLocationLoading(true)
-    let { status } = await Location.requestForegroundPermissionsAsync()
+    setLocationLoading(true);
+    let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
-      setErrorMsg("Permission to access location was denied")
-      setLocationLoading(false)
-      return
+      setErrorMsg("Permission to access location was denied");
+      setLocationLoading(false);
+      return;
     }
 
-    let location = await Location.getCurrentPositionAsync({})
+    let location = await Location.getCurrentPositionAsync({});
     let loc = await Location.reverseGeocodeAsync({
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
@@ -243,7 +242,7 @@ export default HomeScreen = ({ navigation }) => {
         getLocation()
       }
     }
-  }, [])
+  }, []);
   // )
 
   const OnGoingTournament = ({ item }) => {
@@ -279,6 +278,60 @@ export default HomeScreen = ({ navigation }) => {
             <Text>
               Start Date: {dayjs(item.start_date).format("ddd, D MMM")}
             </Text>
+          </HStack>
+        </VStack>
+        <Divider bg="gray.200" my={4} />
+      </Box>
+    );
+  };
+
+  const Header = () => {
+    const userData = useUserData();
+    return (
+      <>
+      <HStack alignItems="center" justifyContent={"space-between"} mb={2}>
+        {/* <Box flex={1}>
+          <HStack direction="column" mb={1}>
+          <Text color="black" fontSize={"2xl"}>
+          {`Hello, ${userName}`}
+          </Text>
+          <Text color="gray.400" fontSize="xs">
+          {userEmail}
+          </Text>
+          </HStack>
+          </Box> 
+        <Button onPress={() => logOut()}>Logout</Button> */}
+        <Image
+          size={30}
+          borderRadius={100}
+          source={{
+            uri: userData?.avatarUrl,
+          }}
+          alt="Alternate Text"/>
+        <HStack alignItems={"flex-end"} space={1}>
+          <Ionicons name="location-outline" size={24} color="black" />
+          {locationLoading ? (
+            <LocationLoading />
+          ) : errorMsg ? (
+            <Text color="black">{errorMsg}</Text>
+            ) : (
+              <Text color="black" bold>
+              {location?.country}, {location?.subregion}, {location?.region}
+            </Text>
+          )}
+        </HStack>
+        <Ionicons
+          name="menu"
+          p={6}
+          size={24}
+          color="black"
+          onPress={() => navigation.openDrawer()}
+          />
+      </HStack>
+      <Divider my="2" />
+        </>
+    );
+  };
             <Text>End Date: {dayjs(item.end_date).format("ddd, D MMM")}</Text>
           </Box>
         </ImageBackground>
@@ -367,7 +420,22 @@ export default HomeScreen = ({ navigation }) => {
   return (
     <ScrollView>
       <Box flex={1} safeArea>
-        <Box px={5} my={4}>
+        <Box p={5} pb={0}>
+          {isLoading ? <HeaderLoading /> : <Header />}
+        </Box>
+        {/* <HStack p={5} pb={0} alignItems={"flex-end"} space={1}>
+          <Ionicons name="location-outline" size={24} color="black" />
+          {locationLoading ? (
+            <LocationLoading />
+          ) : errorMsg ? (
+            <Text color="black">{errorMsg}</Text>
+          ) : (
+            <Text color="black" bold>
+              {location?.country}, {location?.subregion}, {location?.region}
+            </Text>
+          )}
+        </HStack> */}
+        <Box px={5} my={4} marginTop="15px">
           <Text fontSize={"3xl"} bold mb={4}>
             Sports
           </Text>
@@ -376,7 +444,7 @@ export default HomeScreen = ({ navigation }) => {
               <SportsLoadingSkeleton />
             ) : (
               sportsData?.sports.map((item, index) => {
-                let selected = selectedSportsId == item.id ? true : false
+                let selected = selectedSportsId == item.id ? true : false;
                 return (
                   <Box key={index}>
                     <Pressable
@@ -417,7 +485,7 @@ export default HomeScreen = ({ navigation }) => {
                       {item.sport_name}
                     </Text>
                   </Box>
-                )
+                );
               })
             )}
           </HStack>
@@ -589,5 +657,5 @@ export default HomeScreen = ({ navigation }) => {
       <Button onPress={() => logOut()}>Logout</Button>
      */}
     </ScrollView>
-  )
-}
+  );
+};

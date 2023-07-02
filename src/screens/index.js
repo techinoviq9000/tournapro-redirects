@@ -6,6 +6,9 @@ import TournamentScreen from "./Tournaments/TournamentScreen"
 import SplashScreen from "./SplashScreen"
 import TournamentOverviewScreen from "./Tournaments/TournamentOverviewScreen"
 import TournamentRegistrationScreen from "./Tournaments/TournamentRegistrationScreen"
+import ViewUserProfileScreen from "./UserProfile/ViewUserProfileScreen"
+import EditProfile from "./UserProfile/EditProfile"
+import ViewRegisteredTeamsScreen from "./UserProfile/ViewRegisteredTeamsScreen"
 import RegisterUserForTeamScreen from "./Tournaments/RegisterUserForTeamScreen"
 import OngoingTournamentsScreen from "./Home/OngoingTournaments";
 import UpcomingTournamentsScreen from "./Home/UpcomingTournaments";
@@ -20,6 +23,30 @@ export const homeScreens = [
     options: {
       headerShown: false,
       gestureEnabled: false,
+      cardOverlayEnabled: false
+    }
+  }
+]
+export const userProfileScreens = [
+  {
+    name: "ViewUserProfileSCreen",
+    component: ViewUserProfileScreen,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false
+    }
+  },
+  {
+    name: "EditProfile",
+    component: EditProfile,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false
+    }
+  }
+]
       cardOverlayEnabled: false,
     },
   },
@@ -71,6 +98,15 @@ export const tournamentSreen = [
       cardOverlayEnabled: false
     }
   },
+   {
+    name: "ViewRegisteredTeamsScreen",
+    component: ViewRegisteredTeamsScreen,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false
+    }
+  },
   {
     name: "RegisterUserForTeamScreen",
     component: RegisterUserForTeamScreen,
@@ -79,10 +115,6 @@ export const tournamentSreen = [
       gestureEnabled: false,
       cardOverlayEnabled: false
     }
-  }
-]
-      cardOverlayEnabled: false,
-    },
   },
   {
     name: "CreateTournamentScreen",
@@ -130,6 +162,8 @@ export const authScreens = [
       cardOverlayEnabled: false,
     },
   },
+
+  
   {
     name: "SelectRoleScreen",
     component: SelectRoleScreen,

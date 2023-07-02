@@ -1,6 +1,6 @@
 import { useUserDefaultRole } from "@nhost/react"
 import dayjs from "dayjs"
-import { Box, Button, ScrollView, Text } from "native-base"
+import { Box, Button, ScrollView, Stack, Text } from "native-base"
 import React from "react"
 import { useSelector } from "react-redux"
 import { navigationRef } from "../../../rootNavigation"
@@ -32,11 +32,98 @@ const TournamentOverviewScreen = () => {
             {dayjs(tournamentDetails.end_date).format("dddd DD MMMM")}
           </Text>
         </Box>
-        <Box flex="1" justifyContent={"flex-end"}>
+
+        <Box flex="1" justifyContent={"flex-end"} marginTop="5">
           {userRole == "manager" && (
-            <Button colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>Register your team now</Button>
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("ViewRegisteredTeamsScreen")}>View Registered Teams</Button>
           )}
         </Box>
+
+        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
+          {userRole == "manager" && (
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>Tournament Rules</Button>
+          )}
+        </Box>
+
+        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
+          {userRole == "manager" && (
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>Fixture</Button>
+          )}
+        </Box>
+
+        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
+          {userRole == "manager" && (
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>Register my Team</Button>
+          )}
+        </Box>
+
+
+        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
+          {userRole == "user" && (
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>Tournament Rules</Button>
+          )}
+        </Box>
+
+        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
+          {userRole == "user" && (
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>Fixtures</Button>
+          )}
+        </Box>
+
+        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
+          {userRole == "user" && (
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>View Registered Teams</Button>
+          )}
+        </Box>
+
+        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
+          {userRole == "organizer" && (
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>Tournament Rules</Button>
+          )}
+        </Box>
+
+        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
+          {userRole == "organizer" && (
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>Tournament Rules</Button>
+          )}
+        </Box>
+
+        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
+          {userRole == "organizer" && (
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>Fixtures</Button>
+          )}
+        </Box>
+
+        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
+          {userRole == "organizer" && (
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>View Registered Team</Button>
+          )}
+        </Box>
+
+        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
+          {userRole == "organizer" && (
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>Registered my Team</Button>
+          )}
+        </Box>
+
+        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
+          {userRole == "organizer" && (
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>Edit Tournament</Button>
+          )}
+        </Box>
+
+        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
+          {userRole == "organizer" && (
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>Publish Tournament</Button>
+          )}
+        </Box>
+
+        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
+          {userRole == "organizer" && (
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>Pending Tournaments</Button>
+          )}
+        </Box>
+
       </Box>
     </ScrollView>
   )
