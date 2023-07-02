@@ -1,6 +1,6 @@
-import { gql, useLazyQuery } from "@apollo/client"
-import { Ionicons } from "@expo/vector-icons"
-import dayjs from "dayjs"
+import { gql, useLazyQuery } from "@apollo/client";
+import { Ionicons } from "@expo/vector-icons";
+import dayjs from "dayjs";
 import {
   Box,
   Button,
@@ -24,6 +24,7 @@ import { navigationRef } from "../../../rootNavigation"
 import { setPlayerDetails } from "../../../store/registerPlayerSlice"
 import LoaderModal from "../../components/LoaderModal"
 
+
 const TournamentRegistrationScreen = () => {
   const GET_TEAMS = gql`
     query getTeams {
@@ -32,7 +33,7 @@ const TournamentRegistrationScreen = () => {
         team_name
       }
     }
-  `
+  `;
 
   const GET_PLAYERS = gql`
     query getPlayers($id: Int!) {
@@ -89,20 +90,20 @@ const TournamentRegistrationScreen = () => {
               userVerified: null,
             }
           })
-        )
+        );
       },
       onError: (e) => {
         console.log({ e })
       },
     }
-  )
+  );
 
-  let allowedPlayerToRegisterCount = 15
-  let currenPlayerCount = players?.length
-  allowedPlayerToRegisterCount = 15 - currenPlayerCount
+  let allowedPlayerToRegisterCount = 15;
+  let currenPlayerCount = players?.length;
+  allowedPlayerToRegisterCount = 15 - currenPlayerCount;
 
   const handleTeamPressed = async (id) => {
-    setService(id)
+    setService(id);
     getTeamPlayers({
       variables: {
         id,
@@ -187,8 +188,8 @@ const TournamentRegistrationScreen = () => {
     }
   }
   useEffect(() => {
-    getTeams()
-  }, [])
+    getTeams();
+  }, []);
 
   const PlayerInputBox = ({ player, index, founded, userVerified }) => {
     const [currentValue, setCurrentValue] = useState(player.player_email);
@@ -288,7 +289,7 @@ const TournamentRegistrationScreen = () => {
   }
   const PlayerLoadngSkeleton = () => (
     <Skeleton my="4" rounded="md" startColor="coolGray.100" />
-  )
+  );
   return (
     <ScrollView>
       <Box safeArea mt={2} px={4}>
@@ -383,7 +384,7 @@ const TournamentRegistrationScreen = () => {
                       </Text>
                     </HStack>
                   </Box>
-                )
+                );
               }}
             </Pressable>
           )}
@@ -428,7 +429,7 @@ const TournamentRegistrationScreen = () => {
       </Box>
       <LoaderModal isLoading={findUserLoading || loading} />
     </ScrollView>
-  )
-}
+  );
+};
 
-export default TournamentRegistrationScreen
+export default TournamentRegistrationScreen;

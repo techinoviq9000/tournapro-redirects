@@ -7,6 +7,11 @@ import SplashScreen from "./SplashScreen"
 import TournamentOverviewScreen from "./Tournaments/TournamentOverviewScreen"
 import TournamentRegistrationScreen from "./Tournaments/TournamentRegistrationScreen"
 import RegisterUserForTeamScreen from "./Tournaments/RegisterUserForTeamScreen"
+import OngoingTournamentsScreen from "./Home/OngoingTournaments";
+import UpcomingTournamentsScreen from "./Home/UpcomingTournaments";
+import CreateTournamentScreen from "./Tournaments/CreateTournamentScreen";
+import TournamentDates from "./Tournaments/TournamentDates";
+import LogoPoster from "./Tournaments/LogoPoster";
 
 export const homeScreens = [
   {
@@ -15,10 +20,29 @@ export const homeScreens = [
     options: {
       headerShown: false,
       gestureEnabled: false,
-      cardOverlayEnabled: false
-    }
-  }
-]
+      cardOverlayEnabled: false,
+    },
+  },
+  {
+    name: "OngoingTournaments",
+    component: OngoingTournamentsScreen,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false,
+    },
+  },
+
+  {
+    name: "UpcomingTournaments",
+    component: UpcomingTournamentsScreen,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false,
+    },
+  },
+];
 export const tournamentSreen = [
   {
     name: "SelectOrViewTournamentScreen",
@@ -26,8 +50,8 @@ export const tournamentSreen = [
     options: {
       headerShown: false,
       gestureEnabled: false,
-      cardOverlayEnabled: false
-    }
+      cardOverlayEnabled: false,
+    },
   },
   {
     name: "TournamentOverviewScreen",
@@ -35,8 +59,8 @@ export const tournamentSreen = [
     options: {
       headerShown: false,
       gestureEnabled: false,
-      cardOverlayEnabled: false
-    }
+      cardOverlayEnabled: false,
+    },
   },
   {
     name: "TournamentRegistrationScreen",
@@ -57,6 +81,37 @@ export const tournamentSreen = [
     }
   }
 ]
+      cardOverlayEnabled: false,
+    },
+  },
+  {
+    name: "CreateTournamentScreen",
+    component: CreateTournamentScreen,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false,
+    },
+  },
+  {
+    name: "TournamentDates",
+    component: TournamentDates,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false,
+    },
+  },
+  {
+    name: "LogoPoster",
+    component: LogoPoster,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false,
+    },
+  },
+];
 export const authScreens = [
   {
     name: "LoginScreen",
@@ -64,33 +119,33 @@ export const authScreens = [
     options: {
       headerShown: false,
       gestureEnabled: false,
-      cardOverlayEnabled: false
-    }
+      cardOverlayEnabled: false,
+    },
   },
   {
     name: "SignUpScreen",
     component: SignUpScreen,
     options: {
       gestureEnabled: false,
-      cardOverlayEnabled: false
-    }
+      cardOverlayEnabled: false,
+    },
   },
   {
     name: "SelectRoleScreen",
     component: SelectRoleScreen,
     options: {
       gestureEnabled: false,
-      cardOverlayEnabled: false
-    }
-  }
-]
+      cardOverlayEnabled: false,
+    },
+  },
+];
 
-export const splashScreen =  {
+export const splashScreen = {
   name: "SplashScreen",
   component: SplashScreen,
   options: {
     headerShown: false,
     gestureEnabled: false,
-    cardOverlayEnabled: false
-  }
-}
+    cardOverlayEnabled: false,
+  },
+};
