@@ -15,6 +15,7 @@ import UpcomingTournamentsScreen from "./Home/UpcomingTournaments";
 import CreateTournamentScreen from "./Tournaments/CreateTournamentScreen";
 import TournamentDates from "./Tournaments/TournamentDates";
 import LogoPoster from "./Tournaments/LogoPoster";
+import PlayerScreen from "./Tournaments/PlayerScreen"
 
 export const homeScreens = [
   {
@@ -134,6 +135,15 @@ export const tournamentSreen = [
   {
     name: "UpcomingTournamentsScreen",
     component: UpcomingTournamentsScreen ,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false,
+    },
+  },
+  {
+    name: "PlayerScreen",
+    component: PlayerScreen ,
     options: {
       headerShown: false,
       gestureEnabled: false,
