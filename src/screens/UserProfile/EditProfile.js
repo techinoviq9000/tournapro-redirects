@@ -23,50 +23,23 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { TextInput } from "react-native-gesture-handler";
 
 const EditProfile = () => {
-
   const userData = useUserData();
-  const[dateofbirth, setDateOfBirth]=useState("")
+  const [birthdate, setBirthDate] = useState("");
   const [date, setDate] = useState(new Date());
-  const [showPicker, setShowPicker] = useState
-  (false);
-
-    const toggleDatePicker = () => {
-      setShowPicker(!showPicker);
-    };
-
-    const onChange = ({type}, selectedDate) => {
-
-      if(type == "set")
-      {
-        const currentDate = selectedDate;
-        setDate(currentDate);
+  const [showPicker, setShowPicker] = useState(false);
+  const toggleDatepicker = () => {
+    setShowPicker(!showPicker);
+  };
+  const onChange = ({ type }, selectedDate) => {
+    if (type == "set") {
+      if (Platform.OS === "android") {
+        toggleDatepicker();
+        setBirthDate(selectedDate.toDateString());
       }
-
-      else
-      {
-        toggleDatePicker();
-      }
-    };
-
-
-
-  // const [mode, setMode] = useState("date");
-  // const [show, setShow] = useState(false);
-
-  // const onChange = (event, selectedDate) => {
-  //   const currentDate = selectedDate;
-  //   setShow(false);
-  //   setDate(currentDate);
-  // };
-
-  // const showMode = (currentMode) => {
-  //   if (Platform.OS === "android") {
-  //     setShow(false);
-  //     // for iOS, add a button that closes the picker
-  //   }
-  //   setMode(currentMode);
-  // };
-
+    } else {
+      toggleDatepicker();
+    }
+  };
   const openAlert = () => {
     Alert.alert(
       "Profile Picture",
@@ -95,7 +68,7 @@ const EditProfile = () => {
           <Box>
             {/* <Image  marginTop="20px" size={150} borderRadius={100} source={{
             uri: "https://variety.com/wp-content/uploads/2023/02/GettyImages-1466470818.jpg"
-        }} alt="Alternate Text" /> */}
+          }} alt="Alternate Text" /> */}
             <Avatar
               bg="lightBlue.400"
               source={{
@@ -114,13 +87,18 @@ const EditProfile = () => {
                 <Icon display="flex" name="camera" size={15} color="white" />
               </Avatar.Badge>
             </Avatar>
+            <Stack display="flex" alignItems="center" marginTop="20px">
+              <Text fontSize="15px" fontWeight="bold">
+                {userData?.displayName}
+              </Text>
+            </Stack>
           </Box>
         </Pressable>
         <Box padding="30px">
           <Text fontSize="20px" fontWeight="bold">
             Name
           </Text>
-          <Input mx="0" placeholder="" w="100%" />
+          <Input mx="0" value={userData?.displayName} w="100%" />
 
           <Text fontSize="20px" fontWeight="bold" marginTop="20px">
             Email
@@ -131,28 +109,35 @@ const EditProfile = () => {
             Password
           </Text>
           <Input mx="0" placeholder="" w="100%" type="password" />
-          
-          <Text fontSize="20px" fontWeight="bold" marginTop="20px">Date of Birth</Text>
-            {/* {!showPicker && (<DateTimePicker mode="date" display="spinner" value={date}/>)}
-            <Input mx="0" placeholder="Aug 21 2004" w="100%" /> */}
-            
-            {showPicker && (
+
+          <Text fontSize="20px" fontWeight="bold" marginTop="20px">
+            Date of Birth
+          </Text>
+          {showPicker && (
             <DateTimePicker
-             mode="date"
-             display="spinner"
-             value={date}
-             onChange={onChange}
+              mode="date"
+              display="calendar"
+              value={date}
+              onChange={onChange}
             />
-         )}
-         {!showPicker && (
-            <Pressable onPress={toggleDatePicker}>
-              <Input placeholder="select date of birth"
-              value={dateofbirth}
-              
-              placeholderTextColor="#11182744">
-                
-              </Input>
-            </Pressable>)}
+          )}
+
+          <Pressable onPress={toggleDatepicker}>
+            <Input
+              variant="outline"
+              placeholder="Select Date of birth"
+              value={birthdate}
+              fontSize="sm"
+              color="black"
+              borderColor={"gray.300"}
+              borderRadius={"md"}
+              editable={false}
+              _focus={{
+                borderColor: "gray.600",
+                bgColor: "white",
+              }}
+            />
+          </Pressable>
 
           <FormControl marginTop="20px" w="3/4" maxW="300" isRequired isInvalid>
             <FormControl.Label>
