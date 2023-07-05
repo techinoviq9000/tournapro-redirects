@@ -15,6 +15,7 @@ query RegTeams($where: team_tournaments_bool_exp!) {
       team_name
       team_image
       status
+      reason
     }
     player_captain {
       player_name
@@ -56,22 +57,17 @@ const ViewRegisteredTeamsScreen = () => {
     console.log(item);
     return (
       <Pressable onPress={() => navigationRef.navigate("PlayerScreen", {
-        team_id: item?.team_tournaments_team?.id
+        team: item?.team_tournaments_team
       })}>
 
-      <HStack marginTop="30px">
+      <HStack marginTop="30px" borderRadius="md" borderWidth="2" padding="20px" alignItems="center">
         <Box>
       <Box display="flex" 
       flexDirection="row"
-      alignItems="center" 
-      padding="20px" 
-      borderRadius="md" 
-      marginTop="20px" 
-      borderWidth="2"  
       justifyContent="space-between"
       borderLeftColor="red" 
       width="300px" 
-      height="90px">
+      height="50px">
         <Image display="flex" flexDirection="row" borderRadius="10px" source={{
           uri: item?.team_tournaments_team?.team_image
     }} alt="Alternate Text" size="xs"/>
@@ -79,8 +75,10 @@ const ViewRegisteredTeamsScreen = () => {
         <Text fontSize="lg" display="flex" flexDirection="row" fontWeight="bold">{item?.team_tournaments_team?.team_name}</Text>
         </Box>
         <MaterialIcons display="flex" flexDirection="row" name="navigate-next" size={24} color="black"/>
-      <Text display="flex" flexDirection="column">{item?.player_captain?.player_name}</Text>
       </Box>
+      <Stack display="flex" alignItems="center">
+      <Text>Captain: {item?.player_captain?.player_name}</Text>
+      </Stack>
       </Box>
       </HStack>
           </Pressable>

@@ -16,8 +16,8 @@ const GET_TEAM_PLAYERS = gql`
 `;
 
 const ADD_STATUS_REASON = gql`
-mutation MyMutation($id: Int!, $status: String!, $Reason: String!) {
-  update_teams_by_pk(pk_columns: {id: $id}, _set: {status: $status, Reason: $Reason}) {
+mutation MyMutation($id: Int!, $status: String!, $reason: String) {
+  update_teams_by_pk(pk_columns: {id: $id}, _set: {status: $status, reason: $reason}) {
     id
   }
 }
@@ -25,7 +25,10 @@ mutation MyMutation($id: Int!, $status: String!, $Reason: String!) {
 
 
 const PlayerScreen = ({route}) => {
-  const team_id = route?.params?.team_id
+  const team = route?.params?.team
+  const team_id = team.id
+  const status = team.status
+  console.log(status)
   const TeamPlayer = ({ item }) => {
     return (
       <Box>
@@ -70,21 +73,38 @@ const PlayerScreen = ({route}) => {
       [
         {
           text: 'Rules not followed',
-          onPress: () => {
-            console.log("Reason 1 Selected")
-          }
+          onPress: () => addStatusnReason({variables:{
+            status: "Rejected",
+            id: team_id,
+            reason: "Rules not followed"
+          }})
         },
+          // onPress: () => {
+            
+          //   console.log("Reason 1 Selected")
+          // }
+        
         {
           text: 'Inadequate Behaviour',
-          onPress: () => {
-            console.log("Reason 2 Selected")
-          }
+          onPress: () => addStatusnReason({variables:{
+            status: "Rejected",
+            id: team_id,
+            reason: "Inadequate Behaviour"
+          }})
+          // onPress: () => {
+          //   console.log("Reason 2 Selected")
+          // }
         },
         {
           text: 'Less Participants',
-          onPress: () => {
-            abc("Less Participants | R3")
-          }
+          onPress: () => addStatusnReason({variables:{
+            status: "Rejected",
+            id: team_id,
+            reason: "Less Participants"
+          }})
+          // onPress: () => {
+          //   abc("Less Participants | R3")
+          // }
         }
       ]
     )
@@ -101,13 +121,19 @@ const PlayerScreen = ({route}) => {
       <SafeAreaView>
       {data && data?.player_teams?.length  > 0 && 
       <Box style={StyleSheet.container} marginTop="20px" display="flex" flexDirection="row" justifyContent="space-evenly">
+        {status != "Approved" && (
       <Button title="Approve" onPress={() => addStatusnReason({variables:{
         status: "Approved",
         id: team_id
-      }})}/>
+      }})}/>)}
       <Button title="Reject" onPress={simpleAlert}/>
       </Box>}
       </SafeAreaView>
+
+
+      {/* {status == "Approved" && (
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>Edit Tournament</Button>
+          )} */}
 
 
       {/* {data && data?.player_teams?.length > 0 && data?.player_teams.map(item => <Button>Hi</Button>)} */}
