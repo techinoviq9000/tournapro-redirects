@@ -15,6 +15,7 @@ import UpcomingTournamentsScreen from "./Home/UpcomingTournaments";
 import CreateTournamentScreen from "./Tournaments/CreateTournamentScreen";
 import TournamentDates from "./Tournaments/TournamentDates";
 import LogoPoster from "./Tournaments/LogoPoster";
+import MyTournaments from "./UserProfile/MyTournaments";
 
 export const homeScreens = [
   {
@@ -40,6 +41,15 @@ export const userProfileScreens = [
   {
     name: "EditProfile",
     component: EditProfile,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false,
+    },
+  },
+  {
+    name: "MyTournaments",
+    component: MyTournaments,
     options: {
       headerShown: false,
       gestureEnabled: false,

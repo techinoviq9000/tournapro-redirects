@@ -28,7 +28,7 @@ import { navigate, navigationRef } from "../../../rootNavigation";
 import { AntDesign } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { nhost } from "../../../App";
-import { useFileUpload } from "@nhost/react";
+import { useFileUpload, useUserEmail } from "@nhost/react";
 
 const ADD_TOURNAMENT = gql`
   mutation MyMutation(

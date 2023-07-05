@@ -2,8 +2,8 @@ import { useAuthenticationStatus } from "@nhost/react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
-import { View, Text, Button } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { View, Text, Button } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
 import {
   authScreens,
   homeScreens,
@@ -18,7 +18,8 @@ import {
   DrawerContentScrollView,
   DrawerItemList,
   DrawerItem,
-} from '@react-navigation/drawer';
+} from "@react-navigation/drawer";
+import MyTournaments from "./UserProfile/MyTournaments";
 const Router = () => {
   const { colors } = useTheme();
   const Stack = createNativeStackNavigator();
@@ -84,14 +85,14 @@ const Router = () => {
   const DrawerNavigator = () => {
     return (
       <Drawer.Navigator
-      
         screenOptions={{
           headerShown: false,
-          drawerPosition: "right"
+          drawerPosition: "right",
         }}
       >
         <Drawer.Screen name="Dashboard" component={HomeTabs} />
         <Drawer.Screen name="Profile" component={UserProfileStackScreen} />
+        <Drawer.Screen name="MyTournaments" component={MyTournaments} />
       </Drawer.Navigator>
     );
   };
@@ -197,10 +198,12 @@ const Router = () => {
           <Stack.Screen name="AuthStack" component={AuthStacks} />
         </Stack.Navigator>
       ) : (
-        <DrawerNavigator useLegacyImplementation
-        drawerContent={(props) => <CustomDrawerContent {...props} />}>
-          <Drawer.Screen name="Feed"/>
-      <Drawer.Screen name="Notifications"/>
+        <DrawerNavigator
+          useLegacyImplementation
+          drawerContent={(props) => <CustomDrawerContent {...props} />}
+        >
+          <Drawer.Screen name="Feed" />
+          <Drawer.Screen name="Notifications" />
         </DrawerNavigator>
       )}
     </>

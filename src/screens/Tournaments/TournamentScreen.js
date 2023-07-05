@@ -55,6 +55,7 @@ const TournamentScreen = ({ route }) => {
           </Text>
           <Text>List of Ongoing Tournaments</Text>
         </Box>
+
         {ongoingtournamentData?.map((item, index) => (
           <Pressable onPress={() => handlePress(item)} key={item.id}>
             {({ isHovered, isFocused, isPressed }) => {
@@ -146,6 +147,7 @@ const TournamentScreen = ({ route }) => {
             }}
           </Pressable>
         ))}
+
         <Button
           size="lg"
           borderRadius="lg"
