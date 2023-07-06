@@ -1,21 +1,109 @@
-import { useUserDefaultRole, useUserEmail } from "@nhost/react";
-import dayjs from "dayjs";
-import { Box, Button, ScrollView, Stack, Text } from "native-base";
-import React from "react";
-import { useSelector } from "react-redux";
-import { navigationRef } from "../../../rootNavigation";
+import { useUserDefaultRole, useUserEmail } from "@nhost/react"
+import dayjs from "dayjs"
+import { Box, Button, ScrollView, Stack, Text } from "native-base"
+import React from "react"
+import { useSelector } from "react-redux"
+import { navigationRef } from "../../../rootNavigation"
+import GoBack from "../../components/GoBack"
 
 const TournamentOverviewScreen = () => {
   const tournamentDetails = useSelector(
     (state) => state.tournament.tournamentDetails
-  );
-  const userRole = useUserDefaultRole();
-  const userEmail = useUserEmail();
-  console.log(userRole);
-  console.log(tournamentDetails);
+  )
+  const userRole = useUserDefaultRole()
+  const userEmail = useUserEmail()
+  const user_manager = [
+    {
+      onPress: () => {
+        navigationRef.navigate("ViewRegisteredTeamsScreen")
+      },
+      text: "View Teams"
+    },
+    {
+      onPress: () => {
+        navigationRef.navigate("TournamentRegistrationScreen")
+      },
+      text: "Tournament Rules"
+    },
+    {
+      onPress: () => {
+        navigationRef.navigate("ViewMyTeamsToRegisterScreen")
+      },
+      text: "Register my Team"
+    },
+    {
+      onPress: () => {
+        navigationRef.navigate("TournamentRegistrationScreen")
+      },
+      text: "Fixture"
+    }
+  ]
+
+  const user_user = [
+    {
+      onPress: () => {
+        navigationRef.navigate("TournamentRegistrationScreen")
+      },
+      text: "Tournament Rules"
+    },
+    {
+      onPress: () => {
+        navigationRef.navigate("TournamentRegistrationScreen")
+      },
+      text: "Fixtures"
+    },
+    {
+      onPress: () => {
+        navigationRef.navigate("TournamentRegistrationScreen")
+      },
+      text: "View Teams"
+    }
+  ]
+
+  const user_organizer = [
+    {
+      onPress: () => {
+        navigationRef.navigate("PublishTournamentScreen", {
+          tournament: tournamentDetails
+        })
+      },
+      text: "Publish Tournament"
+    },
+    {
+      onPress: () => {
+        navigationRef.navigate("TournamentRegistrationScreen")
+      },
+      text: "Tournament Rules"
+    },
+    {
+      onPress: () => {
+        navigationRef.navigate("TournamentRegistrationScreen")
+      },
+      text: "Fixtures"
+    },
+    {
+      onPress: () => {
+        navigationRef.navigate("ViewRegisteredTeamsScreen")
+      },
+      text: "View Teams"
+    },
+    {
+      onPress: () => {
+        navigationRef.navigate("ViewMyTeamsToRegisterScreen")
+      },
+      text: "Register my Team"
+    },
+    {
+      onPress: () => {
+        navigationRef.navigate("TournamentRegistrationScreen")
+      },
+      text: "Edit Tournament"
+    }
+  ]
   return (
     <ScrollView flex="1">
       <Box px={4} flex="1" safeArea mt={2}>
+        <GoBack />
         <Box mb={4} flex="1">
           <Text textAlign={"center"} fontSize={"3xl"} bold>
             {tournamentDetails.tournament_name}
@@ -36,213 +124,27 @@ const TournamentOverviewScreen = () => {
             {tournamentDetails.status}
           </Text>
         </Box>
-
-        <Box flex="1" justifyContent={"flex-end"} marginTop="5">
-          {userRole == "manager" && (
-            <Button
-              height="50px"
-              colorScheme={"blue"}
-              onPress={() =>
-                navigationRef.navigate("ViewRegisteredTeamsScreen")
-              }
-            >
-              View Registered Teams
+        {userRole == "user" &&
+          user_user.map((item, index) => (
+            <Button mb={5} py={3} colorScheme={"blue"} onPress={item.onPress} key={index}>
+              {item.text}
             </Button>
-          )}
-        </Box>
-
-        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
-          {userRole == "manager" && (
-            <Button
-              height="50px"
-              colorScheme={"blue"}
-              onPress={() =>
-                navigationRef.navigate("TournamentRegistrationScreen")
-              }
-            >
-              Tournament Rules
+          ))}
+           {userRole == "manager" &&
+          user_manager.map((item, index) => (
+            <Button mb={5} py={3} colorScheme={"blue"} onPress={item.onPress} key={index}>
+              {item.text}
             </Button>
-          )}
-        </Box>
-
-        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
-          {userRole == "manager" && (
-            <Button
-              height="50px"
-              colorScheme={"blue"}
-              onPress={() =>
-                navigationRef.navigate("TournamentRegistrationScreen")
-              }
-            >
-              Fixture
+          ))}
+           {userRole == "organizer" &&
+          user_organizer.map((item, index) => (
+            <Button mb={5} py={3} colorScheme={"blue"} onPress={item.onPress} key={index}>
+              {item.text}
             </Button>
-          )}
-        </Box>
-
-        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
-          {userRole == "manager" && (
-            <Button
-              height="50px"
-              colorScheme={"blue"}
-              onPress={() =>
-                navigationRef.navigate("TournamentRegistrationScreen")
-              }
-            >
-              Register my Team
-            </Button>
-          )}
-        </Box>
-
-        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
-          {userRole == "user" && (
-            <Button
-              height="50px"
-              colorScheme={"blue"}
-              onPress={() =>
-                navigationRef.navigate("TournamentRegistrationScreen")
-              }
-            >
-              Tournament Rules
-            </Button>
-          )}
-        </Box>
-
-        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
-          {userRole == "user" && (
-            <Button
-              height="50px"
-              colorScheme={"blue"}
-              onPress={() =>
-                navigationRef.navigate("TournamentRegistrationScreen")
-              }
-            >
-              Fixtures
-            </Button>
-          )}
-        </Box>
-
-        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
-          {userRole == "user" && (
-            <Button
-              height="50px"
-              colorScheme={"blue"}
-              onPress={() =>
-                navigationRef.navigate("TournamentRegistrationScreen")
-              }
-            >
-              View Registered Teams
-            </Button>
-          )}
-        </Box>
-
-        <Box flex="1" justifyContent={"flex-end"} marginTop="0">
-          {userRole == "organizer" && (
-            <Button
-              height="50px"
-              colorScheme={"blue"}
-              onPress={() =>
-                navigationRef.navigate("TournamentRegistrationScreen")
-              }
-            >
-              Tournament Rules
-            </Button>
-          )}
-        </Box>
-
-        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
-          {userRole == "organizer" && (
-            <Button
-              height="50px"
-              colorScheme={"blue"}
-              onPress={() =>
-                navigationRef.navigate("TournamentRegistrationScreen")
-              }
-            >
-              Tournament Rules
-            </Button>
-          )}
-        </Box>
-
-        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
-          {userRole == "organizer" && (
-            <Button
-              height="50px"
-              colorScheme={"blue"}
-              onPress={() =>
-                navigationRef.navigate("TournamentRegistrationScreen")
-              }
-            >
-              Fixtures
-            </Button>
-          )}
-        </Box>
-
-        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
-          {userRole == "organizer" && (
-            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("ViewRegisteredTeamsScreen")}>View Registered Team</Button>
-          )}
-        </Box>
-
-        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
-          {userRole == "organizer" && (
-            <Button
-              height="50px"
-              colorScheme={"blue"}
-              onPress={() =>
-                navigationRef.navigate("TournamentRegistrationScreen")
-              }
-            >
-              Registered my Team
-            </Button>
-          )}
-        </Box>
-
-        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
-          {userRole == "organizer" && (
-            <Button
-              height="50px"
-              colorScheme={"blue"}
-              onPress={() =>
-                navigationRef.navigate("TournamentRegistrationScreen")
-              }
-            >
-              Edit Tournament
-            </Button>
-          )}
-        </Box>
-
-        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
-          {tournamentDetails?.created_by == userEmail &&
-            userRole == "organizer" && (
-              <Button
-                height="50px"
-                colorScheme={"blue"}
-                onPress={
-                  () => alert("Tournament Published")
-                  //navigationRef.navigate("ViewRegisteredTeamsScreen")
-                }
-              >
-                Publish Tournament
-              </Button>
-            )}
-        </Box>
-
-        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
-          {userRole == "organizer" && (
-            <Button
-              height="50px"
-              colorScheme={"blue"}
-              onPress={() =>
-                navigationRef.navigate("TournamentRegistrationScreen")
-              }
-            >
-              Pending Tournaments
-            </Button>
-          )}
-        </Box>
+          ))}
       </Box>
     </ScrollView>
-  );
-};
+  )
+}
 
-export default TournamentOverviewScreen;
+export default TournamentOverviewScreen

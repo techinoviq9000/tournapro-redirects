@@ -22,13 +22,16 @@ import {
   Image,
 } from "native-base";
 import React, { useEffect, useState } from "react";
+import { CommonActions } from '@react-navigation/native';
 import { Platform, ScrollView } from "react-native";
 import { useSelector } from "react-redux";
 import { navigate, navigationRef } from "../../../rootNavigation";
 import { AntDesign } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { nhost } from "../../../App";
 import { useFileUpload, useUserEmail } from "@nhost/react";
+import { nhost } from "../../../nhostClient";
+import { useToast } from "native-base"
+import LoaderModal from "../../components/LoaderModal";
 
 const ADD_TOURNAMENT = gql`
   mutation MyMutation(
@@ -38,6 +41,7 @@ const ADD_TOURNAMENT = gql`
     $end_date: date!
     $tournament_img: String!
     $banner_img: String!
+    $created_by: citext!
   ) {
     insert_tournaments(
       objects: {
@@ -48,6 +52,7 @@ const ADD_TOURNAMENT = gql`
         sport_id: 1
         tournament_img: $tournament_img
         banner_img: $banner_img
+        created_by: $created_by
       }
     ) {
       affected_rows
@@ -55,7 +60,7 @@ const ADD_TOURNAMENT = gql`
   }
 `;
 
-const LogoPoster = ({ route }) => {
+const LogoPoster = ({ route, navigation }) => {
   const {
     start_date,
     end_date,
@@ -64,10 +69,34 @@ const LogoPoster = ({ route }) => {
     tournamentformat,
     tournamentteams,
   } = route.params.values;
-  console.log(route.params.values);
+  const userEmail = useUserEmail();
+  const toast = useToast()
   const [image, setImage] = useState(null);
   const [poster, setPoster] = useState(null);
-  const [addTournament] = useMutation(ADD_TOURNAMENT);
+  const [addTournament, {loading}] = useMutation(ADD_TOURNAMENT, {
+    onCompleted: data => {
+      toast.show({
+        render: () => {
+          return (
+            <Box bg="green.500" px="2" py="1" rounded="sm" mb={5}>
+              <Text color="white">Tournament has been created!</Text>
+            </Box>
+          )
+        }
+      })
+      setTimeout(() => {
+        // navigation.dispatch(
+        //   CommonActions.reset({
+        //     index: 1,
+        //     routes: [
+        //       { name: 'HomeScreen' },
+        //     ],
+        //   })
+        // );
+        navigationRef.navigate("HomeScreen")
+      }, 1000);
+    }
+  });
   const {
     add,
     upload,
@@ -121,10 +150,12 @@ const LogoPoster = ({ route }) => {
   const handleSubmit = async () => {
     const banner_image_file = expoFileToFormFile(poster);
     const tournament_image_file = expoFileToFormFile(image);
+    console.log(banner_image_file)
     const res = await upload({
       file: banner_image_file,
       bucketId: "tournament",
     });
+    console.log(res)
     const res2 = await upload({
       file: tournament_image_file,
       bucketId: "tournament",
@@ -137,7 +168,7 @@ const LogoPoster = ({ route }) => {
       fileId: res2.id,
     });
 
-    const res3 = await addTournament({
+    await addTournament({
       variables: {
         tournament_name,
         venue,
@@ -145,10 +176,9 @@ const LogoPoster = ({ route }) => {
         end_date,
         tournament_img,
         banner_img,
+        created_by: userEmail
       },
     });
-
-    console.log(res3.data);
   };
 
   return (
@@ -239,6 +269,7 @@ const LogoPoster = ({ route }) => {
           Cancel
         </Button>
       </Box>
+      <LoaderModal isLoading={loading} />
     </ScrollView>
   );
 };

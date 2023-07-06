@@ -1,9 +1,13 @@
-import { gql, useLazyQuery, useMutation } from "@apollo/client";
-import { useUserData } from "@nhost/react";
-import { Box, Input, Stack, Text } from "native-base";
-import React, { useEffect } from "react";
-import { Alert, Button, StyleSheet} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { gql, useLazyQuery, useMutation } from "@apollo/client"
+import { useUserData } from "@nhost/react"
+import { Box, Input, ScrollView, Stack, Text } from "native-base"
+import React, { useCallback, useEffect, useState } from "react"
+import { Alert, Button, RefreshControl, StyleSheet } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
+import { navigationRef } from "../../../rootNavigation"
+import GoBack from "../../components/GoBack"
+import { useToast } from "native-base"
+import LoaderModal from "../../components/LoaderModal"
 
 const GET_TEAM_PLAYERS = gql`
   query GetTeamPlayers($team_id: Int!) {
@@ -13,139 +17,188 @@ const GET_TEAM_PLAYERS = gql`
       }
     }
   }
-`;
-
-const ADD_STATUS_REASON = gql`
-mutation MyMutation($id: Int!, $status: String!, $reason: String) {
-  update_teams_by_pk(pk_columns: {id: $id}, _set: {status: $status, reason: $reason}) {
-    id
-  }
-}
 `
 
+const ADD_STATUS_REASON = gql`
+  mutation MyMutation($id: Int!, $status: String!, $reason: String) {
+    update_teams_by_pk(
+      pk_columns: { id: $id }
+      _set: { status: $status, reason: $reason }
+    ) {
+      id
+      status
+    }
+  }
+`
 
-const PlayerScreen = ({route}) => {
+const PlayerScreen = ({ route }) => {
   const team = route?.params?.team
   const team_id = team.id
   const status = team.status
-  console.log(status)
-  const TeamPlayer = ({ item }) => {
-    return (
-      <Box>
-      <Box marginTop="20px" display="flex" borderRadius="15px" padding="20px" borderWidth="1px" borderStyle="solid" borderColor="black">
-        <Text>{item?.player?.player_name}</Text>
-      </Box>
-      </Box>
-    );
-  };
-
-  const userData = useUserData();
-  const [addStatusnReason] = useMutation(ADD_STATUS_REASON);
-  const [getTeamPlayers, {data, loading, error}] = useLazyQuery(GET_TEAM_PLAYERS, {
-    variables: {
-      team_id
-    },
-    onCompleted: data => {
-      console.log(data)
-    },
-    onError: e => {
-      console.log(e)
+  const [refreshing, setRefreshing] = useState(false)
+  const userData = useUserData()
+  const toast = useToast()
+  const [updateStatus, { loading: updateStatusLoading }] = useMutation(
+    ADD_STATUS_REASON,
+    {
+      onCompleted: (data) => {
+        if (data?.update_teams_by_pk.status == "Approved") {
+          toast.show({
+            render: () => {
+              return (
+                <Box bg="green.500" px="2" py="1" rounded="sm" mb={5}>
+                  <Text color="white">Team has been approved!</Text>
+                </Box>
+              )
+            }
+          })
+          setTimeout(() => {
+            navigationRef.goBack()
+          }, 1000);
+        } else {
+          toast.show({
+            render: () => {
+              return (
+                <Box bg="green.500" px="2" py="1" rounded="sm" mb={5}>
+                  <Text color="white">Team has been rejected!</Text>
+                </Box>
+              )
+            }
+          })
+          setTimeout(() => {
+            navigationRef.goBack()
+          }, 1000);
+        }
+        console.log(data)
+      },
+      onError: (e) => {
+        console.log(e)
+      }
     }
-  })
+  )
 
+  const [getTeamPlayers, { data, loading: playersLoading, error }] =
+    useLazyQuery(GET_TEAM_PLAYERS, {
+      variables: {
+        team_id
+      },
+      onCompleted: (data) => {
+        setRefreshing(false)
+        console.log(data)
+      },
+      onError: (e) => {
+        console.log(e)
+      }
+    })
+
+  const handleRejectTeamPressed = (status, reason) => {
+    updateStatus({
+      variables: {
+        status,
+        id: team_id,
+        reason
+      }
+    })
+  }
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true)
+    getTeamPlayers()
+  }, [])
 
   useEffect(() => {
     if (userData) {
-      getTeamPlayers();
+      getTeamPlayers()
     }
-  }, []);
+  }, [])
 
-  const abc = (value) => {
-    console.log(value)
+  const TeamPlayer = ({ item }) => {
+    return (
+      <Box>
+        <Box
+          marginTop="20px"
+          display="flex"
+          borderRadius="15px"
+          padding="20px"
+          borderWidth="1px"
+          borderStyle="solid"
+          borderColor="black"
+        >
+          <Text>{item?.player?.player_name}</Text>
+        </Box>
+      </Box>
+    )
   }
 
   const simpleAlert = () => {
     Alert.alert(
-      //Title
-      'Select the following reasons for team rejection',
-      //Body
-      '',
+      "Select the following reasons for team rejection",
+
+      "",
       [
         {
-          text: 'Rules not followed',
-          onPress: () => addStatusnReason({variables:{
-            status: "Rejected",
-            id: team_id,
-            reason: "Rules not followed"
-          }})
-        },
-          // onPress: () => {
-            
-          //   console.log("Reason 1 Selected")
-          // }
-        
-        {
-          text: 'Inadequate Behaviour',
-          onPress: () => addStatusnReason({variables:{
-            status: "Rejected",
-            id: team_id,
-            reason: "Inadequate Behaviour"
-          }})
-          // onPress: () => {
-          //   console.log("Reason 2 Selected")
-          // }
+          text: "Rules not followed",
+          onPress: () =>
+            handleRejectTeamPressed("Rejected", "Rules not followed")
         },
         {
-          text: 'Less Participants',
-          onPress: () => addStatusnReason({variables:{
-            status: "Rejected",
-            id: team_id,
-            reason: "Less Participants"
-          }})
-          // onPress: () => {
-          //   abc("Less Participants | R3")
-          // }
+          text: "Inadequate Behaviour",
+          onPress: () =>
+            handleRejectTeamPressed("Rejected", "Inadequate Behaviour")
+        },
+        {
+          text: "Less Participants",
+          onPress: () =>
+            handleRejectTeamPressed("Rejected", "Less Participants")
         }
       ]
     )
   }
 
   return (
-    <Box padding="20px" marginTop="40px">
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      <Box bg={"white"} minH="full" flex={1} safeArea p={5} pt={2}>
+        <GoBack />
+        <Box mb={4} mt={0}>
+          <Text fontSize={"4xl"} bold>
+            Team Players
+          </Text>
+          <Text>Players for Tournament</Text>
+          <Text>{team?.team_name}</Text>
+        </Box>
 
-      <Text fontSize="30px">Team Players</Text>
-      <Text>Players for Tournament</Text>
-      {data && data?.player_teams?.length > 0 && data?.player_teams.map(item => <TeamPlayer item={item} />)}
-      <Stack marginTop="20px"/>
+        {data && data?.player_teams?.length > 0 ? (
+          data?.player_teams.map((item) => <TeamPlayer item={item} />)
+        ) : (
+          <Text>No players</Text>
+        )}
+        <Stack marginTop="20px" />
 
-      <SafeAreaView>
-      {data && data?.player_teams?.length  > 0 && 
-      <Box style={StyleSheet.container} marginTop="20px" display="flex" flexDirection="row" justifyContent="space-evenly">
-        {status != "Approved" && (
-      <Button title="Approve" onPress={() => addStatusnReason({variables:{
-        status: "Approved",
-        id: team_id
-      }})}/>)}
-      <Button title="Reject" onPress={simpleAlert}/>
-      </Box>}
-      </SafeAreaView>
+        <SafeAreaView>
+          <Box
+            style={StyleSheet.container}
+            marginTop="20px"
+            display="flex"
+            flexDirection="row"
+            justifyContent="space-evenly"
+          >
+            {status != "Approved" && (
+              <Button
+                title="Approve"
+                onPress={() => handleRejectTeamPressed("Approved", null)}
+              />
+            )}
+            <Button title="Reject" onPress={simpleAlert} />
+          </Box>
+        </SafeAreaView>
+      </Box>
+      <LoaderModal isLoading={playersLoading || updateStatusLoading} />
+    </ScrollView>
+  )
+}
 
-
-      {/* {status == "Approved" && (
-            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>Edit Tournament</Button>
-          )} */}
-
-
-      {/* {data && data?.player_teams?.length > 0 && data?.player_teams.map(item => <Button>Hi</Button>)} */}
-      {/* <Box marginTop="20px" display="flex" flexDirection="row" justifyContent="space-evenly">
-      <Button onPress={() => console.log("hello world")}>Approve</Button>
-      <Button onPress={() => console.log("hello world now")}>Reject</Button> */}
-    </Box>
-      
-    
-  );
-};
-
-export default PlayerScreen;
-
-
+export default PlayerScreen

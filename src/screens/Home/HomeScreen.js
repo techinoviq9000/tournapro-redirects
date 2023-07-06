@@ -62,6 +62,7 @@ import dayjs from "dayjs";
 import MatchesDataLoadingSkeleton from "../../components/MatchesDataLoadingSkeleton";
 import OngGoingDataLoadingSkeleton from "../../components/OngGoingDataLoadingSkeleton";
 import UpComingDataLoadingSkeleton from "../../components/UpComingDataLoadingSkeleton";
+import NoMatchData from "../../components/NoMatchData";
 
 const GET_TOURNAMENT = gql`
   query GetOngoingTournaments($sport_id: Int!) {
@@ -149,6 +150,7 @@ const GET_SPORTS = gql`
 `;
 
 export default HomeScreen = ({ navigation }) => {
+  const [refreshing, setRefreshing] = useState(false);
   const ongoingtournamentData = useSelector(
     (state) => state.tournament.ongoingdata
   );
@@ -158,17 +160,28 @@ export default HomeScreen = ({ navigation }) => {
   const location = useSelector((state) => state.generalData.location);
   const dispatch = useDispatch();
   const userData = useUserData();
-
   const [selectedSportsId, setSelectedSportsId] = useState(null);
-
   const [locationLoading, setLocationLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+  const { isAuthenticated, isLoading } = useAuthenticationStatus();
+  const userName = useUserDisplayName() ?? "";
+  const userEmail = useUserEmail();
+  const { colors } = useTheme();
+  const [logOutLoading, setLogOutLoading] = useState(false);
+  const { signOut } = useSignOut();
 
+  
   const [getTournaments, { loading, data, error }] = useLazyQuery(
     GET_TOURNAMENT,
     {
       notifyOnNetworkStatusChange: true,
+      nextFetchPolicy: "network-only",
+      fetchPolicy: "network-only",
+      variables: {
+        sport_id: selectedSportsId,
+      },
       onCompleted: (data) => {
+        console.log(data)
         const now = dayjs().format("YYYY-MM-D");
         const OnGoingTournament = data.tournaments.filter(
           (tournament) => dayjs(now).diff(tournament.start_date) >= 0
@@ -184,15 +197,21 @@ export default HomeScreen = ({ navigation }) => {
       },
     }
   );
-
+  console.log(loading)
   const [
     getMatches,
     { loading: matchesloading, data: matchdata, error: matcherror },
   ] = useLazyQuery(GET_MATCHES, {
     notifyOnNetworkStatusChange: true,
-    onCompleted: (data) => {},
+    variables: {
+      player_email: userEmail,
+    },
+    onCompleted: (data) => {
+      setRefreshing(false)
+    },
     onError: (e) => {
       console.log(e);
+      setRefreshing(false)
     },
   });
 
@@ -206,11 +225,7 @@ export default HomeScreen = ({ navigation }) => {
           (item) => item.sport_name == "Cricket"
         )[0].id;
         setSelectedSportsId(id);
-        getTournaments({
-          variables: {
-            sport_id: id,
-          },
-        });
+        getTournaments();
       }
     },
     onError: (e) => {
@@ -218,12 +233,6 @@ export default HomeScreen = ({ navigation }) => {
     },
   });
 
-  const { isAuthenticated, isLoading } = useAuthenticationStatus();
-  const userName = useUserDisplayName() ?? "";
-  const userEmail = useUserEmail();
-  const { colors } = useTheme();
-  const [logOutLoading, setLogOutLoading] = useState(false);
-  const { signOut } = useSignOut();
   const logOut = async () => {
     try {
       setLogOutLoading(true);
@@ -252,15 +261,17 @@ export default HomeScreen = ({ navigation }) => {
     dispatch(setLocation(loc[0]));
     setLocationLoading(false);
   };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+   getTournaments();
+   getMatches();
+  }, []);
   // useFocusEffect(
   useEffect(() => {
     if (userEmail) {
       getSports();
-      getMatches({
-        variables: {
-          player_email: "abdullah.s@techinoviq.com",
-        },
-      });
+      getMatches();
       if (!location) {
         getLocation();
       }
@@ -324,6 +335,7 @@ export default HomeScreen = ({ navigation }) => {
           </HStack>
           </Box> 
         <Button onPress={() => logOut()}>Logout</Button> */}
+        <Pressable onPress={() => navigation.navigate("Profile", {screen: "ViewUserProfileScreen"})}>
           <Image
             size={30}
             borderRadius={100}
@@ -332,6 +344,7 @@ export default HomeScreen = ({ navigation }) => {
             }}
             alt="Alternate Text"
           />
+          </Pressable>
           <HStack alignItems={"flex-end"} space={1}>
             <Ionicons name="location-outline" size={24} color="black" />
             {locationLoading ? (
@@ -469,23 +482,13 @@ export default HomeScreen = ({ navigation }) => {
   };
 
   return (
-    <ScrollView>
+    <ScrollView  refreshControl={
+      <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+    }>
       <Box flex={1} safeArea>
         <Box p={5} pb={0}>
           {isLoading ? <HeaderLoading /> : <Header />}
         </Box>
-        {/* <HStack p={5} pb={0} alignItems={"flex-end"} space={1}>
-          <Ionicons name="location-outline" size={24} color="black" />
-          {locationLoading ? (
-            <LocationLoading />
-          ) : errorMsg ? (
-            <Text color="black">{errorMsg}</Text>
-          ) : (
-            <Text color="black" bold>
-              {location?.country}, {location?.subregion}, {location?.region}
-            </Text>
-          )}
-        </HStack> */}
         <Box px={5} my={4} marginTop="15px">
           <Text fontSize={"3xl"} bold mb={4}>
             Sports
@@ -589,11 +592,15 @@ export default HomeScreen = ({ navigation }) => {
               </VStack>
             </>
           ) : (
-            <NoData
-              getData={getTournaments}
-              id={selectedSportsId}
+            <>
+            <Text fontSize={"2xl"} bold px={5}>
+                    My Matches
+                  </Text>
+            <NoMatchData
+              getData={getMatches}
               colors={colors}
             />
+            </>
           )}
         </Box>
         <Divider my={4} />
@@ -707,7 +714,7 @@ export default HomeScreen = ({ navigation }) => {
           )}
         </Box>
 
-        <LoaderModal isLoading={logOutLoading || isLoading || loading} />
+        <LoaderModal isLoading={logOutLoading || isLoading || loading || matchesloading} />
       </Box>
       <StatusBar style="dark" translucent={false} />
       {/*       

@@ -20,6 +20,7 @@ import {
   DrawerItem,
 } from "@react-navigation/drawer";
 import MyTournaments from "./UserProfile/MyTournaments";
+import MyTeamsScreen from "./UserProfile/MyTeamsScreen";
 const Router = () => {
   const { colors } = useTheme();
   const Stack = createNativeStackNavigator();
@@ -93,6 +94,7 @@ const Router = () => {
         <Drawer.Screen name="Dashboard" component={HomeTabs} />
         <Drawer.Screen name="Profile" component={UserProfileStackScreen} />
         <Drawer.Screen name="MyTournaments" component={MyTournaments} />
+        <Drawer.Screen name="My Team" component={MyTeamsScreen} />
       </Drawer.Navigator>
     );
   };
@@ -128,7 +130,7 @@ const Router = () => {
         initialRouteName="ViewUserProfileScreen"
       >
         {userProfileScreens.map(({ name, component, options }) => (
-          <TournamentStack.Screen
+          <UserProfileStack.Screen
             key={`${component}-${name}`}
             name={name}
             component={component}

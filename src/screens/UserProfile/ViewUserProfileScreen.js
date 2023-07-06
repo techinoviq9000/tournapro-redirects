@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons"
-import { useUserData } from "@nhost/react"
+import { useSignOut, useUserData } from "@nhost/react"
 import {
   Box,
   Divider,
@@ -12,11 +12,14 @@ import {
   FlatList,
   ScrollView,
   Pressable,
+  VStack
 } from "native-base"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import LocationLoading from "../../components/LocationLoading"
 import { navigationRef } from "../../../rootNavigation"
 import { gql, useLazyQuery } from "@apollo/client"
+import LoaderModal from "../../components/LoaderModal"
+import GoBack from "../../components/GoBack"
 
 const GET_STATS = gql`
   query GetStats($player_email: citext!) {
@@ -52,23 +55,37 @@ const GET_TOURNAMENT = gql`
 
 const ViewUserProfileScreen = () => {
   const userData = useUserData()
+  const [logOutLoading, setLogOutLoading] = useState(false)
+  const { signOut } = useSignOut()
   //
   const Stats = ({ item }) => {
+    const role = userData?.defaultRole ?? ""
     return (
-      <Box>
-        <Text marginTop="0px" fontSize={"40"} fontWeight="bold">
+      <Box mb={4}>
+        <Text fontSize={"4xl"} textAlign={"center"} fontWeight="bold">
           {item?.player_name ?? ""}
         </Text>
-        <Stack>
-          <HStack display="flex" justifyContent="space-around">
-            <Text fontSize="30px">{item?.player_wickets ?? "0"}</Text>
-            <Text fontSize="30px">{item?.player_score ?? "0"}</Text>
-          </HStack>
-          <HStack display="flex" justifyContent="space-evenly">
-            <Text fontSize="15px">Wickets</Text>
-            <Text fontSize="15px">Score</Text>
-          </HStack>
-        </Stack>
+        <Text fontSize={"4xl"} textAlign={"center"} fontWeight="bold">
+          ({role.charAt(0).toUpperCase() + role.slice(1) ?? ""})
+        </Text>
+        <HStack justifyContent={"space-around"}>
+          <VStack display="flex" justifyContent="space-around">
+            <Text fontSize="30px" textAlign={"center"}>
+              {item?.player_wickets ?? "0"}
+            </Text>
+            <Text fontSize="15px" textAlign={"center"}>
+              Wickets
+            </Text>
+          </VStack>
+          <VStack display="flex" justifyContent="space-evenly">
+            <Text fontSize="30px" textAlign={"center"}>
+              {item?.player_score ?? "0"}
+            </Text>
+            <Text fontSize="15px" textAlign={"center"}>
+              Score
+            </Text>
+          </VStack>
+        </HStack>
       </Box>
     )
   }
@@ -89,14 +106,10 @@ const ViewUserProfileScreen = () => {
 
   const [
     getTournament,
-    {
-      loading: tournamentloading,
-      data: tournamentdata,
-      error: tournamenterror,
-    },
+    { loading: tournamentloading, data: tournamentdata, error: tournamenterror }
   ] = useLazyQuery(GET_TOURNAMENT, {
     variables: {
-      player_email: userData?.email,
+      player_email: userData?.email
     },
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "network-only",
@@ -105,20 +118,31 @@ const ViewUserProfileScreen = () => {
     },
     onError: (e) => {
       console.log(e)
-    },
+    }
   })
   console.log(tournamentloading)
   const [getStats, { loading, data, error }] = useLazyQuery(GET_STATS, {
     variables: {
-      player_email: userData?.email,
+      player_email: userData?.email
     },
     notifyOnNetworkStatusChange: true,
     onCompleted: (data) => {},
     onError: (e) => {
       console.log(e)
-    },
+    }
   })
   console.log(data)
+
+  const logOut = async () => {
+    try {
+      setLogOutLoading(true)
+      signOut()
+      setLogOutLoading(false)
+    } catch (error) {
+      setLogOutLoading(false)
+      console.log(error)
+    }
+  }
 
   useEffect(() => {
     if (userData) {
@@ -129,23 +153,25 @@ const ViewUserProfileScreen = () => {
 
   return (
     <ScrollView>
-      <Box
-        marginBottom="80px"
-        padding="auto"
-        marginTop="40px"
-        display="flex"
-        alignItems="center"
-      >
-        <Image
-          size={150}
-          borderRadius={100}
-          source={{
-            uri: userData?.avatarUrl,
-          }}
-          alt="Alternate Text"
-        />
+      <Box bg={"white"} minH="full" flex={1} safeArea p={5} pt={2}>
+        <GoBack />
+        <Box
+          marginBottom="80px"
+          padding="auto"
+          marginTop="40px"
+          display="flex"
+          alignItems="center"
+        >
+          <Image
+            size={150}
+            borderRadius={100}
+            source={{
+              uri: userData?.avatarUrl
+            }}
+            alt="Alternate Text"
+          />
 
-        {/* <Box space={1} display="flex" alignItems="center">
+          {/* <Box space={1} display="flex" alignItems="center">
           <Ionicons name="location-outline" size={24} color="black" />
           {LocationLoading ? (
             <LocationLoading />
@@ -157,65 +183,52 @@ const ViewUserProfileScreen = () => {
               </Text>
               )}
             </Box> */}
-        <Stats item={data?.players[0]} />
+          <Stats item={data?.players[0]} />
 
-        <Stack
-          display="flex"
-          flexDirection="row"
-          alignItems="center"
-          marginTop="20px"
-          justifyContent="space-between"
-        ></Stack>
-        {/* <Button onPress={() => navigationRef.navigate("EditProfile")}>Edit Profile</Button>
-        <Button>View Stats</Button> */}
-
-        <Box style={{ flexDirection: "row" }}>
-          <Box style={{ marginRight: 10 }}>
+          <HStack space={2}>
             <Button onPress={() => navigationRef.navigate("EditProfile")}>
               Edit Profile
             </Button>
-          </Box>
-          <Box>
             <Button
               onPress={() => navigationRef.navigate("ViewRegisteredTeams")}
             >
               View Stats
             </Button>
-          </Box>
-          <Box></Box>
-          <Stack marginTop="20px" />
-        </Box>
-        <Text
-          fontWeight="bold"
-          fontSize="20px"
-          marginTop="20px"
-          marginBottom="5px"
-        >
-          My Tournaments
-        </Text>
-        <Divider my="3" />
-        {/* <Box marginTop="20px">
+            <Button onPress={() => logOut()}>Logout</Button>
+          </HStack>
+          <Text
+            fontWeight="bold"
+            fontSize="20px"
+            marginTop="20px"
+            marginBottom="5px"
+          >
+            My Tournaments
+          </Text>
+          <Divider my="3" />
+          {/* <Box marginTop="20px">
         <Tournaments item={tournamentdata?.team_tournaments[0].team_tournaments_tournament}/>
         <Tournaments item={tournamentdata?.team_tournaments[1].team_tournaments_tournament}/>
         </Box>
          */}
 
-        <Pressable>
-          <FlatList
-            ItemSeparatorComponent={() => (
-              <Divider my={2} bgColor="transparent" />
-            )}
-            _contentContainerStyle={{
-              padding: 1,
-            }}
-            data={tournamentdata?.team_tournaments}
-            keyExtractor={(item, index) => `${item.id}-${index}`}
-            renderItem={({ item }) => (
-              <Tournaments item={item?.team_tournaments_tournament} />
-            )}
-          />
-        </Pressable>
+          <Pressable>
+            <FlatList
+              ItemSeparatorComponent={() => (
+                <Divider my={2} bgColor="transparent" />
+              )}
+              _contentContainerStyle={{
+                padding: 1
+              }}
+              data={tournamentdata?.team_tournaments}
+              keyExtractor={(item, index) => `${item.id}-${index}`}
+              renderItem={({ item }) => (
+                <Tournaments item={item?.team_tournaments_tournament} />
+              )}
+            />
+          </Pressable>
+        </Box>
       </Box>
+      <LoaderModal isLoading={logOutLoading} />
     </ScrollView>
   )
 }

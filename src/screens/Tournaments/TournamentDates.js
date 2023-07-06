@@ -120,7 +120,7 @@ const TournamentDates = ({ route }) => {
             Select Tournament Start Date and End Date
           </Text>
         </Box>
-        <Box>
+        <Box mb={4}>
           <Text>Start Date</Text>
           {showPicker && (
             <DateTimePicker

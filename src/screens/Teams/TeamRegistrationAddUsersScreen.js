@@ -22,50 +22,43 @@ import { ScrollView } from "react-native"
 import { useDispatch, useSelector } from "react-redux"
 import { navigationRef } from "../../../rootNavigation"
 import { setPlayerDetails } from "../../../store/registerPlayerSlice"
+import GoBack from "../../components/GoBack";
 import LoaderModal from "../../components/LoaderModal"
 
-
-const TournamentRegistrationScreen = () => {
-  const GET_TEAMS = gql`
-    query getTeams {
-      teams {
-        id
-        team_name
-      }
+const GET_PLAYERS = gql`
+query getPlayers($id: Int!) {
+  player_teams(where: { team_id: { _eq: $id } }) {
+    player {
+      id
+      player_name
+      player_email
     }
-  `;
-
-  const GET_PLAYERS = gql`
-    query getPlayers($id: Int!) {
-      player_teams(where: { team_id: { _eq: $id } }) {
-        player {
-          id
-          player_name
-          player_email
-        }
-      }
+  }
+}
+`
+const FIND_USER = gql`
+query findUser($player_email: citext!) {
+  players(where: { player_email: { _eq: $player_email } }) {
+    id
+    player_email
+    user {
+      email
+      emailVerified
     }
-  `
-  const FIND_USER = gql`
-    query findUser($player_email: citext!) {
-      players(where: { player_email: { _eq: $player_email } }) {
-        id
-        player_email
-        user {
-          email
-          emailVerified
-        }
-      }
-    }
-  `
+  }
+}
+`
 
+
+const TeamRegistrationAddUsersScreen = ({route}) => {
+  const id = route?.params?.team.id
+  console.log(route?.params?.team.id)
   const dispatch = useDispatch()
   const { colors } = useTheme()
   const [service, setService] = useState("")
   const [players, setPlayers] = useState(null)
   const [findUserLoading, setFindUserLoading] = useState(false)
   const [errors, setErrors] = useState([])
-  const [getTeams, { loading, data, error }] = useLazyQuery(GET_TEAMS)
   const [findUser] = useLazyQuery(FIND_USER, {
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "network-only",
@@ -102,16 +95,6 @@ const TournamentRegistrationScreen = () => {
   let currenPlayerCount = players?.length;
   allowedPlayerToRegisterCount = 15 - currenPlayerCount;
 
-  const handleTeamPressed = async (id) => {
-    setService(id);
-    getTeamPlayers({
-      variables: {
-        id,
-      },
-    })
-  }
-
-  console.log(players)
   const handleAddPlayerInputField = () => {
     const id = `player_${currenPlayerCount - 1}`
     setPlayers([...players, { id, player_email: "" }])
@@ -188,7 +171,11 @@ const TournamentRegistrationScreen = () => {
     }
   }
   useEffect(() => {
-    getTeams();
+    getTeamPlayers({
+      variables: {
+        id,
+      },
+    })
   }, []);
 
   const PlayerInputBox = ({ player, index, founded, userVerified }) => {
@@ -292,7 +279,8 @@ const TournamentRegistrationScreen = () => {
   );
   return (
     <ScrollView>
-      <Box safeArea mt={2} px={4}>
+      <Box bg={"white"} flex={1} safeArea p={5} pt={2}>
+        <GoBack />
         <Box mb={4}>
           <Text fontSize={"3xl"} bold>
             Register Your Team
@@ -300,29 +288,6 @@ const TournamentRegistrationScreen = () => {
           <Text textAling={"center"}>
             Upto 15 players and minium 12 players can be selected
           </Text>
-        </Box>
-        <Box mb={4}>
-          <Text>Select team</Text>
-          <Select
-            selectedValue={service}
-            minWidth="200"
-            accessibilityLabel="Select Team"
-            placeholder="Select Team"
-            _selectedItem={{
-              bg: "blue.200",
-              endIcon: <CheckIcon color="white" size="5" />,
-            }}
-            mt={1}
-            onValueChange={(itemId) => handleTeamPressed(itemId)}
-          >
-            {data?.teams.map((item) => (
-              <Select.Item
-                key={item.id}
-                label={item.team_name}
-                value={item.id}
-              />
-            ))}
-          </Select>
         </Box>
         <>
           {playersLoading ? (
@@ -427,9 +392,9 @@ const TournamentRegistrationScreen = () => {
           )}
         </>
       </Box>
-      <LoaderModal isLoading={findUserLoading || loading} />
+      <LoaderModal isLoading={findUserLoading || playersLoading} />
     </ScrollView>
   );
 };
 
-export default TournamentRegistrationScreen;
+export default TeamRegistrationAddUsersScreen;
