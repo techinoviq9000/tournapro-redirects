@@ -16,6 +16,7 @@ import CreateTournamentScreen from "./Tournaments/CreateTournamentScreen";
 import TournamentDates from "./Tournaments/TournamentDates";
 import LogoPoster from "./Tournaments/LogoPoster";
 import PlayerScreen from "./Tournaments/PlayerScreen"
+import MyTournaments from "./UserProfile/MyTournaments";
 
 export const homeScreens = [
   {
@@ -24,10 +25,10 @@ export const homeScreens = [
     options: {
       headerShown: false,
       gestureEnabled: false,
-      cardOverlayEnabled: false
-    }
-  }
-]
+      cardOverlayEnabled: false,
+    },
+  },
+];
 export const userProfileScreens = [
   {
     name: "ViewUserProfileSCreen",
@@ -35,8 +36,8 @@ export const userProfileScreens = [
     options: {
       headerShown: false,
       gestureEnabled: false,
-      cardOverlayEnabled: false
-    }
+      cardOverlayEnabled: false,
+    },
   },
   {
     name: "EditProfile",
@@ -44,10 +45,19 @@ export const userProfileScreens = [
     options: {
       headerShown: false,
       gestureEnabled: false,
-      cardOverlayEnabled: false
-    }
-  }
-]
+      cardOverlayEnabled: false,
+    },
+  },
+  {
+    name: "MyTournaments",
+    component: MyTournaments,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false,
+    },
+  },
+];
 
 export const tournamentSreen = [
   {
@@ -74,17 +84,17 @@ export const tournamentSreen = [
     options: {
       headerShown: false,
       gestureEnabled: false,
-      cardOverlayEnabled: false
-    }
+      cardOverlayEnabled: false,
+    },
   },
-   {
+  {
     name: "ViewRegisteredTeamsScreen",
     component: ViewRegisteredTeamsScreen,
     options: {
       headerShown: false,
       gestureEnabled: false,
-      cardOverlayEnabled: false
-    }
+      cardOverlayEnabled: false,
+    },
   },
   {
     name: "RegisterUserForTeamScreen",
@@ -92,8 +102,8 @@ export const tournamentSreen = [
     options: {
       headerShown: false,
       gestureEnabled: false,
-      cardOverlayEnabled: false
-    }
+      cardOverlayEnabled: false,
+    },
   },
   {
     name: "CreateTournamentScreen",
@@ -134,7 +144,7 @@ export const tournamentSreen = [
 
   {
     name: "UpcomingTournamentsScreen",
-    component: UpcomingTournamentsScreen ,
+    component: UpcomingTournamentsScreen,
     options: {
       headerShown: false,
       gestureEnabled: false,
@@ -170,7 +180,6 @@ export const authScreens = [
     },
   },
 
-  
   {
     name: "SelectRoleScreen",
     component: SelectRoleScreen,

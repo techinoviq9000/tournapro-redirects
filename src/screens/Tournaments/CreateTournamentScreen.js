@@ -21,7 +21,8 @@ import {
 import React, { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import { useSelector } from "react-redux";
-import { navigate } from "../../../rootNavigation";
+import { navigate, navigationRef } from "../../../rootNavigation";
+import { Formik } from "formik";
 
 const CreateTournamentScreen = () => {
   const GET_TEAMS = gql`
@@ -51,6 +52,11 @@ const CreateTournamentScreen = () => {
   const { colors } = useTheme();
   const [service, setService] = useState("");
   const [players, setPlayers] = useState(null);
+  const [name, setName] = useState("");
+  const [venue, setVenue] = useState("");
+  const [format, setFormat] = useState("");
+  const [teams, setTeams] = useState("");
+
   const [getTeams, { loading, data, error }] = useLazyQuery(GET_TEAMS);
   const [getTeamPlayers, { loading: playersLoading }] = useLazyQuery(
     GET_PLAYERS,
@@ -115,119 +121,84 @@ const CreateTournamentScreen = () => {
           </Text>
           <Text textAling={"center"}>Enter Tournament Details</Text>
         </Box>
-        <Box mb={4}>
-          <Text>Tournament Name</Text>
-          <Box>
-            <Input
-              variant="outline"
-              placeholder="Email"
-              fontSize="sm"
-              color="black"
-              borderColor={"gray.300"}
-              borderRadius={"md"}
-              keyboardType="default"
-              selectionColor={colors.primary[600]}
-              _focus={{
-                borderColor: "gray.600",
-                bgColor: "white",
-              }}
-            />
-          </Box>
-          <Box>
-            <Container>
-              <FormControl isValid>
-                <FormControl.Label _text={{}}>
-                  Tournament Venue(s)
-                </FormControl.Label>
+        <Formik
+          initialValues={{
+            tournament_name: "",
+            venue: "",
+            tournamentformat: "",
+            tournamentteams: "",
+          }}
+          onSubmit={(values) => {
+            navigationRef.navigate("TournamentDates", {
+              values,
+            });
+            console.log(values);
+          }}
+        >
+          {(props) => (
+            <Box mb={4}>
+              <Text>Tournament Name</Text>
+              <Input
+                variant="outline"
+                placeholder=" Enter Tournament Name"
+                onChangeText={props.handleChange("tournament_name")}
+                value={props.values.tournament_name}
+                borderColor={"gray.300"}
+                borderRadius={"md"}
+                keyboardType="default"
+              />
+              <Text marginTop={"8"}>Tournament Venues</Text>
 
-                <Checkbox.Group
-                  mt="2"
-                  colorScheme="green"
-                  defaultValue={groupValue}
-                  accessibilityLabel="Checkbox"
-                  onChange={(values) => {
-                    setGroupValue(values || []);
-                  }}
-                  alignItems="flex-start"
-                >
-                  <Checkbox value="Insportz" my="1">
-                    Insportz
-                  </Checkbox>
-                  <Checkbox value="Danube" my="2">
-                    Danube
-                  </Checkbox>
-                  <Checkbox value="" my="3">
-                    U Pro
-                  </Checkbox>
-                </Checkbox.Group>
-              </FormControl>
-            </Container>
-          </Box>
-          <Text>Tournament Format</Text>
-          <Select
-            selectedValue={service}
-            minWidth="200"
-            accessibilityLabel="Choose Service"
-            placeholder="Format"
-            _selectedItem={{
-              bg: "teal.600",
-              endIcon: <CheckIcon size="5" />,
-            }}
-            mt={1}
-            onValueChange={(itemValue) => setService(itemValue)}
-          >
-            <Select.Item label="Round Robin" value="rr" />
-            <Select.Item label="Double Round Robin" value="drr" />
-            <Select.Item label="Group Format" value="gf" />
-          </Select>
-          <VStack>
-            <Text>Number of Teams</Text>
-            <Select
-              selectedValue={service}
-              minWidth="200"
-              accessibilityLabel="Choose Service"
-              placeholder="Teams"
-              _selectedItem={{
-                bg: "teal.600",
-                endIcon: <CheckIcon size="5" />,
-              }}
-              mt={1}
-              onValueChange={(itemValue) => setService(itemValue)}
-            >
-              <Select.Item label="4" value="four" />
-              <Select.Item label="6" value="six" />
-              <Select.Item label="8" value="eight" />
-              <Select.Item label="10" value="ten" />
-              <Select.Item label="12" value="twelve" />
-              <Select.Item label="16" value="sixteen" />
-            </Select>
-          </VStack>
-        </Box>
-        <Box>
-          <Button
-            size="lg"
-            borderRadius="lg"
-            // bgColor={"blue.700"}
-            colorScheme={"blue"}
-            my={4}
-            onPress={() => navigate("TournamentDates")}
-          >
-            Next
-          </Button>
-          <Button
-            size="lg"
-            borderRadius="lg"
-            // bgColor={"blue.700"}
-            colorScheme={"red"}
-            my={4}
-            onPress={() => navigate("SelectOrViewTournamentScreen")}
-          >
-            Cancel
-          </Button>
-        </Box>
+              <Input
+                placeholder="Enter Tournament Venue"
+                onChangeText={props.handleChange("venue")}
+                value={props.values.venue}
+                borderColor={"gray.300"}
+                borderRadius={"md"}
+                keyboardType="default"
+              />
+              <Text marginTop={"8"}>Tournament Format</Text>
+              <Input
+                placeholder="Tournament Format"
+                onChangeText={props.handleChange("tournamentformat")}
+                value={props.values.tournamentformat}
+                borderColor={"gray.300"}
+                borderRadius={"md"}
+                keyboardType="default"
+              />
+
+              <Text marginTop={"8"}>Number of Teams</Text>
+
+              <Input
+                placeholder="Enter number of teams"
+                onChangeText={props.handleChange("tournamentteams")}
+                value={props.values.tournamentteams}
+                borderColor={"gray.300"}
+                borderRadius={"md"}
+                keyboardType="default"
+              />
+              <Button
+                size="lg"
+                borderRadius="lg"
+                marginTop={"20"}
+                colorScheme={"blue"}
+                onPress={props.handleSubmit}
+              >
+                Next
+              </Button>
+              <Button
+                size="lg"
+                borderRadius="lg"
+                marginTop={"6"}
+                colorScheme={"red"}
+              >
+                Cancel
+              </Button>
+            </Box>
+          )}
+        </Formik>
       </Box>
     </ScrollView>
   );
 };
-
 export default CreateTournamentScreen;

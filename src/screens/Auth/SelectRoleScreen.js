@@ -1,5 +1,5 @@
-import { Platform } from "react-native"
-import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client"
+import { Platform } from "react-native";
+import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import {
   Box,
   Button,
@@ -14,14 +14,14 @@ import {
   Spacer,
   Center,
   Spinner,
-} from "native-base"
-import { Formik, Form } from "formik"
-import * as Yup from "yup"
-import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons"
-import { useEffect, useState } from "react"
-import { navigate, navigationRef } from "../../../rootNavigation"
-import { useSignUpEmailPassword } from "@nhost/react"
-import LoaderModal from "../../components/LoaderModal"
+} from "native-base";
+import { Formik, Form } from "formik";
+import * as Yup from "yup";
+import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
+import { navigate, navigationRef } from "../../../rootNavigation";
+import { useSignUpEmailPassword } from "@nhost/react";
+import LoaderModal from "../../components/LoaderModal";
 
 // export interface ErrorMessage {
 //   error: string
@@ -40,7 +40,7 @@ const ADD_PLAYER = gql`
       id
     }
   }
-`
+`;
 
 const GET_PLAYER = gql`
   query getPlayer($player_email: citext!) {
@@ -48,12 +48,17 @@ const GET_PLAYER = gql`
       id
     }
   }
-`
+`;
 
 const SelectRoleScreen = ({ route }) => {
-  const { signUpEmailPassword, isLoading, isError, error:signUpError } = useSignUpEmailPassword()
-  const { colors } = useTheme()
-  const [radioValue, setRadioValue] = useState("user")
+  const {
+    signUpEmailPassword,
+    isLoading,
+    isError,
+    error: signUpError,
+  } = useSignUpEmailPassword();
+  const { colors } = useTheme();
+  const [radioValue, setRadioValue] = useState("user");
   const [planArray, setPlanArray] = useState([
     {
       title: "Register As Team Captain / Manager",
@@ -71,10 +76,10 @@ const SelectRoleScreen = ({ route }) => {
       description: "Players can view their profiles and tournament updates",
       role: "user",
     },
-  ])
-  const { email, fullName, password } = route.params.values
-  console.log(email)
-  const [addPlayer] = useMutation(ADD_PLAYER)
+  ]);
+  const { email, fullName, password } = route.params.values;
+  console.log(email);
+  const [addPlayer] = useMutation(ADD_PLAYER);
   const [getPlayer, { loading, data, error }] = useLazyQuery(GET_PLAYER, {
     nextFetchPolicy: "network-only",
     fetchPolicy: "network-only",
@@ -83,15 +88,15 @@ const SelectRoleScreen = ({ route }) => {
       player_email: email,
     },
     onCompleted: (data) => {
-      console.log(data)
+      console.log(data);
       if (data.players.length > 0) {
-        setPlanArray(planArray.splice(-1))
+        setPlanArray(planArray.splice(-1));
       }
     },
     onError: (e) => {
-      console.log(e)
+      console.log(e);
     },
-  })
+  });
 
   const signUp = async () => {
     try {
@@ -102,32 +107,33 @@ const SelectRoleScreen = ({ route }) => {
           displayName: `${fullName}`.trim(),
           defaultRole: radioValue,
         }
-      )
+      );
       if (res?.isError) {
-        console.log(res)
+        console.log(res);
       } else if (res.needsEmailVerification) {
-        console.log(email, "emad")
-        console.log(`${fullName}`.trim(), "fullanme")
+        console.log(email, "emad");
+        console.log(`${fullName}`.trim(), "fullanme");
         addPlayer({
           variables: {
             player_name: `${fullName}`.trim(),
             player_email: email,
           },
-        })
-        console.log(res)
+        });
+
+        console.log(res);
         navigationRef.navigate("LoginScreen", {
           needsEmailVerification: true,
-        })
+        });
       }
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
-  }
+  };
 
   useEffect(() => {
-    getPlayer()
-    console.log("GER PALTYEd")
-  }, [])
+    getPlayer();
+    console.log("GER PALTYEd");
+  }, []);
 
   return (
     <ScrollView keyboardDismissMode="interactive">
@@ -197,7 +203,7 @@ const SelectRoleScreen = ({ route }) => {
                       </Box>
                     </HStack>
                   </Box>
-                )
+                );
               }}
             </Pressable>
           ))
@@ -222,7 +228,7 @@ const SelectRoleScreen = ({ route }) => {
       </Box>
       <LoaderModal isLoading={isLoading} />
     </ScrollView>
-  )
-}
+  );
+};
 
-export default SelectRoleScreen
+export default SelectRoleScreen;

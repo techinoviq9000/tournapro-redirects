@@ -98,7 +98,7 @@ const handleCountryPressed = (itemId) => {
           <Box>
             {/* <Image  marginTop="20px" size={150} borderRadius={100} source={{
             uri: "https://variety.com/wp-content/uploads/2023/02/GettyImages-1466470818.jpg"
-        }} alt="Alternate Text" /> */}
+          }} alt="Alternate Text" /> */}
             <Avatar
               bg="lightBlue.400"
               source={{
@@ -126,7 +126,7 @@ const handleCountryPressed = (itemId) => {
           <Text fontSize="20px" fontWeight="bold">
             Name
           </Text>
-          <Input mx="0" placeholder="" w="100%" />
+          <Input mx="0" value={userData?.displayName} w="100%" />
 
           <Text fontSize="20px" fontWeight="bold" marginTop="20px">
             Email

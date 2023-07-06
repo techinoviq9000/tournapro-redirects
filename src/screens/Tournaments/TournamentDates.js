@@ -22,9 +22,10 @@ import {
 import React, { useEffect, useState } from "react";
 import { Platform, ScrollView } from "react-native";
 import { useSelector } from "react-redux";
-import { navigate } from "../../../rootNavigation";
+import { navigate, navigationRef } from "../../../rootNavigation";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import { clockRunning } from "react-native-reanimated";
 
 // const DatePickerApp = () => {
 //   const [date, setDate] = useState("09-10-2021");
@@ -69,7 +70,8 @@ import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 //   );
 // };
 
-const TournamentDates = () => {
+const TournamentDates = ({ route }) => {
+  let values = route.params.values;
   const [startdate, setStartDate] = useState("");
   const [enddate, setEndDate] = useState("");
 
@@ -87,23 +89,20 @@ const TournamentDates = () => {
   };
   const onChange = ({ type }, selectedDate) => {
     if (type == "set") {
-      const currentDate = selectedDate;
-      setDate(currentDate);
       if (Platform.OS === "android") {
         toggleDatepicker();
-        setStartDate(currentDate.toDateString());
+        setStartDate(selectedDate.toDateString());
       }
     } else {
       toggleDatepicker();
     }
   };
+
   const onChangeEnd = ({ type }, selectedDate) => {
     if (type == "set") {
-      const currentDate = selectedDate;
-      setDates(currentDate);
       if (Platform.OS === "android") {
         toggleendDatepicker();
-        setEndDate(currentDate.toDateString());
+        setEndDate(selectedDate.toDateString());
       }
     } else {
       toggleendDatepicker();
@@ -126,65 +125,59 @@ const TournamentDates = () => {
           {showPicker && (
             <DateTimePicker
               mode="date"
-              display="spinner"
+              display="calendar"
               value={date}
               onChange={onChange}
             />
           )}
 
-          {!showPicker && (
-            <Pressable onPress={toggleDatepicker}>
-              <Input
-                variant="outline"
-                placeholder="Select Date"
-                value={startdate}
-                fontSize="sm"
-                color="black"
-                borderColor={"gray.300"}
-                borderRadius={"md"}
-                keyboardType="default"
-                editable={false}
-                _focus={{
-                  borderColor: "gray.600",
-                  bgColor: "white",
-                }}
-              />
-            </Pressable>
-          )}
+          <Pressable onPress={toggleDatepicker}>
+            <Input
+              variant="outline"
+              placeholder="Select Date"
+              value={startdate}
+              fontSize="sm"
+              color="black"
+              borderColor={"gray.300"}
+              borderRadius={"md"}
+              keyboardType="default"
+              editable={false}
+              _focus={{
+                borderColor: "gray.600",
+                bgColor: "white",
+              }}
+            />
+          </Pressable>
         </Box>
-
         <Box>
           <Text>End Date</Text>
           {endPicker && (
             <DateTimePicker
               mode="date"
-              display="spinner"
+              display="default"
               value={date}
               onChange={onChangeEnd}
             />
           )}
 
-          {!endPicker && (
-            <Pressable onPress={toggleendDatepicker}>
-              <Input
-                variant="outline"
-                placeholder="Select End Date"
-                value={enddate}
-                fontSize="sm"
-                color="black"
-                borderColor={"gray.300"}
-                borderRadius={"md"}
-                keyboardType="default"
-                editable={false}
-                _focus={{
-                  borderColor: "gray.600",
-                  bgColor: "white",
-                }}
-              />
-            </Pressable>
-          )}
+          <Pressable onPress={toggleendDatepicker}>
+            <Input
+              variant="outline"
+              placeholder="Select End Date"
+              value={enddate}
+              fontSize="sm"
+              color="black"
+              borderColor={"gray.300"}
+              borderRadius={"md"}
+              keyboardType="default"
+              editable={false}
+              _focus={{
+                borderColor: "gray.600",
+                bgColor: "white",
+              }}
+            />
+          </Pressable>
         </Box>
-
         <Box marginTop={"20px"}>
           <Button
             size="lg"
@@ -192,7 +185,13 @@ const TournamentDates = () => {
             // bgColor={"blue.700"}
             colorScheme={"blue"}
             my={4}
-            onPress={() => navigate("LogoPoster")}
+            onPress={() => {
+              values.start_date = startdate;
+              values.end_date = enddate;
+              navigationRef.navigate("LogoPoster", {
+                values,
+              });
+            }}
           >
             Next
           </Button>

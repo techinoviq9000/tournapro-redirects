@@ -5,10 +5,10 @@ import {
   useUserData,
   useUserDisplayName,
   useUserEmail,
-} from "@nhost/react"
-import { gql, useLazyQuery, useQuery } from "@apollo/client"
-import { useFocusEffect } from "@react-navigation/native"
-import * as Location from "expo-location"
+} from "@nhost/react";
+import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { useFocusEffect } from "@react-navigation/native";
+import * as Location from "expo-location";
 import {
   Avatar,
   Box,
@@ -27,41 +27,50 @@ import {
   ListItem,
   Separator,
   Icon,
-} from "native-base"
+} from "native-base";
 import {
   Ionicons,
   AntDesign,
   FontAwesome,
   MaterialIcons,
   MaterialCommunityIcons,
-} from "@expo/vector-icons"
-import { ImageBackground, RefreshControl, ScrollView, View } from "react-native"
-import moment from "moment"
-import { useCallback, useContext, useEffect, useState } from "react"
-import { navigate, navigationRef } from "../../../rootNavigation"
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import LoaderModal from "../../components/LoaderModal"
-import { useDispatch, useSelector } from "react-redux"
+} from "@expo/vector-icons";
+import {
+  ImageBackground,
+  RefreshControl,
+  ScrollView,
+  View,
+} from "react-native";
+import moment from "moment";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { navigate, navigationRef } from "../../../rootNavigation";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import LoaderModal from "../../components/LoaderModal";
+import { useDispatch, useSelector } from "react-redux";
 import {
   setTournament,
   setongoingTournament,
   setupcomingTournament,
-} from "../../../store/tournamentSlice"
-import { setLocation } from "../../../store/dataSlice"
-import { StatusBar } from "expo-status-bar"
-import HeaderLoading from "../../components/HeaderLoading"
-import LocationLoading from "../../components/LocationLoading"
-import NoData from "../../components/NoData"
-import SportsLoadingSkeleton from "../../components/SportsLoadingSkeleton"
-import dayjs from "dayjs"
-import MatchesDataLoadingSkeleton from "../../components/MatchesDataLoadingSkeleton"
-import OngGoingDataLoadingSkeleton from "../../components/OngGoingDataLoadingSkeleton"
-import UpComingDataLoadingSkeleton from "../../components/UpComingDataLoadingSkeleton"
+} from "../../../store/tournamentSlice";
+import { setLocation } from "../../../store/dataSlice";
+import { StatusBar } from "expo-status-bar";
+import HeaderLoading from "../../components/HeaderLoading";
+import LocationLoading from "../../components/LocationLoading";
+import NoData from "../../components/NoData";
+import SportsLoadingSkeleton from "../../components/SportsLoadingSkeleton";
+import dayjs from "dayjs";
+import MatchesDataLoadingSkeleton from "../../components/MatchesDataLoadingSkeleton";
+import OngGoingDataLoadingSkeleton from "../../components/OngGoingDataLoadingSkeleton";
+import UpComingDataLoadingSkeleton from "../../components/UpComingDataLoadingSkeleton";
 
 const GET_TOURNAMENT = gql`
   query GetOngoingTournaments($sport_id: Int!) {
     tournaments(
-      where: { sport_id: { _eq: $sport_id }, end_date: { _gte: "now()" } }
+      where: {
+        sport_id: { _eq: $sport_id }
+        end_date: { _gte: "now()" }
+        status: { _eq: true }
+      }
       order_by: { start_date: desc }
     ) {
       id
@@ -73,44 +82,60 @@ const GET_TOURNAMENT = gql`
       venue
       start_date
       end_date
+      status
     }
   }
-`
+`;
 
 const GET_MATCHES = gql`
-query GetMatches($player_email: citext!) {
-  matches(where: {_or: [{team1: {players: {player: {player_email: {_eq: $player_email}}}}}, {team2: {players: {player: {player_email: {_eq: $player_email}}}}}]}, order_by: {match_date: asc, match_time: asc}) {
-    id
-    match_date
-    match_time
-    match_venue
-    team1_id
-    team2_id
-    tournament {
-      tournament_name
-    }
-    team1 {
-      team_name
-      team_image
-      players {
-        player {
-          player_email
+  query GetMatches($player_email: citext!) {
+    matches(
+      where: {
+        _or: [
+          {
+            team1: {
+              players: { player: { player_email: { _eq: $player_email } } }
+            }
+          }
+          {
+            team2: {
+              players: { player: { player_email: { _eq: $player_email } } }
+            }
+          }
+        ]
+      }
+      order_by: { match_date: asc, match_time: asc }
+    ) {
+      id
+      match_date
+      match_time
+      match_venue
+      team1_id
+      team2_id
+      tournament {
+        tournament_name
+      }
+      team1 {
+        team_name
+        team_image
+        players {
+          player {
+            player_email
+          }
         }
       }
-    }
-    team2 {
-      team_name
-      team_image
-      players {
-        player {
-          player_email
+      team2 {
+        team_name
+        team_image
+        players {
+          player {
+            player_email
+          }
         }
       }
     }
   }
-}
-
-`
+`;
 const GET_SPORTS = gql`
   query GetSports {
     sports {
@@ -126,36 +151,36 @@ const GET_SPORTS = gql`
 export default HomeScreen = ({ navigation }) => {
   const ongoingtournamentData = useSelector(
     (state) => state.tournament.ongoingdata
-  )
+  );
   const upcomingtournamentData = useSelector(
     (state) => state.tournament.upcomingdata
-  )
-  const location = useSelector((state) => state.generalData.location)
-  const dispatch = useDispatch()
-  const userData = useUserData()
+  );
+  const location = useSelector((state) => state.generalData.location);
+  const dispatch = useDispatch();
+  const userData = useUserData();
 
-  const [selectedSportsId, setSelectedSportsId] = useState(null)
+  const [selectedSportsId, setSelectedSportsId] = useState(null);
 
-  const [locationLoading, setLocationLoading] = useState(false)
-  const [errorMsg, setErrorMsg] = useState(null)
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   const [getTournaments, { loading, data, error }] = useLazyQuery(
     GET_TOURNAMENT,
     {
       notifyOnNetworkStatusChange: true,
       onCompleted: (data) => {
-        const now = dayjs().format("YYYY-MM-D")        
+        const now = dayjs().format("YYYY-MM-D");
         const OnGoingTournament = data.tournaments.filter(
           (tournament) => dayjs(now).diff(tournament.start_date) >= 0
-        )
+        );
         const UpComingTournament = data.tournaments.filter(
           (tournament) => dayjs(now).diff(tournament.start_date) < 0
-        )
-        dispatch(setongoingTournament(OnGoingTournament))
-        dispatch(setupcomingTournament(UpComingTournament))
+        );
+        dispatch(setongoingTournament(OnGoingTournament));
+        dispatch(setupcomingTournament(UpComingTournament));
       },
       onError: (e) => {
-        console.log(e)
+        console.log(e);
       },
     }
   );
@@ -165,12 +190,11 @@ export default HomeScreen = ({ navigation }) => {
     { loading: matchesloading, data: matchdata, error: matcherror },
   ] = useLazyQuery(GET_MATCHES, {
     notifyOnNetworkStatusChange: true,
-    onCompleted: (data) => {
-    },
+    onCompleted: (data) => {},
     onError: (e) => {
-      console.log(e)
+      console.log(e);
     },
-  })
+  });
 
   const [
     getSports,
@@ -186,20 +210,20 @@ export default HomeScreen = ({ navigation }) => {
           variables: {
             sport_id: id,
           },
-        })
+        });
       }
     },
     onError: (e) => {
-      console.log(e, "error")
+      console.log(e, "error");
     },
-  })
+  });
 
-  const { isAuthenticated, isLoading } = useAuthenticationStatus()
-  const userName = useUserDisplayName() ?? ""
-  const userEmail = useUserEmail()
-  const { colors } = useTheme()
-  const [logOutLoading, setLogOutLoading] = useState(false)
-  const { signOut } = useSignOut()
+  const { isAuthenticated, isLoading } = useAuthenticationStatus();
+  const userName = useUserDisplayName() ?? "";
+  const userEmail = useUserEmail();
+  const { colors } = useTheme();
+  const [logOutLoading, setLogOutLoading] = useState(false);
+  const { signOut } = useSignOut();
   const logOut = async () => {
     try {
       setLogOutLoading(true);
@@ -224,21 +248,21 @@ export default HomeScreen = ({ navigation }) => {
     let loc = await Location.reverseGeocodeAsync({
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
-    })
-    dispatch(setLocation(loc[0]))
-    setLocationLoading(false)
-  }
+    });
+    dispatch(setLocation(loc[0]));
+    setLocationLoading(false);
+  };
   // useFocusEffect(
   useEffect(() => {
     if (userEmail) {
-      getSports()
+      getSports();
       getMatches({
         variables: {
           player_email: "abdullah.s@techinoviq.com",
         },
-      })
+      });
       if (!location) {
-        getLocation()
+        getLocation();
       }
     }
   }, []);
@@ -288,8 +312,8 @@ export default HomeScreen = ({ navigation }) => {
     const userData = useUserData();
     return (
       <>
-      <HStack alignItems="center" justifyContent={"space-between"} mb={2}>
-        {/* <Box flex={1}>
+        <HStack alignItems="center" justifyContent={"space-between"} mb={2}>
+          {/* <Box flex={1}>
           <HStack direction="column" mb={1}>
           <Text color="black" fontSize={"2xl"}>
           {`Hello, ${userName}`}
@@ -300,35 +324,36 @@ export default HomeScreen = ({ navigation }) => {
           </HStack>
           </Box> 
         <Button onPress={() => logOut()}>Logout</Button> */}
-        <Image
-          size={30}
-          borderRadius={100}
-          source={{
-            uri: userData?.avatarUrl,
-          }}
-          alt="Alternate Text"/>
-        <HStack alignItems={"flex-end"} space={1}>
-          <Ionicons name="location-outline" size={24} color="black" />
-          {locationLoading ? (
-            <LocationLoading />
-          ) : errorMsg ? (
-            <Text color="black">{errorMsg}</Text>
+          <Image
+            size={30}
+            borderRadius={100}
+            source={{
+              uri: userData?.avatarUrl,
+            }}
+            alt="Alternate Text"
+          />
+          <HStack alignItems={"flex-end"} space={1}>
+            <Ionicons name="location-outline" size={24} color="black" />
+            {locationLoading ? (
+              <LocationLoading />
+            ) : errorMsg ? (
+              <Text color="black">{errorMsg}</Text>
             ) : (
               <Text color="black" bold>
-              {location?.country}, {location?.subregion}, {location?.region}
-            </Text>
-          )}
-        </HStack>
-        <Ionicons
-          name="menu"
-          p={6}
-          size={24}
-          color="black"
-          onPress={() => navigation.openDrawer()}
+                {location?.country}, {location?.subregion}, {location?.region}
+              </Text>
+            )}
+          </HStack>
+          <Ionicons
+            name="menu"
+            p={6}
+            size={24}
+            color="black"
+            onPress={() => navigation.openDrawer()}
           />
-      </HStack>
-      <Divider my="2" />
-        </>
+        </HStack>
+        <Divider my="2" />
+      </>
     );
   };
 
@@ -369,33 +394,66 @@ export default HomeScreen = ({ navigation }) => {
           </Box>
         </ImageBackground>
       </HStack>
-    )
-  }
+    );
+  };
 
   const Matches = ({ item }) => {
     return (
-        <Box bg={"gray.50"} p={4} borderRadius="lg" w={360} flex={"1"} borderWidth={"1"}  borderLeftWidth={"3"} borderLeftColor={"blue.500"} borderRightWidth={"3"} borderRightColor={"orange.500"} borderBottomColor={"gray.300"} borderTopColor={"gray.300"}>
-          <HStack mb={2} alignItems={"center"} flex={"1"}>
-            <HStack alignItems={"center"} justifyContent={"flex-start"} flex={"1"}>
-            <Image source={{uri: item?.team1?.team_image}} alt="team1" size="sm" borderRadius={100} />
+      <Box
+        bg={"gray.50"}
+        p={4}
+        borderRadius="lg"
+        w={360}
+        flex={"1"}
+        borderWidth={"1"}
+        borderLeftWidth={"3"}
+        borderLeftColor={"blue.500"}
+        borderRightWidth={"3"}
+        borderRightColor={"orange.500"}
+        borderBottomColor={"gray.300"}
+        borderTopColor={"gray.300"}
+      >
+        <HStack mb={2} alignItems={"center"} flex={"1"}>
+          <HStack
+            alignItems={"center"}
+            justifyContent={"flex-start"}
+            flex={"1"}
+          >
+            <Image
+              source={{ uri: item?.team1?.team_image }}
+              alt="team1"
+              size="sm"
+              borderRadius={100}
+            />
             <Text fontSize={"lg"} fontWeight={"black"} ml={2} color="blue.500">
               {item?.team1.team_name}
             </Text>
-            </HStack>
-            <Text fontSize={"xl"} bold mx={2}>
-              V/S
-            </Text>
-            <HStack alignItems={"center"} justifyContent={"flex-end"} flex={"1"}>
-            <Text fontSize={"lg"} fontWeight={"black"} mr={2} color={"orange.500"}>
-            {item?.team2.team_name}
-            </Text>
-            <Image source={{uri: item?.team2?.team_image}} alt="team2" size="sm" borderRadius={100} />
-            </HStack>
           </HStack>
-          <Text textAlign={"center"} my={2} bold fontSize={"lg"}>{item?.tournament?.tournament_name}</Text>
-          <VStack flex={"1"} alignItems={"center"} space={1}>
+          <Text fontSize={"xl"} bold mx={2}>
+            V/S
+          </Text>
+          <HStack alignItems={"center"} justifyContent={"flex-end"} flex={"1"}>
+            <Text
+              fontSize={"lg"}
+              fontWeight={"black"}
+              mr={2}
+              color={"orange.500"}
+            >
+              {item?.team2.team_name}
+            </Text>
+            <Image
+              source={{ uri: item?.team2?.team_image }}
+              alt="team2"
+              size="sm"
+              borderRadius={100}
+            />
+          </HStack>
+        </HStack>
+        <Text textAlign={"center"} my={2} bold fontSize={"lg"}>
+          {item?.tournament?.tournament_name}
+        </Text>
+        <VStack flex={"1"} alignItems={"center"} space={1}>
           <HStack space={2} alignItems="center" mb={2}>
-            
             <AntDesign name="calendar" size={18} />
             <Text>
               {dayjs(item?.match_date).format("DD MMM YYYY") || "N/A"}
@@ -405,10 +463,10 @@ export default HomeScreen = ({ navigation }) => {
             <Ionicons name="location-outline" size={18} color="black" />
             <Text>{item?.match_venue || "N/A"}</Text>
           </HStack>
-          </VStack>
-        </Box>
-    )
-  }
+        </VStack>
+      </Box>
+    );
+  };
 
   return (
     <ScrollView>
@@ -455,7 +513,7 @@ export default HomeScreen = ({ navigation }) => {
                             variables: {
                               sport_id: item.id,
                             },
-                          })
+                          });
                       }}
                     >
                       <Image
@@ -499,7 +557,9 @@ export default HomeScreen = ({ navigation }) => {
                   <Text fontSize={"2xl"} bold>
                     My Matches
                   </Text>
-                  <Pressable onPress={() => navigate("OngoingTournamentsScreen")}>
+                  <Pressable
+                    onPress={() => navigate("OngoingTournamentsScreen")}
+                  >
                     <HStack>
                       <Text color="blue.500" bold>
                         See All
@@ -552,7 +612,9 @@ export default HomeScreen = ({ navigation }) => {
                   <Text fontSize={"2xl"} bold>
                     Ongoing tournaments
                   </Text>
-                  <Pressable onPress={() => navigate("OngoingTournamentsScreen")}>
+                  <Pressable
+                    onPress={() => navigate("OngoingTournamentsScreen")}
+                  >
                     <HStack>
                       <Text color="blue.500" bold>
                         See All
@@ -605,7 +667,9 @@ export default HomeScreen = ({ navigation }) => {
                   <Text fontSize={"2xl"} bold>
                     Upcoming tournaments
                   </Text>
-                  <Pressable onPress={() => navigate("OngoingTournamentsScreen")}>
+                  <Pressable
+                    onPress={() => navigate("OngoingTournamentsScreen")}
+                  >
                     <HStack>
                       <Text color="blue.500" bold>
                         See All
