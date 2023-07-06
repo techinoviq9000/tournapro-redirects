@@ -76,7 +76,7 @@ const TournamentOverviewScreen = () => {
           )}
         </Box>
 
-        <Box flex="1" justifyContent={"flex-end"} marginTop="7">
+        <Box flex="1" justifyContent={"flex-end"} marginTop="0">
           {userRole == "organizer" && (
             <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>Tournament Rules</Button>
           )}
@@ -96,7 +96,7 @@ const TournamentOverviewScreen = () => {
 
         <Box flex="1" justifyContent={"flex-end"} marginTop="7">
           {userRole == "organizer" && (
-            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>View Registered Team</Button>
+            <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("ViewRegisteredTeamsScreen")}>View Registered Team</Button>
           )}
         </Box>
 
@@ -123,7 +123,7 @@ const TournamentOverviewScreen = () => {
             <Button height="50px" colorScheme={"blue"} onPress={() => navigationRef.navigate("TournamentRegistrationScreen")}>Pending Tournaments</Button>
           )}
         </Box>
-
+        <Stack marginBottom="100px"/>
       </Box>
     </ScrollView>
   )

@@ -8,13 +8,14 @@ import TournamentOverviewScreen from "./Tournaments/TournamentOverviewScreen"
 import TournamentRegistrationScreen from "./Tournaments/TournamentRegistrationScreen"
 import ViewUserProfileScreen from "./UserProfile/ViewUserProfileScreen"
 import EditProfile from "./UserProfile/EditProfile"
-import ViewRegisteredTeamsScreen from "./UserProfile/ViewRegisteredTeamsScreen"
+import ViewRegisteredTeamsScreen from "./Tournaments/ViewRegisteredTeamsScreen"
 import RegisterUserForTeamScreen from "./Tournaments/RegisterUserForTeamScreen"
 import OngoingTournamentsScreen from "./Home/OngoingTournaments";
 import UpcomingTournamentsScreen from "./Home/UpcomingTournaments";
 import CreateTournamentScreen from "./Tournaments/CreateTournamentScreen";
 import TournamentDates from "./Tournaments/TournamentDates";
 import LogoPoster from "./Tournaments/LogoPoster";
+import PlayerScreen from "./Tournaments/PlayerScreen"
 
 export const homeScreens = [
   {
@@ -134,6 +135,15 @@ export const tournamentSreen = [
   {
     name: "UpcomingTournamentsScreen",
     component: UpcomingTournamentsScreen ,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false,
+    },
+  },
+  {
+    name: "PlayerScreen",
+    component: PlayerScreen ,
     options: {
       headerShown: false,
       gestureEnabled: false,

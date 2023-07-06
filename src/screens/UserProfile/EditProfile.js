@@ -17,38 +17,31 @@ import {
   Avatar,
 } from "native-base";
 import React, { useState } from "react";
-import { SafeAreaView, StyleSheet, View, Alert } from "react-native";
+import { SafeAreaView, StyleSheet, View, Alert, Platform } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { TextInput } from "react-native-gesture-handler";
 
 const EditProfile = () => {
-
   const userData = useUserData();
-  const[dateofbirth, setDateOfBirth]=useState("")
+  const [dateofbirth, setDateOfBirth] = useState("");
   const [date, setDate] = useState(new Date());
-  const [showPicker, setShowPicker] = useState
-  (false);
+  const [showPicker, setShowPicker] = useState(false);
+  const [country, setCountry] = useState("");
+  const toggleDatePicker = () => {
+    setShowPicker(!showPicker);
+  };
 
-    const toggleDatePicker = () => {
-      setShowPicker(!showPicker);
-    };
-
-    const onChange = ({type}, selectedDate) => {
-
-      if(type == "set")
-      {
-        const currentDate = selectedDate;
-        setDate(currentDate);
-      }
-
-      else
-      {
+  const onChange = ({ type }, selectedDate) => {
+    if (type == "set") {
+      if (Platform.OS == "android") {
         toggleDatePicker();
+        setDateOfBirth(selectedDate.toDateString());
       }
-    };
-
-
+    } else {
+      toggleDatePicker();
+    }
+  };
 
   // const [mode, setMode] = useState("date");
   // const [show, setShow] = useState(false);
@@ -67,6 +60,16 @@ const EditProfile = () => {
   //   setMode(currentMode);
   // };
 
+  const countryRegion = [
+    { label: "Dubai East", value: "Dubai East" },
+    { label: "Dubai Central", value: "Dubai Central" },
+    { label: "Dubai West", value: "Dubai West" },
+    { label: "Dubai South", value: "Dubai South" },
+    { label: "Dubai North", value: "Dubai North" },
+  ];
+const handleCountryPressed = (itemId) => {
+  setCountry(itemId)
+}
   const openAlert = () => {
     Alert.alert(
       "Profile Picture",
@@ -114,6 +117,9 @@ const EditProfile = () => {
                 <Icon display="flex" name="camera" size={15} color="white" />
               </Avatar.Badge>
             </Avatar>
+            <Stack display="flex" alignItems="center" marginTop="20px">
+            <Text fontSize="20px" fontWeight="bold">{userData?.displayName}</Text>
+            </Stack>
           </Box>
         </Pressable>
         <Box padding="30px">
@@ -127,59 +133,56 @@ const EditProfile = () => {
           </Text>
           <Input mx="0" placeholder="" w="100%" />
 
-          <Text fontSize="20px" fontWeight="bold" marginTop="20px">
+          {/* <Text fontSize="20px" fontWeight="bold" marginTop="20px">
             Password
           </Text>
-          <Input mx="0" placeholder="" w="100%" type="password" />
-          
-          <Text fontSize="20px" fontWeight="bold" marginTop="20px">Date of Birth</Text>
-            {/* {!showPicker && (<DateTimePicker mode="date" display="spinner" value={date}/>)}
-            <Input mx="0" placeholder="Aug 21 2004" w="100%" /> */}
-            
-            {showPicker && (
-            <DateTimePicker
-             mode="date"
-             display="spinner"
-             value={date}
-             onChange={onChange}
-            />
-         )}
-         {!showPicker && (
-            <Pressable onPress={toggleDatePicker}>
-              <Input placeholder="select date of birth"
-              value={dateofbirth}
-              
-              placeholderTextColor="#11182744">
-                
-              </Input>
-            </Pressable>)}
+          <Input mx="0" placeholder="" w="100%" type="password" /> */}
 
-          <FormControl marginTop="20px" w="3/4" maxW="300" isRequired isInvalid>
-            <FormControl.Label>
-              <Text fontSize="20px" fontWeight="bold">
+          <Text fontSize="20px" fontWeight="bold" marginTop="20px">
+            Date of Birth
+          </Text>
+          {/* {!showPicker && (<DateTimePicker mode="date" display="spinner" value={date}/>)}
+            <Input mx="0" placeholder="Aug 21 2004" w="100%" /> */}
+
+          {showPicker && (
+            <DateTimePicker
+              mode="date"
+              display="spinner"
+              value={date}
+              onChange={onChange}
+            />
+          )}
+
+          <Pressable onPress={toggleDatePicker} marginBottom={"20px"}>
+            <Input
+              placeholder="select date of birth"
+              value={dateofbirth}
+              editable={false}
+              placeholderTextColor="#11182744"
+            ></Input>
+          </Pressable>
+
+          <Text fontSize="20px" fontWeight="bold">
                 Country/Region
               </Text>
-            </FormControl.Label>
             <Select
-              minWidth="323"
+              minWidth="full"
               accessibilityLabel="Choose Location"
+              selectedValue={country}
+              onValueChange={(itemId) => handleCountryPressed(itemId)}
               placeholder="Choose Location"
+              
               _selectedItem={{
                 bg: "teal.600",
                 endIcon: <CheckIcon size={5} />,
               }}
               mt="1"
             >
-              <Select.Item label="Dubai East" value="Dubai East" />
-              <Select.Item label="Dubai Central" value="Dubai Central" />
-              <Select.Item label="Dubai West" value="Dubai West" />
-              <Select.Item label="Dubai South" value="Dubai South" />
-              <Select.Item label="Dubai North" value="Dubai North" />
+             {countryRegion.map((item, index) => (
+              <Select.Item value={item.value} label={item.label} key={index} /> 
+             ))}
             </Select>
-            {/* <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-          Please make a selection!
-        </FormControl.ErrorMessage> */}
-          </FormControl>
+
           <Box alignItems="center" marginTop="20px">
             <Button onPress={() => alert("Changes Saved")}>Save Changes</Button>
           </Box>

@@ -1,6 +1,6 @@
 import { useUserData, useUserDefaultRole } from "@nhost/react";
 import { Ionicons } from "@expo/vector-icons";
-import { Box, Button, HStack, ScrollView, Stack, Text, Image} from "native-base";
+import { Box, Button, HStack, ScrollView, Stack, Text, Image, Pressable} from "native-base";
 import React from "react";
 import { useSelector } from "react-redux";
 import { navigationRef } from "../../../rootNavigation";
@@ -14,6 +14,8 @@ query RegTeams($where: team_tournaments_bool_exp!) {
       id
       team_name
       team_image
+      status
+      reason
     }
     player_captain {
       player_name
@@ -54,28 +56,32 @@ const ViewRegisteredTeamsScreen = () => {
   const Regteams = ({ item }) => {
     console.log(item);
     return (
-      <HStack marginTop="30px">
+      <Pressable onPress={() => navigationRef.navigate("PlayerScreen", {
+        team: item?.team_tournaments_team
+      })}>
+
+      <HStack marginTop="30px" borderRadius="md" borderWidth="2" padding="20px" alignItems="center">
+        <Box>
       <Box display="flex" 
-      alignItems="center" 
       flexDirection="row"
-      padding="20px" 
-      borderRadius="md" 
-      marginTop="20px" 
-      borderWidth="2"  
       justifyContent="space-between"
       borderLeftColor="red" 
       width="300px" 
-      height="90px">
-        <Image display="flex" borderRadius="10px" source={{
-      uri: item?.team_tournaments_team?.team_image
+      height="50px">
+        <Image display="flex" flexDirection="row" borderRadius="10px" source={{
+          uri: item?.team_tournaments_team?.team_image
     }} alt="Alternate Text" size="xs"/>
         <Box marginRight="50px">
-        <Text fontSize="lg" fontWeight="bold">{item?.team_tournaments_team?.team_name}</Text>
+        <Text fontSize="lg" display="flex" flexDirection="row" fontWeight="bold">{item?.team_tournaments_team?.team_name}</Text>
         </Box>
-        <MaterialIcons name="navigate-next" size={24} color="black"/>
-        <Text>{item?.player_captain?.player_name}</Text>
+        <MaterialIcons display="flex" flexDirection="row" name="navigate-next" size={24} color="black"/>
+      </Box>
+      <Stack display="flex" alignItems="center">
+      <Text>Captain: {item?.player_captain?.player_name}</Text>
+      </Stack>
       </Box>
       </HStack>
+          </Pressable>
     );
   };
 
@@ -91,7 +97,7 @@ const ViewRegisteredTeamsScreen = () => {
       </Box>
       <Box padding="20px" display="flex" alignItems="center">
         <Text fontSize="30px" fontWeight="bold">
-          Cricket Primier League
+          Tournament
         </Text>
         <Text marginTop="10px">List of Registered Teams</Text>
         {loading ? (
@@ -102,6 +108,7 @@ const ViewRegisteredTeamsScreen = () => {
           <Text>NoData</Text>
         )}
       </Box>
+      
     </Box>
   );
 };
