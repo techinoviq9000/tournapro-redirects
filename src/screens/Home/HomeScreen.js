@@ -48,9 +48,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoaderModal from "../../components/LoaderModal";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  setTournament,
-  setongoingTournament,
-  setupcomingTournament,
+  setOnGoingTournamentData,
+  setUpComingTournamentData,
 } from "../../../store/tournamentSlice";
 import { setLocation } from "../../../store/dataSlice";
 import { StatusBar } from "expo-status-bar";
@@ -151,11 +150,11 @@ const GET_SPORTS = gql`
 
 export default HomeScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
-  const ongoingtournamentData = useSelector(
-    (state) => state.tournament.ongoingdata
+  const onGoingTournamentData = useSelector(
+    (state) => state.tournament.onGoingTournamentData
   );
-  const upcomingtournamentData = useSelector(
-    (state) => state.tournament.upcomingdata
+  const upComingTournamentData = useSelector(
+    (state) => state.tournament.upComingTournamentData
   );
   const location = useSelector((state) => state.generalData.location);
   const dispatch = useDispatch();
@@ -183,14 +182,14 @@ export default HomeScreen = ({ navigation }) => {
       onCompleted: (data) => {
         console.log(data)
         const now = dayjs().format("YYYY-MM-D");
-        const OnGoingTournament = data.tournaments.filter(
+        const OnGoingTournamentData = data.tournaments.filter(
           (tournament) => dayjs(now).diff(tournament.start_date) >= 0
         );
-        const UpComingTournament = data.tournaments.filter(
+        const UpComingTournamentData = data.tournaments.filter(
           (tournament) => dayjs(now).diff(tournament.start_date) < 0
         );
-        dispatch(setongoingTournament(OnGoingTournament));
-        dispatch(setupcomingTournament(UpComingTournament));
+        dispatch(setOnGoingTournamentData(OnGoingTournamentData));
+        dispatch(setUpComingTournamentData(UpComingTournamentData));
       },
       onError: (e) => {
         console.log(e);
@@ -607,7 +606,7 @@ export default HomeScreen = ({ navigation }) => {
         <Box>
           {loading || sportsLoading ? (
             <OngGoingDataLoadingSkeleton />
-          ) : ongoingtournamentData?.length >= 1 ? (
+          ) : onGoingTournamentData?.length >= 1 ? (
             <>
               <VStack>
                 <HStack
@@ -642,7 +641,7 @@ export default HomeScreen = ({ navigation }) => {
                     padding: "2",
                     paddingX: "5",
                   }}
-                  data={ongoingtournamentData}
+                  data={onGoingTournamentData}
                   horizontal
                   keyExtractor={(item, index) => `${item.id}-${index}`}
                   renderItem={({ item }) => <OnGoingTournament item={item} />}
@@ -662,7 +661,7 @@ export default HomeScreen = ({ navigation }) => {
         <Box mb={10}>
           {loading || sportsLoading ? (
             <UpComingDataLoadingSkeleton />
-          ) : upcomingtournamentData?.length >= 1 ? (
+          ) : upComingTournamentData?.length >= 1 ? (
             <>
               <VStack>
                 <HStack
@@ -697,7 +696,7 @@ export default HomeScreen = ({ navigation }) => {
                     padding: "2",
                     paddingX: "5",
                   }}
-                  data={upcomingtournamentData}
+                  data={upComingTournamentData}
                   horizontal
                   keyExtractor={(item, index) => `${item.id}-${index}`}
                   renderItem={({ item }) => <UpComingTournament item={item} />}
@@ -714,7 +713,7 @@ export default HomeScreen = ({ navigation }) => {
           )}
         </Box>
 
-        <LoaderModal isLoading={logOutLoading || isLoading || loading || matchesloading} />
+        <LoaderModal isLoading={logOutLoading || loading || matchesloading || sportsLoading} />
       </Box>
       <StatusBar style="dark" translucent={false} />
       {/*       

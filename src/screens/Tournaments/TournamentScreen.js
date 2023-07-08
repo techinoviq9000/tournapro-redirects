@@ -12,34 +12,95 @@ import { Ionicons } from "@expo/vector-icons";
 import { navigate, navigationRef } from "../../../rootNavigation";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  setOnGoingTournamentData,
   setTournamentDetails,
-  setongoingTournamentDetails,
+  setUpComingTournamentData,
 } from "../../../store/tournamentSlice";
 
-import * as React from "react";
-import { View } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NativeScreenNavigationContainer } from "react-native-screens";
+import { RefreshControl } from "react-native";
+import { gql, useLazyQuery } from "@apollo/client";
+import { useCallback, useState } from "react";
+import LoaderModal from "../../components/LoaderModal";
+import dayjs from "dayjs";
+
+const GET_TOURNAMENT = gql`
+  query GetOngoingTournaments($sport_id: Int!) {
+    tournaments(
+      where: {
+        sport_id: { _eq: $sport_id }
+        end_date: { _gte: "now()" }
+        status: { _eq: true }
+      }
+      order_by: { start_date: desc }
+    ) {
+      id
+      sport_id
+      tournament_name
+      tournament_img
+      banner_img
+      time
+      venue
+      start_date
+      end_date
+      status
+    }
+  }
+`;
+
 
 const TournamentScreen = ({ route }) => {
-  const tournamentData = useSelector((state) => state.tournament.data);
-  const ongoingtournamentData = useSelector(
-    (state) => state.tournament.ongoingdata
+  const onGoingTournamentData = useSelector(
+    (state) => state.tournament.onGoingTournamentData
   );
-  const upcomingtournamentData = useSelector(
-    (state) => state.tournament.upcomingdata
+  const upComingTournamentData = useSelector(
+    (state) => state.tournament.upComingTournamentData
   );
   const { colors } = useTheme();
+  const [refreshing, setRefreshing] = useState(false)
   const dispatch = useDispatch();
   const handlePress = async (item) => {
     await dispatch(setTournamentDetails(item));
     navigationRef.navigate("TournamentOverviewScreen");
   };
 
+  const [getTournaments, { loading, data, error }] = useLazyQuery(
+    GET_TOURNAMENT,
+    {
+      notifyOnNetworkStatusChange: true,
+      nextFetchPolicy: "network-only",
+      fetchPolicy: "network-only",
+      variables: {
+        sport_id: onGoingTournamentData[0].sport_id,
+      },
+      onCompleted: (data) => {
+        console.log(data)
+        const now = dayjs().format("YYYY-MM-D");
+        const OnGoingTournamentData = data.tournaments.filter(
+          (tournament) => dayjs(now).diff(tournament.start_date) >= 0
+        );
+        const UpComingTournamentData = data.tournaments.filter(
+          (tournament) => dayjs(now).diff(tournament.start_date) < 0
+        );
+        dispatch(setOnGoingTournamentData(OnGoingTournamentData));
+        dispatch(setUpComingTournamentData(UpComingTournamentData));
+        setRefreshing(false)
+      },
+      onError: (e) => {
+        setRefreshing(false)
+        console.log(e);
+      },
+    }
+  );
+
+  const onRefresh = useCallback(() => {
+    
+    getTournaments()
+  }, [])
+
   return (
-    <ScrollView keyboardDismissMode="interactive">
+    <ScrollView       refreshControl={
+      <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+    }>
       <Box bg={"white"} minH="full" flex={1} safeArea p={5} pt={2}>
         <Box w="full" display={"flex"} justifyItems={"center"}>
           <Ionicons
@@ -56,7 +117,7 @@ const TournamentScreen = ({ route }) => {
           <Text>List of Ongoing Tournaments</Text>
         </Box>
 
-        {ongoingtournamentData?.map((item, index) => (
+        {onGoingTournamentData?.map((item, index) => (
           <Pressable onPress={() => handlePress(item)} key={item.id}>
             {({ isHovered, isFocused, isPressed }) => {
               return (
@@ -105,7 +166,7 @@ const TournamentScreen = ({ route }) => {
           </Text>
           <Text>List of Upcoming Tournaments</Text>
         </Box>
-        {upcomingtournamentData?.map((item, index) => (
+        {upComingTournamentData?.map((item, index) => (
           <Pressable onPress={() => handlePress(item)} key={item.id}>
             {({ isHovered, isFocused, isPressed }) => {
               return (
@@ -159,6 +220,7 @@ const TournamentScreen = ({ route }) => {
           Create New Tournamnet
         </Button>
       </Box>
+      <LoaderModal isLoading={loading} />
     </ScrollView>
   );
 };

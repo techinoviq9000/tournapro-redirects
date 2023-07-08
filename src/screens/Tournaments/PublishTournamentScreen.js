@@ -39,7 +39,7 @@ const PublishTournamentScreen = ({ route }) => {
             }
           })
           setTimeout(() => {
-            navigationRef.navigate("HomeScreen")
+            navigationRef.goBack()
           }, 1000);
         } else {
           toast.show({
@@ -52,7 +52,7 @@ const PublishTournamentScreen = ({ route }) => {
             }
           })
           setTimeout(() => {
-            navigationRef.navigate("HomeScreen")
+            navigationRef.goBack()
           }, 1000);
         }
         console.log(data)
