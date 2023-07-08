@@ -5,7 +5,7 @@ import SelectRoleScreen from "./Auth/SelectRoleScreen"
 import TournamentScreen from "./Tournaments/TournamentScreen"
 import SplashScreen from "./SplashScreen"
 import TournamentOverviewScreen from "./Tournaments/TournamentOverviewScreen"
-import TournamentRegistrationScreen from "./Teams/TeamRegistration"
+import TeamRegistrationScreen from "./Teams/TeamRegistrationScreen"
 import ViewUserProfileScreen from "./UserProfile/ViewUserProfileScreen"
 import EditProfile from "./UserProfile/EditProfile"
 import ViewRegisteredTeamsScreen from "./Teams/ViewRegisteredTeamsScreen"
@@ -14,13 +14,13 @@ import OngoingTournamentsScreen from "./Home/OngoingTournaments";
 import UpcomingTournamentsScreen from "./Home/UpcomingTournaments";
 import CreateTournamentScreen from "./Tournaments/CreateTournamentScreen";
 import TournamentDates from "./Tournaments/TournamentDates";
-import LogoPoster from "./Tournaments/LogoPoster";
 import PlayerScreen from "./Tournaments/PlayerScreen"
 import MyTournaments from "./UserProfile/MyTournaments";
 import MyTeamsScreen from "./UserProfile/MyTeamsScreen"
 import ViewMyTeamsToRegisterScreen from "./Teams/ViewMyTeamsToRegisterScreen"
 import TeamRegistrationAddUsersScreen from "./Teams/TeamRegistrationAddUsersScreen"
 import PublishTournamentScreen from "./Tournaments/PublishTournamentScreen"
+import TournamentRegistrationScreen from "./Tournaments/TournamentRegistrationScreen"
 
 export const homeScreens = [
   {
@@ -92,8 +92,8 @@ export const tournamentSreen = [
     },
   },
   {
-    name: "TournamentRegistrationScreen",
-    component: TournamentRegistrationScreen,
+    name: "TeamRegistrationScreen",
+    component: TeamRegistrationScreen,
     options: {
       headerShown: false,
       gestureEnabled: false,
@@ -164,8 +164,8 @@ export const tournamentSreen = [
     },
   },
   {
-    name: "LogoPoster",
-    component: LogoPoster,
+    name: "TournamentRegistrationScreen",
+    component: TournamentRegistrationScreen,
     options: {
       headerShown: false,
       gestureEnabled: false,

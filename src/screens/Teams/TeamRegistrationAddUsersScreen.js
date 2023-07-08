@@ -1,4 +1,4 @@
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql, useLazyQuery, useMutation } from "@apollo/client";
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
 import {
@@ -49,16 +49,32 @@ query findUser($player_email: citext!) {
 }
 `
 
+const ADD_PLAYERS_TO_TEAM = gql`
+mutation addPlayersToTeam($objects: [player_teams_insert_input!]!) {
+  insert_player_teams(objects: $objects) {
+    affected_rows
+  }
+}
+`
 
-const TeamRegistrationAddUsersScreen = ({route}) => {
-  const id = route?.params?.team.id
-  console.log(route?.params?.team.id)
+
+const TeamRegistrationAddUsersScreen = ({route, navigation}) => {
+  const sportId = useSelector(
+    (state) => state.sport.sportId
+  );
+  const id = route?.params?.team.id  
   const dispatch = useDispatch()
-  const { colors } = useTheme()
-  const [service, setService] = useState("")
   const [players, setPlayers] = useState(null)
   const [findUserLoading, setFindUserLoading] = useState(false)
   const [errors, setErrors] = useState([])
+  const [addPlayersToTeam, {loading: playerAddLoading}] = useMutation(ADD_PLAYERS_TO_TEAM, {
+    onCompleted: data => {
+      console.log(data)
+      navigation.navigate("Profile", {screen: 
+        "MyTeamsScreen"
+      })
+    }
+  })
   const [findUser] = useLazyQuery(FIND_USER, {
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "network-only",
@@ -74,6 +90,7 @@ const TeamRegistrationAddUsersScreen = ({route}) => {
     GET_PLAYERS,
     {
       onCompleted: (data) => {
+        console.log(data)
         setPlayers(
           data.player_teams.map((item) => {
             return {
@@ -158,16 +175,25 @@ const TeamRegistrationAddUsersScreen = ({route}) => {
     navigationRef.navigate("RegisterUserForTeamScreen")
   }
 
+  console.log(players)
   const handleSubmit = async () => {
     for (let index = 0; index < players.length; index++) {
       const player = players[index];
       if (player.player_email == "") {
         setErrors([...errors, {id: player.id, error: "Invalid Email"}])
       }
-      if (player?.player_email != "" && player?.found == undefined) {
+      if (player?.player_email != "") {
         await handleFindPlayer(player, index)
       }
       
+    }
+    if(players.every(item => item.found)) {
+      const objects = players.map(item => {return {player_email: item.player_email, team_id: id, sport_id: sportId}})
+      addPlayersToTeam({
+        variables: {
+          objects
+        }
+      })
     }
   }
   useEffect(() => {
@@ -280,7 +306,10 @@ const TeamRegistrationAddUsersScreen = ({route}) => {
   return (
     <ScrollView>
       <Box bg={"white"} flex={1} safeArea p={5} pt={2}>
-        <GoBack />
+      <GoBack customOnPress={() => navigation.reset({
+              index: 0,
+              routes: [{name: 'SelectOrViewTournamentScreen'}],
+            })} />
         <Box mb={4}>
           <Text fontSize={"3xl"} bold>
             Register Your Team

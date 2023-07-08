@@ -28,12 +28,20 @@ import LoaderModal from "../../components/LoaderModal"
 import { nhost } from "../../../nhostClient"
 
 const GET_TEAMS = gql`
-query getTeams {
-  teams {
+query getTeams($team_manager: citext!) {
+  teams(where: {team_manager: {_eq: $team_manager}}) {
     id
     team_name
   }
+}`
+
+const GET_REGISTERED_TEAM = gql`
+query getAlreadyRegistedTeam($team_id: Int!) {
+  team_tournaments(where: {team_tournaments_team: {id: {_eq: $team_id}}}) {
+    id
+  }
 }
+
 `
 
 const CREATE_TEAM = gql`
@@ -52,31 +60,22 @@ insert_team_tournaments_one(object: {team_id: $team_id, tournament_id: $tourname
 }
 `
 
-const TournamentRegistrationScreen = () => {
+const TeamRegistrationScreen = () => {
   const {
-    add,
     upload,
-    cancel,
-    isUploaded,
-    isUploading,
-    isError,
-    progress,
-    id,
-    bucketId,
-    name,
   } = useFileUpload();
   const tournamentDetails = useSelector(
     (state) => state.tournament.tournamentDetails
   );
-  console.log(tournamentDetails.id)
   const userEmail = useUserEmail();
   const [image, setImage] = useState(null);
   const [service, setService] = useState("")
   const [loading, setLoading] = useState(false);
-  const [findUserLoading, setFindUserLoading] = useState(false)
-  const [errors, setErrors] = useState([])
+  const [errors, setError] = useState("")
+  const [errorImage, setImageError] = useState("")
   const [teamName, setTeamName] = useState("")
   const [getTeams, { loading: teamLoading, data, error }] = useLazyQuery(GET_TEAMS)
+  const [getRegisteredTeam, { loading: registeredTeamLoading }] = useLazyQuery(GET_REGISTERED_TEAM)
   const [insertIntoTournament, { loading: insertIntoTournamentLoading }] = useMutation(INSERT_TO_TOURNAMENT, {
     onCompleted: data => {
       console.log(data)
@@ -118,7 +117,17 @@ const TournamentRegistrationScreen = () => {
 
   const handleTeamPressed = async (id) => {
     setTeamName("");
-    setService(id)
+    const res = await getRegisteredTeam({
+      variables: {
+        team_id: id
+      }
+    })
+    console.log(res.data.team_tournaments.length)
+    if (res.data.team_tournaments.length > 0) {
+      setError("Team Already Registered")
+    } else {
+      setService(id)
+    }
   }
   const handleTeamNameChange = (text) => {
     setTeamName(text)
@@ -126,31 +135,40 @@ const TournamentRegistrationScreen = () => {
   }
 
   const handleSubmit = async () => {
-    setLoading(true)
-    const team_logo_file = expoFileToFormFile(image);
-    const res = await upload({
-      file: team_logo_file,
-      bucketId: "team",
-    });
-    const team_image = nhost.storage.getPublicUrl({
-      fileId: res.id,
-    });
-    if (teamName != "") {
-      createTeam({
-        variables: {
-          team_name: teamName,
-          team_manager: userEmail,
-          team_image: team_image
+    if (image) {
+      setLoading(true)
+      try {
+        const team_logo_file = expoFileToFormFile(image);
+        const res = await upload({
+          file: team_logo_file,
+          bucketId: "team",
+        });
+        const team_image = nhost.storage.getPublicUrl({
+          fileId: res.id,
+        });
+        if (teamName != "") {
+          createTeam({
+            variables: {
+              team_name: teamName.trim(),
+              team_manager: userEmail,
+              team_image: team_image
+            }
+          })
+        } else {
+          registerExistingTeam({
+            variables: {
+              team_id: service
+            }
+          })
         }
-      })
+      } catch (error) {
+        alert(JSON.stringify(error))
+      }
+      setLoading(false)
     } else {
-      registerExistingTeam({
-        variables: {
-          team_id: service
-        }
-      })
+      setImageError("Please upload Image")
     }
-    setLoading(false)
+   
   }
 
   const pickLogo = async () => {
@@ -161,20 +179,24 @@ const TournamentRegistrationScreen = () => {
       aspect: [1, 2],
       quality: 1,
     });
-
-    console.log(result);
-
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+      setImageError("")
     }
   };
 
 
   useEffect(() => {
-    getTeams()
+    if(userEmail) {
+      getTeams({
+        variables: {
+          team_manager: userEmail
+        }
+      })
+    }
+    
   }, [])
 
-  console.log(teamName != "" || service != "")
   const PlayerInputBox = ({ player, index, founded, userVerified }) => {
     const [currentValue, setCurrentValue] = useState(player.player_email)
     let borderColor = "gray.300"
@@ -299,7 +321,7 @@ const TournamentRegistrationScreen = () => {
             autoCapitalize="none"
             placeholder={"Team Name"}
             borderColor={"gray.400"}
-            onChangeText={(text) => handleTeamNameChange(text.trim())}
+            onChangeText={(text) => handleTeamNameChange(text)}
           />
         </Box>
         <Text textAlign={"center"} bold my={"4"}>Or</Text>
@@ -325,12 +347,14 @@ const TournamentRegistrationScreen = () => {
               />
             ))}
           </Select>
+          {errors && <Text bold color="red.500">{errors}</Text>}
         </Box>
         <VStack alignItems={"center"}
         >
           <Text textAling={"center"} bold>
             Upload Tournament Logo
           </Text>
+          {errorImage && <Text color="red.500" bold>Please select image</Text>}
           <Button
             size="md"
             width={"24"}
@@ -398,4 +422,4 @@ const TournamentRegistrationScreen = () => {
   )
 }
 
-export default TournamentRegistrationScreen
+export default TeamRegistrationScreen

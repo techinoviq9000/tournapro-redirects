@@ -78,8 +78,14 @@ const SelectRoleScreen = ({ route }) => {
     },
   ]);
   const { email, fullName, password } = route.params.values;
-  console.log(email);
-  const [addPlayer] = useMutation(ADD_PLAYER);
+  const [addPlayer] = useMutation(ADD_PLAYER, {
+    onCompleted: data => {
+      console.log(data)
+    },
+    onError: e => {
+      console.log(e)
+    }
+  });
   const [getPlayer, { loading, data, error }] = useLazyQuery(GET_PLAYER, {
     nextFetchPolicy: "network-only",
     fetchPolicy: "network-only",
@@ -119,8 +125,6 @@ const SelectRoleScreen = ({ route }) => {
             player_email: email,
           },
         });
-
-        console.log(res);
         navigationRef.navigate("LoginScreen", {
           needsEmailVerification: true,
         });

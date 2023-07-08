@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons"
-import { useSignOut, useUserData } from "@nhost/react"
+import { useSignOut, useUserData, useUserDisplayName } from "@nhost/react"
 import {
   Box,
   Divider,
@@ -45,7 +45,9 @@ const GET_TOURNAMENT = gql`
         time
         start_date
         updated_at
-        venue
+        venue {
+          name
+        }
         end_date
         description
       }
@@ -53,17 +55,18 @@ const GET_TOURNAMENT = gql`
   }
 `
 
-const ViewUserProfileScreen = () => {
+const ViewUserProfileScreen = ({navigation}) => {
   const userData = useUserData()
   const [logOutLoading, setLogOutLoading] = useState(false)
   const { signOut } = useSignOut()
   //
   const Stats = ({ item }) => {
     const role = userData?.defaultRole ?? ""
+    const userName = useUserDisplayName();
     return (
       <Box mb={4}>
         <Text fontSize={"4xl"} textAlign={"center"} fontWeight="bold">
-          {item?.player_name ?? ""}
+          {userName ?? ""}
         </Text>
         <Text fontSize={"4xl"} textAlign={"center"} fontWeight="bold">
           ({role.charAt(0).toUpperCase() + role.slice(1) ?? ""})
@@ -97,7 +100,7 @@ const ViewUserProfileScreen = () => {
         <Text>Time: {item?.time ?? ""}</Text>
         <Text>Start Date: {item?.start_date ?? ""}</Text>
         <Text>End Date: {item?.end_date ?? ""}</Text>
-        <Text>Venue: {item?.venue ?? ""}</Text>
+        <Text>Venue: {item?.venue?.name ?? ""}</Text>
         <Text>{item?.description ?? ""}</Text>
         <Text></Text>
       </Box>
@@ -137,6 +140,10 @@ const ViewUserProfileScreen = () => {
     try {
       setLogOutLoading(true)
       signOut()
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'Feed'}],
+      })
       setLogOutLoading(false)
     } catch (error) {
       setLogOutLoading(false)
@@ -170,19 +177,6 @@ const ViewUserProfileScreen = () => {
             }}
             alt="Alternate Text"
           />
-
-          {/* <Box space={1} display="flex" alignItems="center">
-          <Ionicons name="location-outline" size={24} color="black" />
-          {LocationLoading ? (
-            <LocationLoading />
-            ) : errorMsg ? (
-              <Text color="black">{errorMsg}</Text>
-            ) : (
-              <Text color="black" bold>
-              {location?.country}, {location?.subregion}, {location?.region}
-              </Text>
-              )}
-            </Box> */}
           <Stats item={data?.players[0]} />
 
           <HStack space={2}>
@@ -205,11 +199,6 @@ const ViewUserProfileScreen = () => {
             My Tournaments
           </Text>
           <Divider my="3" />
-          {/* <Box marginTop="20px">
-        <Tournaments item={tournamentdata?.team_tournaments[0].team_tournaments_tournament}/>
-        <Tournaments item={tournamentdata?.team_tournaments[1].team_tournaments_tournament}/>
-        </Box>
-         */}
 
           <Pressable>
             <FlatList

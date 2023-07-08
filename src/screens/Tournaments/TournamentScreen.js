@@ -22,6 +22,7 @@ import { gql, useLazyQuery } from "@apollo/client";
 import { useCallback, useState } from "react";
 import LoaderModal from "../../components/LoaderModal";
 import dayjs from "dayjs";
+import { useUserDefaultRole } from "@nhost/react";
 
 const GET_TOURNAMENT = gql`
   query GetOngoingTournaments($sport_id: Int!) {
@@ -39,7 +40,9 @@ const GET_TOURNAMENT = gql`
       tournament_img
       banner_img
       time
-      venue
+      venue {
+        name
+      }
       start_date
       end_date
       status
@@ -49,6 +52,10 @@ const GET_TOURNAMENT = gql`
 
 
 const TournamentScreen = ({ route }) => {
+  const userRole = useUserDefaultRole();
+  const sportId = useSelector(
+    (state) => state.sport.sportId
+  );
   const onGoingTournamentData = useSelector(
     (state) => state.tournament.onGoingTournamentData
   );
@@ -62,7 +69,6 @@ const TournamentScreen = ({ route }) => {
     await dispatch(setTournamentDetails(item));
     navigationRef.navigate("TournamentOverviewScreen");
   };
-
   const [getTournaments, { loading, data, error }] = useLazyQuery(
     GET_TOURNAMENT,
     {
@@ -70,7 +76,7 @@ const TournamentScreen = ({ route }) => {
       nextFetchPolicy: "network-only",
       fetchPolicy: "network-only",
       variables: {
-        sport_id: onGoingTournamentData[0].sport_id,
+        sport_id: sportId,
       },
       onCompleted: (data) => {
         console.log(data)
@@ -141,7 +147,7 @@ const TournamentScreen = ({ route }) => {
                       <Text fontSize={"xl"} bold>
                         {item.tournament_name}
                       </Text>
-                      <Text>{item.venue}</Text>
+                      <Text>{item.venue?.name}</Text>
                       <Text>Start Date: {item.start_date}</Text>
                       <Text>End Date: {item.end_date}</Text>
                     </Box>
@@ -190,7 +196,7 @@ const TournamentScreen = ({ route }) => {
                       <Text fontSize={"xl"} bold>
                         {item.tournament_name}
                       </Text>
-                      <Text>{item.venue}</Text>
+                      <Text>{item.venue?.name}</Text>
                       <Text>Start Date: {item.start_date}</Text>
                       <Text>End Date: {item.end_date}</Text>
                     </Box>
@@ -209,7 +215,7 @@ const TournamentScreen = ({ route }) => {
           </Pressable>
         ))}
 
-        <Button
+       {userRole == "organizer" && <Button
           size="lg"
           borderRadius="lg"
           // bgColor={"blue.700"}
@@ -218,7 +224,7 @@ const TournamentScreen = ({ route }) => {
           onPress={() => navigate("CreateTournamentScreen")}
         >
           Create New Tournamnet
-        </Button>
+        </Button>}
       </Box>
       <LoaderModal isLoading={loading} />
     </ScrollView>

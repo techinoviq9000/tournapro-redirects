@@ -3,7 +3,7 @@ import { Text } from "native-base";
 
 // eas update --branch development
 // eas build --profile development
-export const VERSION = "1.8.3"
+export const VERSION = "1.0.0"
 
 const AppVersion  = () => {
   return (

@@ -1,74 +1,17 @@
-import { gql, useLazyQuery } from "@apollo/client";
-import { Ionicons } from "@expo/vector-icons";
-import dayjs from "dayjs";
-
 import {
   Box,
   Button,
-  Checkbox,
-  CheckIcon,
-  Container,
-  FormControl,
-  HStack,
   Input,
   Pressable,
-  Select,
-  Skeleton,
-  Spacer,
   Text,
-  useTheme,
   VStack,
 } from "native-base";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Platform, ScrollView } from "react-native";
-import { useSelector } from "react-redux";
 import { navigate, navigationRef } from "../../../rootNavigation";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
-import { clockRunning } from "react-native-reanimated";
+import GoBack from "../../components/GoBack";
 
-// const DatePickerApp = () => {
-//   const [date, setDate] = useState("09-10-2021");
-//   return (
-//     <Box>
-//       <Text style={styles.text}>Birth Date :</Text>
-//       <DatePickerApp
-//         date={date}
-//         mode="date"
-//         placeholder="select date"
-//         format="DD/MM/YYYY"
-//         minDate="28-06-2023"
-//         maxDate="27-06-2024"
-//         confirmBtnText="Confirm"
-//         cancelBtnText="Cancel"
-//         customStyles={{
-//           dateIcon: {
-//             position: "absolute",
-//             right: -5,
-//             top: 4,
-//             marginLeft: 0,
-//           },
-//           dateInput: {
-//             borderColor: "gray",
-//             alignItems: "flex-start",
-//             borderWidth: 0,
-//             borderBottomWidth: 1,
-//           },
-//           placeholderText: {
-//             fontSize: 17,
-//             color: "gray",
-//           },
-//           dateText: {
-//             fontSize: 17,
-//           },
-//         }}
-//         onDateChange={(date) => {
-//           setDate(date);
-//         }}
-//       />
-//     </Box>
-//   );
-// };
 
 const TournamentDates = ({ route }) => {
   let values = route.params.values;
@@ -111,17 +54,17 @@ const TournamentDates = ({ route }) => {
 
   return (
     <ScrollView>
-      <Box p={6} safeArea mt={2} px={4}>
+      <Box bg={"white"} minH="full" flex={1} safeArea p={5} pt={2}>
+        <GoBack />
+        <Box display="flex">
+          <VStack space={4} mb={4}>
+            <Text fontSize="30px" fontWeight="bold">
+              Create New Tournament
+            </Text>
+            <Text bold>Select Tournament Start Date and End Date</Text>
+          </VStack>
         <Box mb={4}>
-          <Text fontSize={"3xl"} bold>
-            Create New Tournament
-          </Text>
-          <Text textAling={"center"}>
-            Select Tournament Start Date and End Date
-          </Text>
-        </Box>
-        <Box mb={4}>
-          <Text>Start Date</Text>
+          <Text  mb={1} fontWeight="bold">Start Date</Text>
           {showPicker && (
             <DateTimePicker
               mode="date"
@@ -149,8 +92,9 @@ const TournamentDates = ({ route }) => {
             />
           </Pressable>
         </Box>
-        <Box>
-          <Text>End Date</Text>
+        <Box  mb={4}
+        >
+          <Text  mb={1} fontWeight="bold">End Date</Text>
           {endPicker && (
             <DateTimePicker
               mode="date"
@@ -206,6 +150,7 @@ const TournamentDates = ({ route }) => {
             Cancel
           </Button>
         </Box>
+      </Box>
       </Box>
     </ScrollView>
   );

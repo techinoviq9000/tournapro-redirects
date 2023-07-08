@@ -1,31 +1,37 @@
-import { useAuthenticationStatus } from "@nhost/react";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import React from "react";
-import { View, Text, Button } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  useAuthenticationStatus,
+  useSignOut,
+  useUserDefaultRole,
+} from "@nhost/react"
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
+import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import React, { useState } from "react"
 import {
   authScreens,
   homeScreens,
   tournamentSreen,
   userProfileScreens,
-} from ".";
-import SplashScreen from "./SplashScreen";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useTheme } from "native-base";
+} from "."
+import SplashScreen from "./SplashScreen"
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
+import { Box, useTheme, Text, Button } from "native-base"
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
   DrawerItemList,
   DrawerItem,
-} from "@react-navigation/drawer";
-import MyTournaments from "./UserProfile/MyTournaments";
-import MyTeamsScreen from "./UserProfile/MyTeamsScreen";
+} from "@react-navigation/drawer"
+import MyTournaments from "./UserProfile/MyTournaments"
+import MyTeamsScreen from "./UserProfile/MyTeamsScreen"
+import LogOutButton from "../components/LogOutButton"
+import { View } from "react-native"
+import AppVersion from "../components/AppVersion"
 const Router = () => {
-  const { colors } = useTheme();
-  const Stack = createNativeStackNavigator();
+  const userRole = useUserDefaultRole()
+  const { colors } = useTheme()
+  const Stack = createNativeStackNavigator()
 
-  const Tab = createBottomTabNavigator();
+  const Tab = createBottomTabNavigator()
   const HomeTabs = () => {
     return (
       <Tab.Navigator
@@ -41,21 +47,21 @@ const Router = () => {
           headerShown: false,
           lazy: true,
           tabBarIcon: ({ focused, color, size }) => {
-            let iconName;
+            let iconName
             if (route.name === "Home") {
-              iconName = focused ? "home" : "home-outline";
+              iconName = focused ? "home" : "home-outline"
             } else if (route.name === "Tournament") {
-              iconName = "flag-checkered";
+              iconName = "flag-checkered"
               return (
                 <MaterialCommunityIcons
                   name={iconName}
                   size={size}
                   color={color}
                 />
-              );
+              )
             }
 
-            return <Ionicons name={iconName} size={size} color={color} />;
+            return <Ionicons name={iconName} size={size} color={color} />
           },
         })}
         initialRouteName="Home"
@@ -63,8 +69,8 @@ const Router = () => {
         <Tab.Screen name="Home" component={HomeStackScreen} />
         <Tab.Screen name="Tournament" component={TournamentStackScreen} />
       </Tab.Navigator>
-    );
-  };
+    )
+  }
 
   function CustomDrawerContent(props) {
     return (
@@ -79,10 +85,45 @@ const Router = () => {
           onPress={() => props.navigation.toggleDrawer()}
         />
       </DrawerContentScrollView>
-    );
+    )
+  }
+  const [logOutLoading, setLogOutLoading] = useState(false)
+  const { signOut } = useSignOut()
+  const logOut = async () => {
+    try {
+      setLogOutLoading(true)
+      signOut()
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Feed" }],
+      })
+      setLogOutLoading(false)
+    } catch (error) {
+      setLogOutLoading(false)
+      console.log(error)
+    }
   }
 
-  const Drawer = createDrawerNavigator();
+  function AppDrawerContent(props) {
+    return (
+      <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
+        {/*all of the drawer items*/}
+        <DrawerItemList {...props} style={{ borderWidth: 1 }} />
+        <Box flex={1} />
+        <Box>
+          <Box m={4} w="1/2">
+            {/* here's where you put your logout drawer item*/}
+            <LogOutButton logout={logOut} />
+          </Box>
+          <Box>
+           <AppVersion />
+          </Box>
+        </Box>
+      </DrawerContentScrollView>
+    )
+  }
+
+  const Drawer = createDrawerNavigator()
   const DrawerNavigator = () => {
     return (
       <Drawer.Navigator
@@ -90,16 +131,19 @@ const Router = () => {
           headerShown: false,
           drawerPosition: "right",
         }}
+        drawerContent={(props) => <AppDrawerContent {...props} />}
       >
-        <Drawer.Screen name="Dashboard" component={HomeTabs} />
+        <Drawer.Screen name="Feed" component={HomeTabs} />
         <Drawer.Screen name="Profile" component={UserProfileStackScreen} />
-        <Drawer.Screen name="MyTournaments" component={MyTournaments} />
+        {userRole == "organizer" && (
+          <Drawer.Screen name="My Tournaments" component={MyTournaments} />
+        )}
         <Drawer.Screen name="My Team" component={MyTeamsScreen} />
       </Drawer.Navigator>
-    );
-  };
+    )
+  }
 
-  const HomeStack = createNativeStackNavigator();
+  const HomeStack = createNativeStackNavigator()
   const HomeStackScreen = () => {
     return (
       <HomeStack.Navigator
@@ -117,10 +161,10 @@ const Router = () => {
           />
         ))}
       </HomeStack.Navigator>
-    );
-  };
+    )
+  }
 
-  const UserProfileStack = createNativeStackNavigator();
+  const UserProfileStack = createNativeStackNavigator()
   const UserProfileStackScreen = () => {
     return (
       <UserProfileStack.Navigator
@@ -138,10 +182,10 @@ const Router = () => {
           />
         ))}
       </UserProfileStack.Navigator>
-    );
-  };
+    )
+  }
 
-  const TournamentStack = createNativeStackNavigator();
+  const TournamentStack = createNativeStackNavigator()
   const TournamentStackScreen = () => {
     return (
       <TournamentStack.Navigator
@@ -159,10 +203,10 @@ const Router = () => {
           />
         ))}
       </TournamentStack.Navigator>
-    );
-  };
+    )
+  }
 
-  const AuthStack = createNativeStackNavigator();
+  const AuthStack = createNativeStackNavigator()
   const AuthStacks = () => {
     return (
       <AuthStack.Navigator
@@ -180,11 +224,18 @@ const Router = () => {
           />
         ))}
       </AuthStack.Navigator>
-    );
-  };
+    )
+  }
 
-  const { isAuthenticated, isLoading } = useAuthenticationStatus();
+  const { isAuthenticated, isLoading, isError } = useAuthenticationStatus()
 
+  if (isError) {
+    return (
+      <Box>
+        <Text>Authentication Error</Text>
+      </Box>
+    )
+  }
   return (
     <>
       {isLoading ? (
@@ -209,7 +260,7 @@ const Router = () => {
         </DrawerNavigator>
       )}
     </>
-  );
-};
+  )
+}
 
-export default Router;
+export default Router

@@ -1,78 +1,42 @@
-import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
-import { Ionicons } from "@expo/vector-icons";
-import dayjs from "dayjs";
+import { gql, useMutation } from "@apollo/client";
 
 import {
   Box,
   Button,
-  Checkbox,
-  CheckIcon,
-  Container,
-  FormControl,
-  HStack,
-  Input,
-  Pressable,
-  Select,
-  Skeleton,
-  Spacer,
-  Stack,
-  Text,
-  useTheme,
   VStack,
   Image,
 } from "native-base";
-import React, { useEffect, useState } from "react";
-import { CommonActions } from '@react-navigation/native';
-import { Platform, ScrollView } from "react-native";
-import { useSelector } from "react-redux";
+import React, { useState } from "react";
+import { ScrollView } from "react-native";
 import { navigate, navigationRef } from "../../../rootNavigation";
-import { AntDesign } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useFileUpload, useUserEmail } from "@nhost/react";
 import { nhost } from "../../../nhostClient";
 import { useToast } from "native-base"
 import LoaderModal from "../../components/LoaderModal";
+import GoBack from "../../components/GoBack";
 
 const ADD_TOURNAMENT = gql`
-  mutation MyMutation(
-    $tournament_name: String!
-    $venue: String!
-    $start_date: date!
-    $end_date: date!
-    $tournament_img: String!
-    $banner_img: String!
-    $created_by: citext!
-  ) {
-    insert_tournaments(
-      objects: {
-        tournament_name: $tournament_name
-        venue: $venue
-        start_date: $start_date
-        end_date: $end_date
-        sport_id: 1
-        tournament_img: $tournament_img
-        banner_img: $banner_img
-        created_by: $created_by
-      }
-    ) {
-      affected_rows
-    }
+mutation MyMutation($tournament_name: String!, $start_date: date!, $end_date: date!, $tournament_img: String!, $banner_img: String!, $created_by: citext!, $venue_id: Int!) {
+  insert_tournaments(objects: {tournament_name: $tournament_name, start_date: $start_date, end_date: $end_date, sport_id: 1, tournament_img: $tournament_img, banner_img: $banner_img, created_by: $created_by, venue_id: $venue_id}) {
+    affected_rows
   }
+}
+
 `;
 
-const LogoPoster = ({ route, navigation }) => {
+const TournamentRegistrationScreen = ({ route, navigation }) => {
   const {
     start_date,
     end_date,
     tournament_name,
-    venue,
-    tournamentformat,
-    tournamentteams,
+    venue_id,
   } = route.params.values;
   const userEmail = useUserEmail();
   const toast = useToast()
   const [image, setImage] = useState(null);
   const [poster, setPoster] = useState(null);
+  const [imageLoading, setImageLoading] = useState(false)
   const [addTournament, {loading}] = useMutation(ADD_TOURNAMENT, {
     onCompleted: data => {
       toast.show({
@@ -93,8 +57,13 @@ const LogoPoster = ({ route, navigation }) => {
         //     ],
         //   })
         // );
+        navigationRef.navigate("SelectOrViewTournamentScreen")
         navigationRef.navigate("HomeScreen")
       }, 1000);
+    },
+    onError: e => {
+      console.log(e)
+      setImageLoading(false)
     }
   });
   const {
@@ -114,7 +83,6 @@ const LogoPoster = ({ route, navigation }) => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
-      aspect: [1, 2],
       quality: 1,
     });
 
@@ -129,7 +97,6 @@ const LogoPoster = ({ route, navigation }) => {
     let resultposter = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
-      aspect: [1, 2],
       quality: 1,
     });
 
@@ -148,6 +115,7 @@ const LogoPoster = ({ route, navigation }) => {
     return { uri: localUri, name: filename, type };
   };
   const handleSubmit = async () => {
+    setImageLoading(true)
     const banner_image_file = expoFileToFormFile(poster);
     const tournament_image_file = expoFileToFormFile(image);
     console.log(banner_image_file)
@@ -167,40 +135,43 @@ const LogoPoster = ({ route, navigation }) => {
     const tournament_img = nhost.storage.getPublicUrl({
       fileId: res2.id,
     });
-
-    await addTournament({
-      variables: {
-        tournament_name,
-        venue,
-        start_date,
-        end_date,
-        tournament_img,
-        banner_img,
-        created_by: userEmail
-      },
-    });
+try {
+  await addTournament({
+    variables: {
+      tournament_name,
+      start_date,
+      end_date,
+      tournament_img,
+      banner_img,
+      venue_id,
+      created_by: userEmail
+    },
+  });
+  setImageLoading(false)
+} catch (e) {
+  setImageLoading(false)
+}
+   
   };
 
   return (
     <ScrollView>
-      <Box p={6} safeArea mt={2} px={4}>
-        <Box mb={4}>
-          <Text fontSize={"3xl"} bold>
-            Create New Tournament
-          </Text>
-          <Text textAling={"center"}>Upload Tournament Graphics</Text>
-        </Box>
+      <Box bg={"white"} minH="full" flex={1} safeArea p={5} pt={2}>
+        <GoBack />
+        <Box display="flex">
+          <VStack space={4} mb={4}>
+            <Text fontSize="30px" fontWeight="bold">
+              Create New Tournament
+            </Text>
+            <Text bold>Upload Tournament Graphics</Text>
+          </VStack>
 
-        <Box
-          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-        >
-          <Text marginBottom="12" textAling={"center"} bold>
+        <Box alignItems={"center"}>
+          <Text textAlign={"center"} bold fontSize={"xl"}>
             Upload Tournament Logo
           </Text>
           <Button
-            mt={"24"}
-            size="md"
-            width={"24"}
+            size="md"            
             borderRadius="lg"
             // bgColor={"blue.700"}
             colorScheme={"blue"}
@@ -212,24 +183,20 @@ const LogoPoster = ({ route, navigation }) => {
 
           {image && (
             <Image
+            size={150}
               source={{ uri: image }}
-              style={{ width: 200, height: 200 }}
+              // size={"xl"}
               alt="asd"
             />
           )}
         </Box>
-        <Box
-          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-        >
-          <Text marginBottom="12" textAling={"center"} bold>
+        <Box alignItems={"center"}>
+          <Text textAlign={"center"} bold fontSize={"xl"}>
             Upload Tournament Poster
           </Text>
           <Button
             size="md"
-            mt={"24"}
-            width={"24"}
             borderRadius="lg"
-            // bgColor={"blue.700"}
             colorScheme={"blue"}
             my={4}
             onPress={pickposter}
@@ -240,7 +207,8 @@ const LogoPoster = ({ route, navigation }) => {
           {poster && (
             <Image
               source={{ uri: poster }}
-              style={{ width: 200, height: 200 }}
+              // style={{ width: 200, height: 200 }}
+              size={150}
               alt="123"
             />
           )}
@@ -269,8 +237,9 @@ const LogoPoster = ({ route, navigation }) => {
           Cancel
         </Button>
       </Box>
-      <LoaderModal isLoading={loading} />
+      </Box>
+      <LoaderModal isLoading={loading || imageLoading} />
     </ScrollView>
   );
 };
-export default LogoPoster;
+export default TournamentRegistrationScreen;

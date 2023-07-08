@@ -1,61 +1,77 @@
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { gql, useQuery } from "@apollo/client";
 import {
   Box,
-  Button,
-  useTheme,
   Text,
-  ScrollView,
   Pressable,
   HStack,
   Spacer,
+  VStack,
+  Badge,
 } from "native-base";
 import { useUserData } from "@nhost/react";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { navigate, navigationRef } from "../../../rootNavigation";
-import { useDispatch, useSelector } from "react-redux";
+import { Ionicons } from "@expo/vector-icons";
+import { navigationRef } from "../../../rootNavigation";
+import { useDispatch } from "react-redux";
 import {
   setTournamentDetails,
-  setongoingTournamentDetails,
 } from "../../../store/tournamentSlice";
 
 import * as React from "react";
-import { View } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NativeScreenNavigationContainer } from "react-native-screens";
 import { Image } from "react-native-svg";
 
-const MyTournaments = ({ route }) => {
-  const GET_TOURNAMENT = gql`
-    query GetTournaments($sport_id: Int!, $created_by: citext!) {
-      tournaments(
-        where: {
-          sport_id: { _eq: $sport_id }
-          created_by: { _eq: $created_by }
-          end_date: { _gte: "now()" }
-        }
-        order_by: { start_date: desc }
-      ) {
-        id
-        sport_id
-        tournament_name
-        tournament_img
-        banner_img
-        time
-        venue
-        start_date
-        end_date
-        status
-        created_by
-      }
+const GET_TOURNAMENT = gql`
+query GetTournaments($sport_id: Int!, $created_by: citext!) {
+  tournaments(
+    where: {
+      sport_id: { _eq: $sport_id }
+      created_by: { _eq: $created_by }
+      end_date: { _gte: "now()" }
     }
-  `;
+    order_by: { start_date: desc }
+  ) {
+    id
+    sport_id
+    tournament_name
+    tournament_img
+    banner_img
+    time
+    venue {
+      name
+    }
+    start_date
+    end_date
+    status
+    created_by
+    created_at
+  }
+}
+`;
+
+const MyTournaments = ({ navigation }) => {
+
+  const MyBadge = ({ status }) => {
+    let colorScheme = ""
+    switch (status) {
+      case true:
+        colorScheme = "success"
+        break
+      case false:
+        colorScheme = "error"
+        break
+      default:
+        break
+    }
+    return (
+      <Badge colorScheme={colorScheme} alignSelf="center" variant={"outline"}>
+        {status ? "Published" : "Unpublished"}
+      </Badge>
+    )
+  }
   const userData = useUserData();
   const dispatch = useDispatch();
   const handlePress = async (item) => {
     await dispatch(setTournamentDetails(item));
-    navigationRef.navigate("TournamentOverviewScreen");
+    navigation.navigate("Tournament", {screen: "TournamentOverviewScreen"})
   };
   const { loading, data, error } = useQuery(GET_TOURNAMENT, {
     variables: {
@@ -69,7 +85,7 @@ const MyTournaments = ({ route }) => {
     },
   });
   const GetTournaments = ({ item }) => {
-    console.log(item);
+    console.log(item.tournament_img);
     return (
       <Box>
         <Pressable onPress={() => handlePress(item)} key={item.id}>
@@ -91,16 +107,31 @@ const MyTournaments = ({ route }) => {
                 mb={8}
               >
                 <HStack alignItems="center" justifyContent={"space-between"}>
-                  <Box>
+                <VStack>
+                  <HStack space={4} alignItems="center">
+                    <Image
+                      display="flex"
+                      flexDirection="row"
+                      borderRadius="10px"
+                      source={{
+                        uri: item?.tournament_img
+                      }}
+                      alt="Alternate Text"
+                      size="xs"
+                    />
                     <Text fontSize={"xl"} bold>
-                      {item.tournament_name}
+                      {item?.tournament_name}
                     </Text>
-                    <Text>{item.venue}</Text>
+                  </HStack>
+                    <HStack my={2} alignItems="center" space={2}>
+                      <Text>Status: </Text>
+                      <MyBadge status={item.status} />
+                    </HStack>
+                    <Text>Created By: {item.created_by}</Text>
+                    <Text>Created At : {item.created_at}</Text>
                     <Text>Start Date: {item.start_date}</Text>
-                    <Text>End Date: {item.end_date}</Text>
-                    <Text>Status: {item.status}</Text>
-                    <Text>created by : {item.created_by}</Text>
-                  </Box>
+                    <Text>End Date : {item.end_date}</Text>
+                  </VStack>
                   <Spacer />
                   <Box>
                     <Ionicons name={"arrow-forward"} size={24} />
@@ -113,20 +144,6 @@ const MyTournaments = ({ route }) => {
       </Box>
     );
   };
-  //   const tournamentData = useSelector((state) => state.tournament.data);
-  //   const ongoingtournamentData = useSelector(
-  //     (state) => state.tournament.ongoingdata
-  //   );
-  //   const upcomingtournamentData = useSelector(
-  //     (state) => state.tournament.upcomingdata
-  //   );
-  //   const { colors } = useTheme();
-  //   const dispatch = useDispatch();
-  //   const handlePress = async (item) => {
-  //     await dispatch(setTournamentDetails(item));
-  //     navigationRef.navigate("TournamentOverviewScreen");
-  //   };
-
   return (
     <Box bg={"white"} minH="full" flex={1} safeArea p={5} pt={2}>
       <Box w="full" display={"flex"} justifyItems={"center"}>

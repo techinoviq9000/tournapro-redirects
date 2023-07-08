@@ -5,10 +5,10 @@ import {
   useUserData,
   useUserDisplayName,
   useUserEmail,
-} from "@nhost/react";
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
-import { useFocusEffect } from "@react-navigation/native";
-import * as Location from "expo-location";
+} from "@nhost/react"
+import { gql, useLazyQuery, useQuery } from "@apollo/client"
+import { useFocusEffect } from "@react-navigation/native"
+import * as Location from "expo-location"
 import {
   Avatar,
   Box,
@@ -27,41 +27,37 @@ import {
   ListItem,
   Separator,
   Icon,
-} from "native-base";
+} from "native-base"
 import {
   Ionicons,
   AntDesign,
   FontAwesome,
   MaterialIcons,
   MaterialCommunityIcons,
-} from "@expo/vector-icons";
-import {
-  ImageBackground,
-  RefreshControl,
-  ScrollView,
-  View,
-} from "react-native";
-import moment from "moment";
-import { useCallback, useContext, useEffect, useState } from "react";
-import { navigate, navigationRef } from "../../../rootNavigation";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import LoaderModal from "../../components/LoaderModal";
-import { useDispatch, useSelector } from "react-redux";
+} from "@expo/vector-icons"
+import { ImageBackground, RefreshControl, ScrollView, View } from "react-native"
+import moment from "moment"
+import { useCallback, useContext, useEffect, useState } from "react"
+import { navigate, navigationRef } from "../../../rootNavigation"
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import LoaderModal from "../../components/LoaderModal"
+import { useDispatch, useSelector } from "react-redux"
 import {
   setOnGoingTournamentData,
   setUpComingTournamentData,
-} from "../../../store/tournamentSlice";
-import { setLocation } from "../../../store/dataSlice";
-import { StatusBar } from "expo-status-bar";
-import HeaderLoading from "../../components/HeaderLoading";
-import LocationLoading from "../../components/LocationLoading";
-import NoData from "../../components/NoData";
-import SportsLoadingSkeleton from "../../components/SportsLoadingSkeleton";
-import dayjs from "dayjs";
-import MatchesDataLoadingSkeleton from "../../components/MatchesDataLoadingSkeleton";
-import OngGoingDataLoadingSkeleton from "../../components/OngGoingDataLoadingSkeleton";
-import UpComingDataLoadingSkeleton from "../../components/UpComingDataLoadingSkeleton";
-import NoMatchData from "../../components/NoMatchData";
+} from "../../../store/tournamentSlice"
+import { setLocation } from "../../../store/dataSlice"
+import { StatusBar } from "expo-status-bar"
+import HeaderLoading from "../../components/HeaderLoading"
+import LocationLoading from "../../components/LocationLoading"
+import NoData from "../../components/NoData"
+import SportsLoadingSkeleton from "../../components/SportsLoadingSkeleton"
+import dayjs from "dayjs"
+import MatchesDataLoadingSkeleton from "../../components/MatchesDataLoadingSkeleton"
+import OngGoingDataLoadingSkeleton from "../../components/OngGoingDataLoadingSkeleton"
+import UpComingDataLoadingSkeleton from "../../components/UpComingDataLoadingSkeleton"
+import NoMatchData from "../../components/NoMatchData"
+import { setSportId } from "../../../store/sportSlice"
 
 const GET_TOURNAMENT = gql`
   query GetOngoingTournaments($sport_id: Int!) {
@@ -79,13 +75,15 @@ const GET_TOURNAMENT = gql`
       tournament_img
       banner_img
       time
-      venue
+      venue {
+        name
+      }
       start_date
       end_date
       status
     }
   }
-`;
+`
 
 const GET_MATCHES = gql`
   query GetMatches($player_email: citext!) {
@@ -135,7 +133,7 @@ const GET_MATCHES = gql`
       }
     }
   }
-`;
+`
 const GET_SPORTS = gql`
   query GetSports {
     sports {
@@ -146,30 +144,29 @@ const GET_SPORTS = gql`
       updated_at
     }
   }
-`;
+`
 
 export default HomeScreen = ({ navigation }) => {
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false)
   const onGoingTournamentData = useSelector(
     (state) => state.tournament.onGoingTournamentData
-  );
+  )
   const upComingTournamentData = useSelector(
     (state) => state.tournament.upComingTournamentData
-  );
-  const location = useSelector((state) => state.generalData.location);
-  const dispatch = useDispatch();
-  const userData = useUserData();
-  const [selectedSportsId, setSelectedSportsId] = useState(null);
-  const [locationLoading, setLocationLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState(null);
-  const { isAuthenticated, isLoading } = useAuthenticationStatus();
-  const userName = useUserDisplayName() ?? "";
-  const userEmail = useUserEmail();
-  const { colors } = useTheme();
-  const [logOutLoading, setLogOutLoading] = useState(false);
-  const { signOut } = useSignOut();
+  )
+  const location = useSelector((state) => state.generalData.location)
+  const dispatch = useDispatch()
+  const userData = useUserData()
+  const [selectedSportsId, setSelectedSportsId] = useState(null)
+  const [locationLoading, setLocationLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState(null)
+  const { isAuthenticated, isLoading } = useAuthenticationStatus()
+  const userName = useUserDisplayName() ?? ""
+  const userEmail = useUserEmail()
+  const { colors } = useTheme()
+  const [logOutLoading, setLogOutLoading] = useState(false)
+  const { signOut } = useSignOut()
 
-  
   const [getTournaments, { loading, data, error }] = useLazyQuery(
     GET_TOURNAMENT,
     {
@@ -181,21 +178,21 @@ export default HomeScreen = ({ navigation }) => {
       },
       onCompleted: (data) => {
         console.log(data)
-        const now = dayjs().format("YYYY-MM-D");
+        const now = dayjs().format("YYYY-MM-D")
         const OnGoingTournamentData = data.tournaments.filter(
           (tournament) => dayjs(now).diff(tournament.start_date) >= 0
-        );
+        )
         const UpComingTournamentData = data.tournaments.filter(
           (tournament) => dayjs(now).diff(tournament.start_date) < 0
-        );
-        dispatch(setOnGoingTournamentData(OnGoingTournamentData));
-        dispatch(setUpComingTournamentData(UpComingTournamentData));
+        )
+        dispatch(setOnGoingTournamentData(OnGoingTournamentData))
+        dispatch(setUpComingTournamentData(UpComingTournamentData))
       },
       onError: (e) => {
-        console.log(e);
+        console.log(e)
       },
     }
-  );
+  )
   console.log(loading)
   const [
     getMatches,
@@ -209,10 +206,10 @@ export default HomeScreen = ({ navigation }) => {
       setRefreshing(false)
     },
     onError: (e) => {
-      console.log(e);
+      console.log(e)
       setRefreshing(false)
     },
-  });
+  })
 
   const [
     getSports,
@@ -222,60 +219,61 @@ export default HomeScreen = ({ navigation }) => {
       if (!selectedSportsId) {
         const id = data?.sports.filter(
           (item) => item.sport_name == "Cricket"
-        )[0].id;
-        setSelectedSportsId(id);
-        getTournaments();
+        )[0].id
+        dispatch(setSportId(id))
+        setSelectedSportsId(id)
+        getTournaments()
       }
     },
     onError: (e) => {
-      console.log(e, "error");
+      console.log(e, "error")
     },
-  });
+  })
 
   const logOut = async () => {
     try {
-      setLogOutLoading(true);
-      signOut();
-      setLogOutLoading(false);
+      setLogOutLoading(true)
+      signOut()
+      setLogOutLoading(false)
     } catch (error) {
-      setLogOutLoading(false);
-      console.log(error);
+      setLogOutLoading(false)
+      console.log(error)
     }
-  };
+  }
 
   const getLocation = async () => {
-    setLocationLoading(true);
-    let { status } = await Location.requestForegroundPermissionsAsync();
+    setLocationLoading(true)
+    let { status } = await Location.requestForegroundPermissionsAsync()
     if (status !== "granted") {
-      setErrorMsg("Permission to access location was denied");
-      setLocationLoading(false);
-      return;
+      setErrorMsg("Permission to access location was denied")
+      setLocationLoading(false)
+      return
     }
 
-    let location = await Location.getCurrentPositionAsync({});
+    let location = await Location.getCurrentPositionAsync({})
     let loc = await Location.reverseGeocodeAsync({
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
-    });
-    dispatch(setLocation(loc[0]));
-    setLocationLoading(false);
-  };
+    })
+    dispatch(setLocation(loc[0]))
+    setLocationLoading(false)
+  }
 
   const onRefresh = useCallback(() => {
-    setRefreshing(true);
-   getTournaments();
-   getMatches();
-  }, []);
+    setRefreshing(true)
+    getTournaments()
+    getMatches()
+  }, [])
   // useFocusEffect(
   useEffect(() => {
     if (userEmail) {
-      getSports();
-      getMatches();
+      getSports()
+      getMatches()
       if (!location) {
-        getLocation();
+        getLocation()
       }
     }
-  }, []);
+  }, [])
   // )
 
   const OnGoingTournament = ({ item }) => {
@@ -307,7 +305,7 @@ export default HomeScreen = ({ navigation }) => {
             <Text fontSize={"xl"} bold>
               {item.tournament_name}
             </Text>
-            <Text>{item.venue}</Text>
+            <Text>{item.venue?.name}</Text>
             <Text>
               Start Date: {dayjs(item.start_date).format("ddd, D MMM")}
             </Text>
@@ -315,11 +313,11 @@ export default HomeScreen = ({ navigation }) => {
           </Box>
         </ImageBackground>
       </HStack>
-    );
-  };
+    )
+  }
 
   const Header = () => {
-    const userData = useUserData();
+    const userData = useUserData()
     return (
       <>
         <HStack alignItems="center" justifyContent={"space-between"} mb={2}>
@@ -334,15 +332,21 @@ export default HomeScreen = ({ navigation }) => {
           </HStack>
           </Box> 
         <Button onPress={() => logOut()}>Logout</Button> */}
-        <Pressable onPress={() => navigation.navigate("Profile", {screen: "ViewUserProfileScreen"})}>
-          <Image
-            size={30}
-            borderRadius={100}
-            source={{
-              uri: userData?.avatarUrl,
-            }}
-            alt="Alternate Text"
-          />
+          <Pressable
+            onPress={() =>
+              navigation.navigate("Profile", {
+                screen: "ViewUserProfileScreen",
+              })
+            }
+          >
+            <Image
+              size={30}
+              borderRadius={100}
+              source={{
+                uri: userData?.avatarUrl,
+              }}
+              alt="Alternate Text"
+            />
           </Pressable>
           <HStack alignItems={"flex-end"} space={1}>
             <Ionicons name="location-outline" size={24} color="black" />
@@ -366,8 +370,8 @@ export default HomeScreen = ({ navigation }) => {
         </HStack>
         <Divider my="2" />
       </>
-    );
-  };
+    )
+  }
 
   const UpComingTournament = ({ item }) => {
     return (
@@ -398,7 +402,7 @@ export default HomeScreen = ({ navigation }) => {
             <Text fontSize={"xl"} bold>
               {item.tournament_name}
             </Text>
-            <Text>{item.venue}</Text>
+            <Text>{item.venue?.name}</Text>
             <Text>
               Start Date: {dayjs(item.start_date).format("ddd, D MMM")}
             </Text>
@@ -406,8 +410,8 @@ export default HomeScreen = ({ navigation }) => {
           </Box>
         </ImageBackground>
       </HStack>
-    );
-  };
+    )
+  }
 
   const Matches = ({ item }) => {
     return (
@@ -477,13 +481,15 @@ export default HomeScreen = ({ navigation }) => {
           </HStack>
         </VStack>
       </Box>
-    );
-  };
+    )
+  }
 
   return (
-    <ScrollView  refreshControl={
-      <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-    }>
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <Box flex={1} safeArea>
         <Box p={5} pb={0}>
           {isLoading ? <HeaderLoading /> : <Header />}
@@ -497,7 +503,7 @@ export default HomeScreen = ({ navigation }) => {
               <SportsLoadingSkeleton />
             ) : (
               sportsData?.sports.map((item, index) => {
-                let selected = selectedSportsId == item.id ? true : false;
+                let selected = selectedSportsId == item.id ? true : false
                 return (
                   <Box key={index}>
                     <Pressable
@@ -510,12 +516,13 @@ export default HomeScreen = ({ navigation }) => {
                       justifyContent={"center"}
                       mb={2}
                       onPress={() => {
+                        dispatch(setSportId(item.id))
                         setSelectedSportsId(item.id),
                           getTournaments({
                             variables: {
                               sport_id: item.id,
                             },
-                          });
+                          })
                       }}
                     >
                       <Image
@@ -538,7 +545,7 @@ export default HomeScreen = ({ navigation }) => {
                       {item.sport_name}
                     </Text>
                   </Box>
-                );
+                )
               })
             )}
           </HStack>
@@ -592,13 +599,10 @@ export default HomeScreen = ({ navigation }) => {
             </>
           ) : (
             <>
-            <Text fontSize={"2xl"} bold px={5}>
-                    My Matches
-                  </Text>
-            <NoMatchData
-              getData={getMatches}
-              colors={colors}
-            />
+              <Text fontSize={"2xl"} bold px={5}>
+                My Matches
+              </Text>
+              <NoMatchData getData={getMatches} colors={colors} />
             </>
           )}
         </Box>
@@ -650,11 +654,16 @@ export default HomeScreen = ({ navigation }) => {
               </VStack>
             </>
           ) : (
-            <NoData
-              getData={getTournaments}
-              id={selectedSportsId}
-              colors={colors}
-            />
+            <>
+              <Text fontSize={"2xl"} bold>
+                Ongoing tournaments
+              </Text>
+              <NoData
+                getData={getTournaments}
+                id={selectedSportsId}
+                colors={colors}
+              />
+            </>
           )}
         </Box>
         <Divider my={4} />
@@ -705,20 +714,29 @@ export default HomeScreen = ({ navigation }) => {
               </VStack>
             </>
           ) : (
-            <NoData
-              getData={getTournaments}
-              id={selectedSportsId}
-              colors={colors}
-            />
+            <>
+              <Text fontSize={"2xl"} bold>
+                Upcoming tournaments
+              </Text>
+              <NoData
+                getData={getTournaments}
+                id={selectedSportsId}
+                colors={colors}
+              />
+            </>
           )}
         </Box>
 
-        <LoaderModal isLoading={logOutLoading || loading || matchesloading || sportsLoading} />
+        <LoaderModal
+          isLoading={
+            logOutLoading || loading || matchesloading || sportsLoading
+          }
+        />
       </Box>
       <StatusBar style="dark" translucent={false} />
       {/*       
       <Button onPress={() => logOut()}>Logout</Button>
      */}
     </ScrollView>
-  );
-};
+  )
+}

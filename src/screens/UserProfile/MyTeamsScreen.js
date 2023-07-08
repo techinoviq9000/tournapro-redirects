@@ -20,8 +20,8 @@ import { setTeamDetails } from "../../../store/teamSlice"
 import { useCallback, useEffect, useState } from "react"
 import GoBack from "../../components/GoBack"
 const GET_TEAM = gql`
-query MyQuery {
-  teams(order_by: { id: desc }) {
+query MyQuery($where: teams_bool_exp!) {
+  teams(order_by: {id: desc}, where: $where) {
     id
     team_image
     team_manager
@@ -29,28 +29,66 @@ query MyQuery {
     status
     reason
     created_at
+    players {
+      id
+    }
   }
 }
+
+
 `
 
-const MyTeamsScreen = ({ route }) => {
+const MyTeamsScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const userData = useUserData()
   const dispatch = useDispatch()
   const handlePress = async (item) => {
-    await dispatch(setTeamDetails(item))
-    navigationRef.navigate("TournamentOverviewScreen")
+    console.log(item.players?.length)
+    if (item.players?.length > 0) {
+      navigation.navigate("Tournament", {
+        screen: "PlayerScreen",
+        params: {
+          team: item
+        }
+      })
+    } else {
+      navigation.navigate("Tournament", {
+        screen: "TeamRegistrationAddUsersScreen",
+        params: {
+          team: item
+        }
+      })
+    }
+    // await dispatch(setTeamDetails(item))
+
+  }
+  const variables = {}
+  if (userData.defaultRole != "user") {
+    variables.where = {
+      team_manager: {
+        _eq: userData?.email
+      }
+    }
+  } else {
+    variables.where = {
+      players: {
+        player_email: {
+          _eq: userData?.email
+        }
+      }
+    }
   }
   const [getTeams, { loading, data, error }] = useLazyQuery(GET_TEAM, {
-    variables: {
-      team_manager: userData?.email
-    },
+    variables,
     notifyOnNetworkStatusChange: true,
+    nextFetchPolicy: "network-only",
+    fetchPolicy: "network-only",
     onCompleted: (data) => {
       setRefreshing(false)
     },
     onError: (e) => {
       console.log(e)
+      setRefreshing(false)
     }
   })
 
@@ -157,10 +195,10 @@ const MyTeamsScreen = ({ route }) => {
         </Box>
         {loading ? (
           <Text>Loading</Text>
-        ) : data?.teams.length > 0 ? (
+        ) : data?.teams?.length > 0 ? (
           data?.teams.map((item) => <Teams item={item} key={item.id}/>)
         ) : (
-          <Text>NoData</Text>
+          <Text>No Teams found in which you are part of or manager of.</Text>
         )}
       </Box>
     </ScrollView>

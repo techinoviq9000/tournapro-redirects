@@ -41,24 +41,27 @@ const ViewRegisteredTeamsScreen = () => {
   const tournamentDetails = useSelector(
     (state) => state.tournament.tournamentDetails
   )
-  console.log(tournamentDetails)
   const tournament_id = tournamentDetails.id
   const [refreshing, setRefreshing] = useState(false)
   const userRole = useUserDefaultRole()
   let variables = {}
-  if (userRole == "manager") {
+  if (userRole == "manager"  || userRole == "user") {
     variables.where = {
       tournament_id: { _eq: tournament_id },
       team_tournaments_team: { status: { _eq: "Approved" } }
     }
   }
-  if (userRole == "organizer") {
+  if (userRole == "organizer" ) {
     variables.where = { tournament_id: { _eq: tournament_id } }
   }
+
   const [getTeams, { loading, data, error }] = useLazyQuery(GET_REGTEAMS, {
     variables,
     notifyOnNetworkStatusChange: true,
+    nextFetchPolicy: "network-only",
+    fetchPolicy: "network-only",
     onCompleted: (data) => {
+      console.log(data.team_tournaments)
       setRefreshing(false)
     },
     onError: (e) => {
@@ -77,7 +80,6 @@ const ViewRegisteredTeamsScreen = () => {
     }, [])
   )
 
-  // console.log(data);
   const MyBadge = ({ status }) => {
     let colorScheme = ""
     switch (status) {
@@ -143,12 +145,15 @@ const ViewRegisteredTeamsScreen = () => {
                       {item?.team_tournaments_team?.team_name}
                     </Text>
                   </HStack>
+                  {userRole == "organizer" && <>
                   <HStack my={2} alignItems="center" space={2}>
                     <Text>Status: </Text>
                     <MyBadge status={item?.team_tournaments_team?.status} />
                   </HStack>
-                  {item.reason ?? <Text>Reason: {item?.team_tournaments_team?.reason}</Text>}
+                  {item.reason && <Text>Reason: {item?.team_tournaments_team?.reason}</Text>}
+                  </>}
                   <Text>
+                   
                     Team Manger: {item?.team_tournaments_team?.team_manager}
                   </Text>
                   <Text>

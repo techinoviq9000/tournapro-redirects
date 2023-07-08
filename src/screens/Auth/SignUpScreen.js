@@ -84,11 +84,11 @@ const SignUpScreen = () => {
           </Text>
           <Formik
             initialValues={{
-              email: "salmanhanif133@gmail.com",
-              fullName: "Salman Hanif",
-              password: "123456789",
-              phoneNumber: "03222681575",
-              confirmPassword: "123456789",
+              email: "",
+              fullName: "",
+              password: "",
+              phoneNumber: "",
+              confirmPassword: "",
             }}
             validationSchema={SignupSchema}
             validateOnChange={false}

@@ -3,7 +3,7 @@ import React from 'react'
 
 const SplashScreen = () => {
   return (
-    <Box safeArea mt={2} flex={"1"} justifyContent={"center"} alignItems={"center"} pb={20}>
+    <Box safeArea bg="white" mt={2} flex={"1"} justifyContent={"center"} alignItems={"center"} pb={20}>
       <Center>
         <Image
           alt="Logo"

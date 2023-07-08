@@ -27,7 +27,7 @@ import {
   useUserData,
 } from "@nhost/react"
 import { StatusBar } from "expo-status-bar"
-import AppVersion from "../../../AppVersion"
+import AppVersion from "../../components/AppVersion"
 import { gql, useMutation } from "@apollo/client"
 import LoaderModal from "../../components/LoaderModal"
 
@@ -46,7 +46,7 @@ const UPDATE_TOKEN = gql`
   }
 `
 
-const LoginScreen = ({ route }) => {
+const LoginScreen = ({ navigation }) => {
   const { isAuthenticated, isLoading } = useAuthenticationStatus()
   const [tokenLoading, setTokenLoading] = useState(false)
   const userData = useUserData()
@@ -199,8 +199,8 @@ const LoginScreen = ({ route }) => {
           </Text>
           <Formik
             initialValues={{
-              email: "salmanhanif133@gmail.com",
-              password: "123456789",
+              email: "",
+              password: "",
             }}
             // validationSchema={SignupSchema}
             // validateOnChange={false}
@@ -343,7 +343,8 @@ const LoginScreen = ({ route }) => {
           </Formik>
         </Box>
       </Box>
-      <LoaderModal isLoading={signInloading || isLoading || loadingSendEmail} />
+      <AppVersion />
+      <LoaderModal isLoading={signInloading || isLoading || loadingSendEmail || signInLoadng} />
     </ScrollView>
   )
 }

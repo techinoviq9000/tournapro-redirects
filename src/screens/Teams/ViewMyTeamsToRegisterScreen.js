@@ -185,7 +185,6 @@ const ViewMyTeamsToRegisterScreen = () => {
             <Box>
               <Text bold>No Teams are registered yet!</Text>
 
-              {userRole == "manager" && (
                 <Box flex="1" justifyContent={"flex-end"} marginTop="7">
                   <Button
                     height="50px"
@@ -197,7 +196,6 @@ const ViewMyTeamsToRegisterScreen = () => {
                     Register my Team
                   </Button>
                 </Box>
-              )}
             </Box>
           )}
         </Box>

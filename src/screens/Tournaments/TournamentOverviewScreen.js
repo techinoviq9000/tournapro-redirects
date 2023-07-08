@@ -6,12 +6,11 @@ import { useSelector } from "react-redux"
 import { navigationRef } from "../../../rootNavigation"
 import GoBack from "../../components/GoBack"
 
-const TournamentOverviewScreen = () => {
+const TournamentOverviewScreen = ({navigation}) => {
   const tournamentDetails = useSelector(
     (state) => state.tournament.tournamentDetails
   )
   const userRole = useUserDefaultRole()
-  const userEmail = useUserEmail()
   const user_manager = [
     {
       onPress: () => {
@@ -21,19 +20,19 @@ const TournamentOverviewScreen = () => {
     },
     {
       onPress: () => {
-        navigationRef.navigate("TournamentRegistrationScreen")
+        // navigationRef.navigate("TournamentRegistrationScreen")
       },
       text: "Tournament Rules"
     },
     {
       onPress: () => {
-        navigationRef.navigate("ViewMyTeamsToRegisterScreen")
+        navigationRef.navigate("TeamRegistrationScreen")
       },
       text: "Register my Team"
     },
     {
       onPress: () => {
-        navigationRef.navigate("TournamentRegistrationScreen")
+        // navigationRef.navigate("TournamentRegistrationScreen")
       },
       text: "Fixture"
     }
@@ -42,19 +41,19 @@ const TournamentOverviewScreen = () => {
   const user_user = [
     {
       onPress: () => {
-        navigationRef.navigate("TournamentRegistrationScreen")
+        // navigationRef.navigate("TournamentRegistrationScreen")
       },
       text: "Tournament Rules"
     },
     {
       onPress: () => {
-        navigationRef.navigate("TournamentRegistrationScreen")
+        // navigationRef.navigate("TournamentRegistrationScreen")
       },
       text: "Fixtures"
     },
     {
       onPress: () => {
-        navigationRef.navigate("TournamentRegistrationScreen")
+        navigationRef.navigate("ViewRegisteredTeamsScreen")
       },
       text: "View Teams"
     }
@@ -71,13 +70,13 @@ const TournamentOverviewScreen = () => {
     },
     {
       onPress: () => {
-        navigationRef.navigate("TournamentRegistrationScreen")
+        // navigationRef.navigate("TournamentRegistrationScreen")
       },
       text: "Tournament Rules"
     },
     {
       onPress: () => {
-        navigationRef.navigate("TournamentRegistrationScreen")
+        // navigationRef.navigate("TournamentRegistrationScreen")
       },
       text: "Fixtures"
     },
@@ -89,13 +88,13 @@ const TournamentOverviewScreen = () => {
     },
     {
       onPress: () => {
-        navigationRef.navigate("ViewMyTeamsToRegisterScreen")
+        navigationRef.navigate("TeamRegistrationScreen")
       },
       text: "Register my Team"
     },
     {
       onPress: () => {
-        navigationRef.navigate("TournamentRegistrationScreen")
+        // navigationRef.navigate("TournamentRegistrationScreen")
       },
       text: "Edit Tournament"
     }
@@ -103,13 +102,16 @@ const TournamentOverviewScreen = () => {
   return (
     <ScrollView flex="1">
       <Box px={4} flex="1" safeArea mt={2}>
-        <GoBack />
+        <GoBack customOnPress={() => navigation.reset({
+              index: 0,
+              routes: [{name: 'SelectOrViewTournamentScreen'}],
+            })} />
         <Box mb={4} flex="1">
           <Text textAlign={"center"} fontSize={"3xl"} bold>
             {tournamentDetails.tournament_name}
           </Text>
           <Text textAlign={"center"} fontSize={"2xl"}>
-            {tournamentDetails.venue}
+            {tournamentDetails.venue?.name}
           </Text>
           <Text textAlign={"center"} fontSize={"lg"}>
             {dayjs(tournamentDetails.start_date).format("dddd DD MMMM")}
