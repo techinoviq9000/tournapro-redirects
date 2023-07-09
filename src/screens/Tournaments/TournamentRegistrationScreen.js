@@ -5,6 +5,7 @@ import {
   Button,
   VStack,
   Image,
+  Text,
 } from "native-base";
 import React, { useState } from "react";
 import { ScrollView } from "react-native";

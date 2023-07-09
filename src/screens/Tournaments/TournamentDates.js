@@ -132,7 +132,7 @@ const TournamentDates = ({ route }) => {
             onPress={() => {
               values.start_date = startdate;
               values.end_date = enddate;
-              navigationRef.navigate("LogoPoster", {
+              navigationRef.navigate("TournamentRegistrationScreen", {
                 values,
               });
             }}
