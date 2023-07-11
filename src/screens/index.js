@@ -21,6 +21,7 @@ import ViewMyTeamsToRegisterScreen from "./Teams/ViewMyTeamsToRegisterScreen"
 import TeamRegistrationAddUsersScreen from "./Teams/TeamRegistrationAddUsersScreen"
 import PublishTournamentScreen from "./Tournaments/PublishTournamentScreen"
 import TournamentRegistrationScreen from "./Tournaments/TournamentRegistrationScreen"
+import NotificationScreen from "./Notifications/NotificationScreen"
 
 export const homeScreens = [
   {
@@ -69,6 +70,18 @@ export const userProfileScreens = [
       gestureEnabled: false,
       cardOverlayEnabled: false,
     },
+  },
+];
+
+export const jasgdashd = [
+  {
+    name: "NotificationScreen",
+    component: NotificationScreen,
+    options: {
+      headerShown: false,
+      gestureEnabled: false,
+      cardOverlayEnabled: false,
+    }, 
   },
 ];
 

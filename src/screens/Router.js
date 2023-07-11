@@ -9,11 +9,14 @@ import React, { useState } from "react"
 import {
   authScreens,
   homeScreens,
+  jasgdashd,
+  notificationScreen,
   tournamentSreen,
   userProfileScreens,
 } from "."
 import SplashScreen from "./SplashScreen"
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
+import { Entypo } from '@expo/vector-icons';
 import { Box, useTheme, Text, Button } from "native-base"
 import {
   createDrawerNavigator,
@@ -59,8 +62,10 @@ const Router = () => {
                   color={color}
                 />
               )
+            } else if (route.name === 'Notifications'){
+              iconName = "bell";
+              return <Entypo name={iconName} size={size} color={color}/>
             }
-
             return <Ionicons name={iconName} size={size} color={color} />
           },
         })}
@@ -68,6 +73,7 @@ const Router = () => {
       >
         <Tab.Screen name="Home" component={HomeStackScreen} />
         <Tab.Screen name="Tournament" component={TournamentStackScreen} />
+        <Tab.Screen name="Notifications" component={NotificationStackScreen}/>
       </Tab.Navigator>
     )
   }
@@ -161,6 +167,27 @@ const Router = () => {
           />
         ))}
       </HomeStack.Navigator>
+    )
+  }
+
+  const NotificationStack = createNativeStackNavigator()
+  const NotificationStackScreen = () => {
+    return (
+      <NotificationStack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}
+        initialRouteName="NotificationScreen"//it has to a notification screen called in index js
+      >
+        {jasgdashd.map(({ name, component, options }) => (
+          <NotificationStack.Screen
+            key={`${component}-${name}`}
+            name={name}
+            component={component}
+            options={options}
+          />
+        ))}
+      </NotificationStack.Navigator>
     )
   }
 
