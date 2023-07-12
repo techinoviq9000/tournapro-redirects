@@ -4,6 +4,7 @@ import Header from './components/Header'
 
 const App = () => {
   return(
+    <>
     <center>
     <div className='container'>
       <h1>Congratulations!</h1>
@@ -17,6 +18,7 @@ const App = () => {
       </div>
     </div>
     </center>
+    </>
     
 
 
