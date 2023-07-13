@@ -1,24 +1,23 @@
 import React from 'react'
 import './App.css';
-import Header from './components/Header'
+import TournaPro_Icon from './images/TournaPro_Icon.png'
+// import Header from './components/Header'
 
 const App = () => {
   return(
-    <>
+    <div className='pagecolor'>
     <center>
     <div className='container'>
+      <img style={{width:"150px", height:"150px"}}src={TournaPro_Icon} alt="logo"/>
       <h1>Congratulations!</h1>
       <div>
       <h2>You have been registered.</h2>
       </div>
       <a href="https://techinoviq.com">Continue to your app</a>
 
-      <div className="footer">
-        <p>Powered by TournaPro</p>
-      </div>
     </div>
     </center>
-    </>
+    </div>
     
 
 
