@@ -5,15 +5,15 @@ import TournaPro_Icon from './images/TournaPro_Icon.png'
 
 const App = () => {
   return(
-    <div className='pagecolor'>
+    <div>
     <center>
     <div className='container'>
-      <img style={{width:"150px", height:"150px"}}src={TournaPro_Icon} alt="logo"/>
+      <img style={{width:"200px", height:"200px"}}src={TournaPro_Icon} alt="logo"/>
       <h1>Congratulations!</h1>
       <div>
       <h2>You have been registered.</h2>
       </div>
-      <a href="https://techinoviq.com">Continue to your app</a>
+      <p>You may close the window and login from the TournaPro mobile app.</p>
 
     </div>
     </center>
