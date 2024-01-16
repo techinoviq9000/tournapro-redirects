@@ -12,7 +12,7 @@ const App = () => {
   const [inputFocused, setInputFocused] = useState(false)
   const [screenChange, setScreenChange] = useState(false)
   const [passwordChanged, setPasswordChanged] = useState()
-
+  console.log(userEmail)
   const isPasswordResetPage = window.location.href.includes("passwordReset")
 
   const isResetButtonDisabled = !newPassword || !confirmNewPassword
@@ -24,6 +24,7 @@ const App = () => {
       return // Prevent further execution
     } else {
       const res = nhost.auth.changePassword(newPassword)
+      console.log(res)
       if (res.error == null) {
         setPasswordChanged(true)
       } else {
