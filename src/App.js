@@ -6,32 +6,39 @@ import { nhost } from "./nhostClient"
 
 const App = () => {
   const userEmail = useUserEmail()
-  const changePassword = useChangePassword()
+  // const changePassword = useChangePassword()
   const [newPassword, setNewPassword] = useState("")
   const [confirmNewPassword, setConfirmNewPassword] = useState("")
   const [inputFocused, setInputFocused] = useState(false)
   const [screenChange, setScreenChange] = useState(false)
   const [passwordChanged, setPasswordChanged] = useState()
+  const [error, setError] = useState("")
   console.log(userEmail)
-  const isPasswordResetPage = window.location.href.includes("passwordReset")
+  const isPasswordResetPage = window.location.href.includes("password")
 
   const isResetButtonDisabled = !newPassword || !confirmNewPassword
 
-  const handlePasswordReset = async () => {
+  const handlePasswordReset = async (e) => {
+    e.preventDefault()
     // Check if new password and confirm new password match
     if (newPassword !== confirmNewPassword) {
-      alert("Passwords do not match. Please try again.")
+      setError("Password does not match")
       return // Prevent further execution
-    } else {
-      const res = await nhost.auth.changePassword(newPassword)
-      console.log(res)
-      if (res.error == null) {
-        setPasswordChanged(true)
-      } else {
-        setPasswordChanged(false)
-      }
-      setScreenChange(true)
     }
+    if (newPassword.length < 8) {
+      setError("Password must be at least 8 characters")
+      return
+    }
+    const res = await nhost.auth.changePassword({ newPassword })
+    console.log(res)
+    if (res.error == null) {
+      setPasswordChanged(true)
+    } else {
+      setPasswordChanged(false)
+      setError(res.error?.message)
+      return
+    }
+    setScreenChange(true)
 
     // Add your password reset logic here
     console.log("Password reset logic goes here")
@@ -39,178 +46,157 @@ const App = () => {
 
   return (
     <>
-      <center>
-        {isPasswordResetPage ? (
-          !screenChange ? (
+      {isPasswordResetPage ? (
+        !screenChange ? (
+          <section class="bg-gray-50 dark:bg-gray-900">
+            <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+              <div class="w-full p-6 bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md dark:bg-gray-800 dark:border-gray-700 sm:p-8">
+                <h2 class="mb-1 text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
+                  Change Password
+                </h2>
+                <form class="mt-4 space-y-4 lg:mt-5 md:space-y-5" action="#">
+                  <div>
+                    <label
+                      for="email"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      Your email
+                    </label>
+                    <input
+                      disabled="true"
+                      value={userEmail}
+                      type="email"
+                      name="email"
+                      id="email"
+                      class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      placeholder="name@company.com"
+                      required=""
+                    />
+                  </div>
+                  <div>
+                    <label
+                      for="password"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      New Password
+                    </label>
+                    <input
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      type="password"
+                      name="password"
+                      id="password"
+                      placeholder="Enter New Password"
+                      class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      required=""
+                    />
+                  </div>
+                  <div>
+                    <label
+                      for="confirm-password"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      Confirm password
+                    </label>
+                    <input
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      type="password"
+                      name="confirm-password"
+                      id="confirm-password"
+                      placeholder="Confirm Password"
+                      class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      required=""
+                    />
+                  </div>
+                  <div class="flex justify-center items-center">
+                    <button
+                      style={{
+                        background: isResetButtonDisabled ? "#ccc" : "#007BFF",
+                        color: "#fff",
+                        padding: "8px 17px",
+                        fontSize: "14px",
+                        borderRadius: "5px",
+                        cursor: isResetButtonDisabled
+                          ? "not-allowed"
+                          : "pointer",
+                        border: "none"
+                      }}
+                      onClick={handlePasswordReset}
+                      disabled={isResetButtonDisabled}
+                    >
+                      Reset Password
+                    </button>
+                  </div>
+
+                  {error && (
+                    <div
+                      class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+                      role="alert"
+                    >
+                      <span class="font-medium">Error! </span>
+                      {error}
+                    </div>
+                  )}
+                </form>
+              </div>
+            </div>
+          </section>
+        ) : (
+          <center>
             <div
               style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center"
+                // marginTop: "80px",
+                padding: "20px",
+                marginBottom: "10px",
+                color: "black"
+
+                // alignItems: "center"
               }}
             >
               <img
-                style={{ width: "150px", height: "150px" }}
+                style={{ width: "300px", height: "300px" }}
                 src={TournaPro_Icon}
                 alt="logo"
               />
-
-              <div
-                style={{
-                  boxSizing: "border-box",
-                  backgroundColor: "#f4f4f4",
-                  width: "50%",
-                  padding: "10px",
-                  borderRadius: "10px",
-                  boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-                  margin: "auto",
-                  marginTop: "20px",
-                  textAlign: "center",
-                  backgroundImage:
-                    "linear-gradient(to bottom, #ffffff, #dce5e5)"
-                }}
-              >
-                <h1
-                  style={{
-                    color: "black",
-                    marginBottom: "20px",
-                    fontSize: "28px"
-                  }}
-                >
-                  Reset Your Password
-                </h1>
-                <div
-                  style={{
-                    marginBottom: "20px",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center"
-                  }}
-                >
-                  <label
-                    style={{
-                      fontStyle: "italic",
-                      fontWeight: "bold",
-                      fontSize: "15px",
-                      color: "#555"
-                    }}
-                  >
-                    New Password
-                  </label>
-                  <input
-                    style={{
-                      outline: "none",
-                      width: "30%",
-                      padding: "5px",
-                      fontSize: "16px",
-                      borderRadius: "5px",
-                      border: `3px solid ${inputFocused ? "#80bdff" : "#ccc"}`,
-                      margin: "10px 0",
-                      boxSizing: "border-box",
-                      transition: "border-color 0.3s"
-                    }}
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    onFocus={() => setInputFocused(true)}
-                    onBlur={() => setInputFocused(false)}
-                  />
-                </div>
-                <div
-                  style={{
-                    marginBottom: "20px",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center"
-                  }}
-                >
-                  <label
-                    style={{
-                      fontStyle: "italic",
-                      fontWeight: "bold",
-                      fontSize: "15px",
-                      color: "#555"
-                    }}
-                  >
-                    Confirm New Password:
-                  </label>
-                  <input
-                    style={{
-                      outline: "none",
-                      width: "30%",
-                      padding: "5px",
-                      fontSize: "16px",
-                      borderRadius: "5px",
-                      border: `3px solid ${inputFocused ? "#80bdff" : "#ccc"}`,
-                      margin: "10px 0",
-                      boxSizing: "border-box",
-                      transition: "border-color 0.3s"
-                    }}
-                    type="password"
-                    value={confirmNewPassword}
-                    onChange={(e) => setConfirmNewPassword(e.target.value)}
-                    onFocus={() => setInputFocused(true)}
-                    onBlur={() => setInputFocused(false)}
-                  />
-                </div>
-                <button
-                  style={{
-                    background: isResetButtonDisabled ? "#ccc" : "#007BFF",
-                    color: "#fff",
-                    padding: "10px 20px",
-                    fontSize: "18px",
-                    borderRadius: "5px",
-                    cursor: isResetButtonDisabled ? "not-allowed" : "pointer",
-                    border: "none"
-                  }}
-                  onClick={handlePasswordReset}
-                  disabled={isResetButtonDisabled}
-                >
-                  Reset Password
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="container">
-              <img
-                style={{ width: "200px", height: "200px" }}
-                src={TournaPro_Icon}
-                alt="logo"
-              />
-              {passwordChanged && <h1>Congratulations!</h1>}
-              <div>
-                <h2>
-                  {passwordChanged
-                    ? "Your Password has been reset successfully"
-                    : "There was an error while reseting your password"}
-                </h2>
-              </div>
+              <p style={{ fontSize: 40, fontWeight: "bold" }}>
+                Password reset successful
+              </p>
+              <div></div>
               <p>
-                {passwordChanged
-                  ? "You may close the window and login from the TournaPro mobile app."
-                  : "Please try again by clicking on forget password on the TournaPro mobile app"}
+                Close this window and continue to login from the TournaPro
+                mobile app.
               </p>
             </div>
-          )
-        ) : (
-          <div className="container">
+          </center>
+        )
+      ) : (
+        <center>
+          <div
+            style={{
+              // marginTop: "80px",
+              padding: "20px",
+              marginBottom: "10px",
+              color: "black"
+
+              // alignItems: "center"
+            }}
+          >
             <img
-              style={{ width: "200px", height: "200px" }}
+              style={{ width: "300px", height: "300px" }}
               src={TournaPro_Icon}
               alt="logo"
             />
-            <h1>Congratulations!</h1>
+            <p style={{ fontSize: 40, fontWeight: "bold" }}>Congratulations!</p>
             <div>
-              <h2>You have been registered.</h2>
+              <p style={{ fontSize: 30, fontWeight: "500" }}>
+                You have been registered.
+              </p>
             </div>
             <p>
               You may close the window and login from the TournaPro mobile app.
             </p>
           </div>
-        )}
-      </center>
+        </center>
+      )}
     </>
   )
 }
