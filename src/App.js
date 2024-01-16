@@ -10,10 +10,10 @@ const App = () => {
   const [newPassword, setNewPassword] = useState("")
   const [confirmNewPassword, setConfirmNewPassword] = useState("")
   const [inputFocused, setInputFocused] = useState(false)
-  const [screenChange, setScreenChange] = useState(true)
-  const [passwordChanged, setPasswordChanged] = useState(false)
+  const [screenChange, setScreenChange] = useState(false)
+  const [passwordChanged, setPasswordChanged] = useState()
 
-  const isPasswordResetPage = window.location.href.includes("loc")
+  const isPasswordResetPage = window.location.href.includes("passwordReset")
 
   const isResetButtonDisabled = !newPassword || !confirmNewPassword
 
