@@ -17,13 +17,13 @@ const App = () => {
 
   const isResetButtonDisabled = !newPassword || !confirmNewPassword
 
-  const handlePasswordReset = () => {
+  const handlePasswordReset = async () => {
     // Check if new password and confirm new password match
     if (newPassword !== confirmNewPassword) {
       alert("Passwords do not match. Please try again.")
       return // Prevent further execution
     } else {
-      const res = nhost.auth.changePassword(newPassword)
+      const res = await nhost.auth.changePassword(newPassword)
       console.log(res)
       if (res.error == null) {
         setPasswordChanged(true)
