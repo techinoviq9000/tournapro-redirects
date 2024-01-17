@@ -51,7 +51,7 @@ const App = () => {
             <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0 h-screen">
               <>
               <img src="https://wepuirejkqdmeaineqto.storage.ap-south-1.nhost.run/v1/files/51963784-1148-478b-99e9-c711faea0732" className="w-32 pb-10"/>
-              {!userEmail ? 
+              {userEmail ? 
               <div class="w-full p-6 bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md dark:bg-gray-800 dark:border-gray-700 sm:p-8">
                 <h2 class="mb-1 text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
                   Reset Password
