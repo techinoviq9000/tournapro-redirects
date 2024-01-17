@@ -3,6 +3,7 @@ import "./App.css"
 import TournaPro_Icon from "./images/TournaPro_Icon.png"
 import { useChangePassword, useUserEmail } from "@nhost/react"
 import { nhost } from "./nhostClient"
+import Spinner from "./components/Spinner"
 
 const App = () => {
   const userEmail = useUserEmail()
@@ -13,7 +14,6 @@ const App = () => {
   const [screenChange, setScreenChange] = useState(false)
   const [passwordChanged, setPasswordChanged] = useState()
   const [error, setError] = useState("")
-  console.log(userEmail)
   const isPasswordResetPage = window.location.href.includes("password")
 
   const isResetButtonDisabled = !newPassword || !confirmNewPassword
@@ -45,14 +45,16 @@ const App = () => {
   }
 
   return (
-    <>
+    <div class="bg-gray-50 dark:bg-gray-900 h-screen">
       {isPasswordResetPage ? (
         !screenChange ? (
-          <section class="bg-gray-50 dark:bg-gray-900">
-            <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+            <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0 h-screen">
+              <>
+              <img src="https://wepuirejkqdmeaineqto.storage.ap-south-1.nhost.run/v1/files/51963784-1148-478b-99e9-c711faea0732" className="w-32 pb-10"/>
+              {!userEmail ? 
               <div class="w-full p-6 bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md dark:bg-gray-800 dark:border-gray-700 sm:p-8">
                 <h2 class="mb-1 text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-                  Change Password
+                  Reset Password
                 </h2>
                 <form class="mt-4 space-y-4 lg:mt-5 md:space-y-5" action="#">
                   <div>
@@ -137,9 +139,9 @@ const App = () => {
                     </div>
                   )}
                 </form>
-              </div>
+              </div> : <Spinner />}
+              </>
             </div>
-          </section>
         ) : (
           <center>
             <div
@@ -197,7 +199,7 @@ const App = () => {
           </div>
         </center>
       )}
-    </>
+    </div>
   )
 }
 
